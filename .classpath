@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="G:/GitHub/new-londis-city/lwjgl/jar/lwjgl.jar">
+	<classpathentry kind="lib" path="lib/jar/lwjgl.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/G:/GitHub/new-londis-city/lwjgl/doc/javadoc.zip!/"/>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G:/GitHub/new-londis-city/lwjgl/native"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Procedural%20City%20Generator/lib/doc/javadoc.zip!/"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Procedural City Generator/lib/native"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
