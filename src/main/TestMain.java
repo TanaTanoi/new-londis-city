@@ -23,8 +23,8 @@ public class TestMain {
 	private long window;
 
 	/*Window properties*/
-	private static int WIDTH = 600;
-	private static int HEIGHT = 600;
+	private static int WIDTH = 800;
+	private static int HEIGHT = 800;
 
 	/*Mouse control fields*/
 	private Vector2 mousePos = new Vector2(0,0);
@@ -143,6 +143,8 @@ public class TestMain {
 
 			renderGrid();
 			renderCube(0,0,0);
+			
+			/*----------------------------------*/
 			glFlush();
 			glfwSwapBuffers(window); // swap the color buffers
 			/*This polls for events that happened on the window
@@ -152,7 +154,7 @@ public class TestMain {
 	}
 	/**
 	 * Sets up the lighting in the scene, coming from the camera initially.
-	 * This is called during initialize
+	 * This is called during initialize FIXME for some reason this removes all colour from the scene
 	 */
 	private void initialiseLighting(){
 		float[] direction	  = {0.0f, 0.0f, 1.0f, 0.0f};
@@ -169,20 +171,23 @@ public class TestMain {
 	 * This is called every draw tick
 	 */
 	private void setUpCamera(){
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
+		/*glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();*/
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		glTranslatef(0,0,zoom);
+		//glTranslatef(0,0,zoom);
+		glScalef(zoom, zoom, zoom);
 		glRotatef(rot_x, 0, 1, 0);
 		glRotatef(rot_y, 1, 0, 0);
-
+		
 	}
 	/**
-	 * Renders a basic 2 by 2 grid as well as length 2 axis from 0,0,0
+	 * Renders a basic 2 by 2 grid as well as length 2 axis from 0,0,0.
+	 * Lighting is disabled for this grid (and enabled at the end).
 	 */
 	private void renderGrid(){
+		glDisable(GL_LIGHTING);
 		glMatrixMode(GL_MODELVIEW);
 		glBegin(GL_LINES);
 		glColor3f(0.3f, 0.3f, 0.3f);
@@ -202,6 +207,7 @@ public class TestMain {
 		glVertex3f(0,0,0);
 		glVertex3f(0,0,2);
 		glEnd();
+		glEnable(GL_LIGHTING);
 	}
 	
 	private void renderCube(float x, float y, float z){
