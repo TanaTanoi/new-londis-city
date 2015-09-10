@@ -6,6 +6,8 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
@@ -130,9 +132,13 @@ public class TestMain {
 		// creates the ContextCapabilities instance and makes the OpenGL
 		// bindings available for use.
 		GL.createCapabilities(false); // valid for latest build
-
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
+		//Clear the buffer to this frame
+		glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+		
+		//Create a display list of the building
+		int buildings = generateBuildings();
+		
+		
 		/*The primary rendering loop! This is run until closed 
 		 * or the user presses escape (defined in KeyboardCallback)*/
 		while ( glfwWindowShouldClose(window) == GL_FALSE ) {
@@ -140,10 +146,9 @@ public class TestMain {
 			initialiseLighting();
 			glClear(GL_COLOR_BUFFER_BIT); // clear the frame buffer
 			/*#Insert methods that draw in here #*/
-
-			renderGrid();
-			renderCube(0,0,0);
 			
+			renderGrid();
+			glCallList(buildings);
 			/*----------------------------------*/
 			glFlush();
 			glfwSwapBuffers(window); // swap the color buffers
@@ -183,7 +188,8 @@ public class TestMain {
 		
 	}
 	/**
-	 * Renders a basic 2 by 2 grid as well as length 2 axis from 0,0,0.
+	 * Renders a basic 2 by 2 grid along the x/z axis (y is up)
+	 *  as well as length 2 axis from 0,0,0.
 	 * Lighting is disabled for this grid (and enabled at the end).
 	 */
 	private void renderGrid(){
@@ -192,10 +198,10 @@ public class TestMain {
 		glBegin(GL_LINES);
 		glColor3f(0.3f, 0.3f, 0.3f);
 		for(float i = -1;i<=1.1;i+=0.1){
-			glVertex3f(i,-1,0);
-			glVertex3f(i,1,0);
-			glVertex3f(-1,i,0);
-			glVertex3f(1,i,0);
+			glVertex3f(i,0,-1);
+			glVertex3f(i,0,1);
+			glVertex3f(-1,0,i);
+			glVertex3f(1,0,i);
 		}
 		glColor3f(1f,0,0);
 		glVertex3f(0,0,0);
@@ -209,7 +215,27 @@ public class TestMain {
 		glEnd();
 		glEnable(GL_LIGHTING);
 	}
-	
+	private int generateBuildings(){
+		int list = glGenLists(1);
+		glNewList(list,GL_COMPILE);
+		float size= 1f;
+		float disp = 0.15f;
+		for(float i = -size;i<size;i+=disp){
+			for(float j = -size;j<size;j+=disp){
+				
+				List<Vector2> points = new ArrayList<Vector2>();
+				points.add(new Vector2(i,j));
+				points.add(new Vector2(i+0.1f,j));
+				points.add(new Vector2(i+0.1f,j+0.1f));
+				points.add(new Vector2(i,j+0.1f));
+				glColor3f(i+1, j+1, (i+j)/2+1);
+				glColor3f(1,0,0);
+				building.Generator.renderRandomBlock(points, 4);
+			}
+		}
+		glEndList();
+		return list;
+	}
 	private void renderCube(float x, float y, float z){
 		glMatrixMode(GL_MODELVIEW);
 		float w = 0.5f;
