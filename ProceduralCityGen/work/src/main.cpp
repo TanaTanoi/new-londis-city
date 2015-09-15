@@ -30,6 +30,8 @@ using namespace comp308;
 //
 int main(int argc, char **argv) {
 
+	cout << "CityGen v 2.0" << endl;
+
 	GLFWwindow* window;
 
 	/* Initialize the library */
