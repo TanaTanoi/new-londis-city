@@ -33,3 +33,4 @@ void setupCamera(void);
 void initLighting(void);
 static void mouseMotionCallbackFPS(GLFWwindow*, double, double);
 void mouseScrollCallback(GLFWwindow*, double, double);
+void windowSizeCallback(GLFWwindow*, int , int);

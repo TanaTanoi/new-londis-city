@@ -30,7 +30,7 @@ using namespace comp308;
 //
 int main(int argc, char **argv) {
 
-	cout << "CityGen v 2.0" << endl;
+	cout << "CityGen v 0.1" << endl;
 
 	GLFWwindow* window;
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	/*Setup callback functions*/
 	glfwSetCursorPosCallback(window,mouseMotionCallbackFPS);
 	glfwSetScrollCallback(window, mouseScrollCallback);
-
+	glfwSetWindowSizeCallback(window,windowSizeCallback);
 	/*Setting up other stuff*/
 
 	building = Building();
@@ -88,14 +88,24 @@ int main(int argc, char **argv) {
 }
 
 void initLighting() {
-	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
-	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
+//	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
+//	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+//	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
+//	glLightfv(GL_LIGHT0, GL_POSITION, direction);
+//	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
+//	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+//	glEnable(GL_LIGHT0);
+//	glEnable(GL_LIGHTING);
+	float direction[]	  = {0.0f, 0.0f, 1.0f, 0.0f};
+	float diffintensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
+	float ambient[]       = {0.2f, 0.2f, 0.2f, 1.0f};
+
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffintensity);
+	glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
+
+
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
 }
 
 void setupCamera(){
@@ -112,11 +122,11 @@ int generateRandomBuildings() {
 	int toReturn = glGenLists(1);
 	float size = 1.0f;
 	float disp = 0.1f;
-	float building_size = 0.1f;
+	float building_size = 1.1f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i<size; i += disp) {
-		for (float j = -size; j<i; j += disp) {
+	for (float i = -size; i<=-size; i += disp) {
+		for (float j = -size; j<=-size; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -160,10 +170,9 @@ void drawGrid(double grid_size, double square_size){
 
 
 static void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos){
-	//The times two is to account for the movement back from setCursorPos
 	rotation.x+=(xpos-rotation.x);
 	rotation.y+=(ypos-rotation.y);
-	// glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
+	 glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
 }
 
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
@@ -174,4 +183,10 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 	else {
 		zoom /= 1.1;
 	}
+}
+
+void windowSizeCallback(GLFWwindow* window, int width, int height){
+	g_winHeight = height;
+	g_winWidth = width;
+
 }
