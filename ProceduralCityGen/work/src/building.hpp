@@ -16,3 +16,13 @@
 #include <vector>
 
 #include "comp308.hpp"
+
+class Building {
+private:
+
+
+
+public:
+	int generateRandomBuilding(std::vector<comp308::vec2>);
+
+};

@@ -20,7 +20,7 @@
 #include "comp308.hpp"
 #include "geometry.hpp"
 #include "main.hpp"
-
+#include "building.hpp"
 using namespace std;
 using namespace comp308;
 
@@ -58,19 +58,23 @@ int main(int argc, char **argv) {
 
 	/*Setup callback functions*/
 	glfwSetCursorPosCallback(window,mouseMotionCallbackFPS);
+	glfwSetScrollCallback(window, mouseScrollCallback);
 
+	/*Setting up other stuff*/
 
-
-
+	building = Building();
+	int testList = generateRandomBuildings();
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window)){
 
 		/*## Render here ##*/
 		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.0f,0.0f,0.0f,1.0f);
+		glClearColor(0.7f,0.7f,0.7f,1.0f);
+		initLighting();
 		setupCamera();
+		
 		drawGrid(10,1);
-
+		glCallList(testList);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -83,15 +87,49 @@ int main(int argc, char **argv) {
 
 }
 
-void setupCamera(){
-	glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
- glRotatef(rotation.y,1.0f,0.0f,0.0f);
- glRotatef(rotation.x,0.0f,1.0f,0.0f);
-
+void initLighting() {
+	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
+	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, direction);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
 }
 
+void setupCamera(){
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glScalef(zoom, zoom, zoom);
+	glRotatef(rotation.y,1.0f,0.0f,0.0f);
+	glRotatef(rotation.x,0.0f,1.0f,0.0f);
+
+}
+/*Returns a display list */
+int generateRandomBuildings() {
+	/*Generate a random bunch of floor plans*/
+	int toReturn = glGenLists(1);
+	float size = 1.0f;
+	float disp = 0.1f;
+
+	glNewList(toReturn, GL_COMPILE);
+	vector<vec2> points;
+	for (float i = -size; i<size; i += disp) {
+		for (float j = -size; j<i; j += disp) {
+			points.clear();
+			points.push_back(vec2(i, j));
+			points.push_back(vec2(i + 0.1f, j));
+			points.push_back(vec2(i + 0.1f, j + 0.1f));
+			points.push_back(vec2(i, j + 0.1f));
+			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
+			glColor3f((i+size)/2, (i + size) / 2, (i + size) / 2);
+			building.generateRandomBuilding(points);
+		}
+	}
+	glEndList();
+	return toReturn;
+}
 
 /**
  * Basic method that draws a grid specified by grid_sie and square_size
@@ -119,9 +157,21 @@ void drawGrid(double grid_size, double square_size){
 	glEnd();
 }
 
+
+
 static void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos){
 	//The times two is to account for the movement back from setCursorPos
-	rotation.x+=(xpos-rotation.x)*2;
-	rotation.y+=(ypos-rotation.y)*2;
-	 glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
+	rotation.x+=(xpos-rotation.x);
+	rotation.y+=(ypos-rotation.y);
+	// glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
+}
+
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
+
+	if (yoffset > 0) {
+		zoom *= 1.1;
+	}
+	else {
+		zoom /= 1.1;
+	}
 }
