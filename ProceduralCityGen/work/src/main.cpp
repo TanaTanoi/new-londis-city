@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 		glClearColor(0.7f,0.7f,0.7f,1.0f);
 		initLighting();
 		setupCamera();
-		
+
 		drawGrid(10,1);
 		glCallList(testList);
 
@@ -112,16 +112,16 @@ int generateRandomBuildings() {
 	int toReturn = glGenLists(1);
 	float size = 1.0f;
 	float disp = 0.1f;
-
+	float building_size = 0.1f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
 	for (float i = -size; i<size; i += disp) {
 		for (float j = -size; j<i; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
-			points.push_back(vec2(i + 0.1f, j));
-			points.push_back(vec2(i + 0.1f, j + 0.1f));
-			points.push_back(vec2(i, j + 0.1f));
+			points.push_back(vec2(i + building_size, j));
+			points.push_back(vec2(i + building_size, j + building_size));
+			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i+size)/2, (i + size) / 2, (i + size) / 2);
 			building.generateRandomBuilding(points);
