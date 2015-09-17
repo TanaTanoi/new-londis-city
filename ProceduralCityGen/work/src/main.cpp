@@ -57,6 +57,7 @@ int main(int argc, char **argv) {
 	}
 
 	/*Setup callback functions*/
+	glfwSetMouseButtonCallback(window,mouseButtonCallback);
 	glfwSetCursorPosCallback(window,mouseMotionCallbackFPS);
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window,windowSizeCallback);
@@ -88,23 +89,12 @@ int main(int argc, char **argv) {
 }
 
 void initLighting() {
-//	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
-//	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-//	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
-//	glLightfv(GL_LIGHT0, GL_POSITION, direction);
-//	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-//	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-//	glEnable(GL_LIGHT0);
-//	glEnable(GL_LIGHTING);
-	float direction[]	  = {0.0f, 0.0f, 1.0f, 0.0f};
-	float diffintensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
-	float ambient[]       = {0.2f, 0.2f, 0.2f, 1.0f};
-
+	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
+	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffintensity);
-	glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
-
-
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 }
 
@@ -166,13 +156,15 @@ void drawGrid(double grid_size, double square_size){
 	}
 	glEnd();
 }
+//action = state, 1 is down, 0 is release
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods){
+cout<< button << " " << action << " " << mods<<endl;
+}
 
-
-
-static void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos){
+void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos){
 	rotation.x+=(xpos-rotation.x);
 	rotation.y+=(ypos-rotation.y);
-	 glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
+//	 glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
 }
 
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
