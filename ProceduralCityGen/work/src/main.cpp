@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
 		glfwSwapBuffers(window);
 		/* Poll for and process events */
 		glfwPollEvents();
+		// woo poll events
 	}
 
 
