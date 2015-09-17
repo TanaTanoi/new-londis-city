@@ -31,6 +31,9 @@ int main(int argc, char **argv) {
 
 	cout << "CityGen v 0.1" << endl;
 
+	/*Running some checks*/
+
+
 	GLFWwindow* window;
 
 	/* Initialize the library */
@@ -55,6 +58,11 @@ int main(int argc, char **argv) {
 		abort(); // Unrecoverable error
 	}
 
+	/*Test for joysticks/controllers */
+	joystick = glfwJoystickPresent(GLFW_JOYSTICK_1);
+	cout << joystick << " joystick.." << endl;
+
+
 	/*Setup callback functions*/
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
@@ -69,7 +77,7 @@ int main(int argc, char **argv) {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	int testList = generateRandomBuildings();
-
+	//int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window)) {
 
@@ -87,6 +95,7 @@ int main(int argc, char **argv) {
 		glfwSwapBuffers(window);
 		/* Poll for and process events */
 		glfwPollEvents();
+		joystickEventsPoll();
 		// woo poll events
 	}
 
@@ -152,8 +161,26 @@ int generateRandomBuildings() {
 	return toReturn;
 }
 
+/*Returns a display list of a hexagon shaped building */
+int generateHexagonBuilding(float x, float y) {
+	/*Generate a random bunch of floor plans*/
+	int toReturn = glGenLists(1);
+	vector<vec2> points;
+	
+	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
+	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
+	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
+	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
+	
+	
+	glNewList(toReturn, GL_COMPILE);
+	building.generateRandomBuilding(points);
+	glEndList();
+	return toReturn;
+}
+
 /**
- * Basic method that draws a grid specified by grid_sie and square_size
+ * Basic method that draws a grid specified by grid_size and square_size
  */
 void drawGrid(double grid_size, double square_size) {
 	glBegin(GL_LINES);
@@ -209,4 +236,16 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
 	g_winWidth = width;
 	glViewport(0, 0, width, height);
 
+}
+
+void joystickEventsPoll() {
+	int count;
+	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+	if (count > 0) {
+		c_LSpos = vec2((float)((int)(axes[0]*100))/100.0f, (float)((int)(axes[1] * 100)) / 100.0f);
+		rotation.x += (0.0f - c_LSpos.x);
+		rotation.y += (0.0f - c_LSpos.y);
+		
+		
+	}
 }
