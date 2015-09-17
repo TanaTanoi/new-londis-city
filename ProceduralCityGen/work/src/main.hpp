@@ -31,6 +31,7 @@ void drawGrid(double,double);
 int generateRandomBuildings(void);
 void setupCamera(void);
 void initLighting(void);
+void init(void);
 void mouseButtonCallback(GLFWwindow* , int , int , int );
 void mouseMotionCallbackFPS(GLFWwindow*, double, double);
 void mouseScrollCallback(GLFWwindow*, double, double);

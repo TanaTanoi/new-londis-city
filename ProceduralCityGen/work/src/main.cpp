@@ -1,4 +1,3 @@
-//---------------------------------------------------------------------------
 //
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
 //
@@ -62,14 +61,26 @@ int main(int argc, char **argv) {
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window,windowSizeCallback);
 	/*Setting up other stuff*/
+	/*Set up depths and perspective*/
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glShadeModel(GL_SMOOTH);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	/*Create a new building object*/
 	building = Building();
+	
+
+
+	
 	int testList = generateRandomBuildings();
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window)){
 
 		/*## Render here ##*/
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f,0.7f,0.7f,1.0f);
 		initLighting();
 		setupCamera();
@@ -88,6 +99,18 @@ int main(int argc, char **argv) {
 	glfwTerminate();
 
 }
+/*Any code that needs to get run just before the main loop, put it here*/
+void init() {
+	/*Set up depths and perspective*/
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glShadeModel(GL_SMOOTH);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	/*Create a new building object*/
+	building = Building();
+}
 
 void initLighting() {
 	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
@@ -100,24 +123,26 @@ void initLighting() {
 }
 
 void setupCamera(){
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glScalef(zoom, zoom, zoom);
 	glRotatef(rotation.y,1.0f,0.0f,0.0f);
 	glRotatef(rotation.x,0.0f,1.0f,0.0f);
 
 }
+
+
 /*Returns a display list */
 int generateRandomBuildings() {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
 	float size = 1.0f;
 	float disp = 0.1f;
-	float building_size = 1.1f;
+	float building_size = 0.1f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i<=-size; i += disp) {
-		for (float j = -size; j<=-size; j += disp) {
+	for (float i = -size; i<=size; i += disp) {
+		for (float j = -size; j<=size; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -181,5 +206,6 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 void windowSizeCallback(GLFWwindow* window, int width, int height){
 	g_winHeight = height;
 	g_winWidth = width;
+	glViewport(0, 0, width, height);
 
 }
