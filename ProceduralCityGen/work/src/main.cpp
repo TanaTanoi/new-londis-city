@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(g_winWidth, g_winHeight, "Procedural City Generator", nullptr, nullptr);
-	if (!window){
+	if (!window) {
 		glfwTerminate();
 		return -1;
 	}
@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
 	}
 
 	/*Setup callback functions*/
-	glfwSetMouseButtonCallback(window,mouseButtonCallback);
-	glfwSetCursorPosCallback(window,mouseMotionCallbackFPS);
+	glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 	glfwSetScrollCallback(window, mouseScrollCallback);
-	glfwSetWindowSizeCallback(window,windowSizeCallback);
+	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	/*Setting up other stuff*/
 	/*Set up depths and perspective*/
 	glClearDepth(1.0f);
@@ -68,24 +68,19 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-	/*Create a new building object*/
-	building = Building();
-	
-
-
-	
 	int testList = generateRandomBuildings();
+
 	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window)){
+	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
-		glClearColor(0.7f,0.7f,0.7f,1.0f);
+		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		initLighting();
 		setupCamera();
 
-		drawGrid(10,1);
+		drawGrid(10, 1);
 		glCallList(testList);
 
 		/* Swap front and back buffers */
@@ -122,12 +117,12 @@ void initLighting() {
 	glEnable(GL_LIGHT0);
 }
 
-void setupCamera(){
+void setupCamera() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glScalef(zoom, zoom, zoom);
-	glRotatef(rotation.y,1.0f,0.0f,0.0f);
-	glRotatef(rotation.x,0.0f,1.0f,0.0f);
+	glRotatef(rotation.y, 1.0f, 0.0f, 0.0f);
+	glRotatef(rotation.x, 0.0f, 1.0f, 0.0f);
 
 }
 
@@ -141,15 +136,15 @@ int generateRandomBuildings() {
 	float building_size = 0.1f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i<=size; i += disp) {
-		for (float j = -size; j<=size; j += disp) {
+	for (float i = -size; i <= size; i += disp) {
+		for (float j = -size; j <= size; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
 			points.push_back(vec2(i + building_size, j + building_size));
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
-			glColor3f((i+size)/2, (i + size) / 2, (i + size) / 2);
+			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
 			building.generateRandomBuilding(points);
 		}
 	}
@@ -160,40 +155,46 @@ int generateRandomBuildings() {
 /**
  * Basic method that draws a grid specified by grid_sie and square_size
  */
-void drawGrid(double grid_size, double square_size){
+void drawGrid(double grid_size, double square_size) {
 	glBegin(GL_LINES);
-	glColor3f(1.0f,0.0f,0.0f);
-	glVertex3d(grid_size,0,0);
-	glVertex3d(-grid_size,0,0);
-	glColor3f(0.0f,1.0f,0.0f);
-	glVertex3d(0,5,0);
-	glVertex3d(0,0,0);
-	glColor3f(0.0f,0.0f,1.0f);
-	glVertex3d(0,0,grid_size);
-	glVertex3d(0,0,-grid_size);
-	glColor3f(0.4,0.4,0.4);
-	for(int i = -grid_size;i<grid_size+square_size;i+=square_size){
-		glVertex3d(-grid_size,0,i);
-		glVertex3d(grid_size,0,i);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3d(grid_size, 0, 0);
+	glVertex3d(-grid_size, 0, 0);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3d(0, 5, 0);
+	glVertex3d(0, 0, 0);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3d(0, 0, grid_size);
+	glVertex3d(0, 0, -grid_size);
+	glColor3f(0.4, 0.4, 0.4);
+	for (int i = -grid_size; i < grid_size + square_size; i += square_size) {
+		glVertex3d(-grid_size, 0, i);
+		glVertex3d(grid_size, 0, i);
 	}
-	for(int j = -grid_size;j<grid_size+square_size;j+=square_size){
-		glVertex3d(j,0,-grid_size);
-		glVertex3d(j,0,grid_size);
+	for (int j = -grid_size; j < grid_size + square_size; j += square_size) {
+		glVertex3d(j, 0, -grid_size);
+		glVertex3d(j, 0, grid_size);
 	}
 	glEnd();
 }
 //action = state, 1 is down, 0 is release
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods){
-cout<< button << " " << action << " " << mods<<endl;
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+	cout << button << " " << action << " " << mods << endl;
+
+	if (button == GLFW_MOUSE_BUTTON_1) {
+		m_LeftButton = action;
+	}
 }
 
-void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos){
-	rotation.x+=(xpos-rotation.x);
-	rotation.y+=(ypos-rotation.y);
-//	 glfwSetCursorPos(window,g_winWidth/2,g_winHeight/2);
+void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
+	if (m_LeftButton) {
+		rotation.x += (m_pos.x-xpos);
+		rotation.y += (m_pos.y-ypos );
+	}
+	m_pos = vec2(xpos, ypos);
 }
 
-void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {
 		zoom *= 1.1;
@@ -203,7 +204,7 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 	}
 }
 
-void windowSizeCallback(GLFWwindow* window, int width, int height){
+void windowSizeCallback(GLFWwindow* window, int width, int height) {
 	g_winHeight = height;
 	g_winWidth = width;
 	glViewport(0, 0, width, height);

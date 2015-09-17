@@ -20,6 +20,9 @@
 double g_winWidth 	= 640;
 double g_winHeight 	= 480;
 
+bool m_LeftButton = false;
+comp308::vec2 m_pos = comp308::vec2(0, 0);
+
 float zoom = 1;
 
 comp308::vec2 rotation = comp308::vec2(0,0);
