@@ -11,6 +11,7 @@ SET(headers
 	"shaderLoader.hpp"
 	"imageLoader.hpp"
 	"section.hpp"
+	"generator.h"
 )
 
 
@@ -19,6 +20,7 @@ SET(sources
 	"main.cpp"
 	"building.cpp"
 	"section.cpp"
+	"generator.cpp"
 )
 
 # Add executable target and link libraries

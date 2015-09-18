@@ -19,7 +19,7 @@
 #include "comp308.hpp"
 #include "main.hpp"
 #include "building.hpp"
-
+#include "generator.h"
 using namespace std;
 using namespace comp308;
 
@@ -80,6 +80,10 @@ int main(int argc, char **argv) {
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	initLighting();
+	for (int i = 0; i < 5; i++) {
+		cout << generator.generateRandomString(i) << endl;
+	}
+
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
@@ -115,6 +119,7 @@ void init() {
 
 	/*Create a new building object*/
 	building = Building();
+	generator = Generator();
 }
 
 void initLighting() {
@@ -194,7 +199,7 @@ int generateBuildingFromString(string input) {
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateFromString(points, input);
+			building.generateFromString(points, generator.generateRandomString(4));
 		}
 	}
 	glEndList();
