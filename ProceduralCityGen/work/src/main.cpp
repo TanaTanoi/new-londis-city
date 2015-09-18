@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	//int testList = generateRandomBuildings();
-	int testList = generateBuildingFromString("ESESSSSR");
+	int testList = generateBuildingFromString("SEESER");
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	initLighting();
@@ -185,8 +185,8 @@ int generateBuildingFromString(string input) {
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i < size; i += disp) {
-		for (float j = -size; j < size; j += disp) {
+	for (float i = -size; i <=size; i += disp) {
+		for (float j = -size; j <=size; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
