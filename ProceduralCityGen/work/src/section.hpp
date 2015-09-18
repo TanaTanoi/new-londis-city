@@ -16,7 +16,7 @@ struct line {
 struct section {
 	std::vector<line> lines;
 	float area;
-	Building::Building building;
+	//Building:: building;
 };
 
 class SectionDivider {
