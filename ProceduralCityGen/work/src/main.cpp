@@ -116,9 +116,9 @@ void init() {
 }
 
 void initLighting() {
-	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
-	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 0.1f };
-	float ambient[] = { 0.9f, 0.9f, 0.9f, 0.1f };
+	float direction[]	  = {0.0f, 0.0f, -1.0f, 0.0f};
+	float diffintensity[] = {0.7f, 0.7f, 0.7f, 0.2f};
+	float ambient[]       = {0.0f, 0.4f, 0.2f, 0.4f};
 	float specular[] = { 0.5, 0.5, 1.0, 0.1 };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
@@ -138,7 +138,7 @@ void initLighting() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
     glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 
-//    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
 }
 
 void setupCamera() {

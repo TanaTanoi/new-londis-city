@@ -50,7 +50,10 @@ find_package(OpenGL REQUIRED)
 #########################################################
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw")
 include_directories("${PROJECT_SOURCE_DIR}/ext/glfw/include")
-
+#########################################################
+# Include STB Subproject
+#########################################################
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 #########################################################
 # Include GLEW Subproject
 #########################################################

@@ -8,6 +8,8 @@ SET(headers
 	"comp308.hpp"
 	"main.hpp"
 	"building.hpp"
+	"shaderLoader.hpp"
+	"imageLoader.hpp"
 )
 
 
