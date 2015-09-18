@@ -24,7 +24,6 @@ using namespace std;
 using namespace comp308;
 
 
-
 //Main program
 //
 int main(int argc, char **argv) {
@@ -77,17 +76,18 @@ int main(int argc, char **argv) {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	int testList = generateRandomBuildings();
-	//int testList = generateHexagonBuilding(0.0f,0.0f);
+//	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
+	initLighting();
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-		initLighting();
-		setupCamera();
 
+		setupCamera();
+		initLighting();
 		drawGrid(10, 1);
 		glCallList(testList);
 
@@ -118,12 +118,28 @@ void init() {
 
 void initLighting() {
 	float direction[] = { 0.0f, 0.0f, 1.0f, 0.5f };
-	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-	float ambient[] = { 0.6f, 0.2f, 0.2f, 1.0f };
+	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 0.1f };
+	float ambient[] = { 0.9f, 0.9f, 0.9f, 0.1f };
+	float specular[] = { 0.5, 0.5, 1.0, 0.1 };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
+
+	float light_position[] = { 1.0f, 10.0f, 0.0f,1.0f};
+	vec3 diff = (vec3(0,0,0)-vec3(light_position[0],light_position[1],light_position[2]));
+	float spotlight_position[] = { diff.x, diff.y, diff.z};
+    glEnable(GL_LIGHT1);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 46.0);
+    glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 4.0);
+    glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,spotlight_position);
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+
+//    glEnable(GL_LIGHTING);
 }
 
 void setupCamera() {
@@ -135,18 +151,17 @@ void setupCamera() {
 
 }
 
-
 /*Returns a display list */
 int generateRandomBuildings() {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
-	float size = 1.0f;
-	float disp = 0.1f;
-	float building_size = 0.1f;
+	float size = 2.4f;
+	float disp = 1.2f;
+	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
 	for (float i = -size; i <= size; i += disp) {
-		for (float j = -size; j <= size; j += disp) {
+		for (float j = -size; j <= i; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -154,7 +169,7 @@ int generateRandomBuildings() {
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateRandomBuilding(points);
+			building.generateBlock(points,-1.0f);
 		}
 	}
 	glEndList();
@@ -166,15 +181,16 @@ int generateHexagonBuilding(float x, float y) {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
 	vector<vec2> points;
-	
+
 	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
 	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
-	
-	
+	points.push_back(vec2(x, y) - vec2(1.0f, 2.0f));
+
+
 	glNewList(toReturn, GL_COMPILE);
-	building.generateRandomBuilding(points);
+	building.generateBlock(points,0.0f);
 	glEndList();
 	return toReturn;
 }
@@ -245,7 +261,7 @@ void joystickEventsPoll() {
 		c_LSpos = vec2((float)((int)(axes[0]*100))/100.0f, (float)((int)(axes[1] * 100)) / 100.0f);
 		rotation.x += (0.0f - c_LSpos.x);
 		rotation.y += (0.0f - c_LSpos.y);
-		
-		
+
+
 	}
 }

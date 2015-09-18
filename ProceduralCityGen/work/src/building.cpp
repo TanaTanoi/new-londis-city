@@ -21,13 +21,21 @@
 using namespace std;
 using namespace comp308;
 
-int Building::generateRandomBuilding(std::vector<comp308::vec2> floor) {
+/*Generates a block from the given floor plan *floor from the given
+ * height *elevation.
+ * *floor must be a list of points where a wall is connected between
+ * point i and point i +1 (where last and first point are connected)
+ *
+ */
+int Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
 	vector<vec3> bot;
 	vector<vec3> top;
-	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/2.0f)+0.5f;
+	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/2.0f)+1.0f;
+	//float height = 1.0f;
+	height+=elevation;
 	for (vec2 v2 : floor) {
-		bot.push_back(vec3(v2.x, 0, v2.y));
+		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
 	//int toReturn = glGenLists(1); //TODO find out what I wanna do with the lists here
@@ -68,9 +76,48 @@ int Building::generateRandomBuilding(std::vector<comp308::vec2> floor) {
 	for (vec3 floorPoint: bot) {
 		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
 	}
-	
+
 	glEnd();
+
+	if(rand()%10 > 2){
+
+		generateBlock(shrinkPoints(floor),height);
+
+	}
+
+
 	//glEndList();
 	//return toReturn;
 	return 0;
 }
+
+
+vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
+	vec2 mid = centerPoint(points);
+	vector<vec2> smallPoints;
+	float dist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
+	for(vec2 v2:points){
+		vec2 diff = (mid - v2)*dist;
+
+		smallPoints.push_back(v2+diff);
+	}
+	return smallPoints;
+}
+/*Returns a vec2 that represents a point in the center of the
+ * shape created by *points.
+ */
+vec2 Building::centerPoint(vector<vec2> points){
+	vec2 max = points[0];
+	vec2 min = max;
+	for(int i = 1; i < points.size();i++){
+		if(points[i].x > max.x && points[i].y > max.y){
+			max = points[i];
+		}
+		if(points[i].x < min.x && points[i].y < min.y){
+			min= points[i];
+		}
+	}
+	vec2 mid = ((max - min)/2) + min;
+	return mid;
+}
+

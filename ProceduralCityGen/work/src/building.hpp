@@ -23,6 +23,8 @@ private:
 
 
 public:
-	int generateRandomBuilding(std::vector<comp308::vec2>);
+	int generateBlock(std::vector<comp308::vec2>, float);
+	std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
+	comp308::vec2 centerPoint(std::vector<comp308::vec2>);
 
 };
