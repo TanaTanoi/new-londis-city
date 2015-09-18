@@ -22,7 +22,7 @@
 using namespace std;
 using namespace comp308;
 
-GLuint g_texture = 0;
+//GLuint g_texture = 0;
 
 void Building::initTexture() {
 	//image tex = image("../work/res/textures/example.jpg");
@@ -52,21 +52,19 @@ void Building::initTexture() {
  * point i and point i +1 (where last and first point are connected)
  *
  */
-int Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
+float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
 	vector<vec3> bot;
 	vector<vec3> top;
+	/*Height is a value between 1 and 2 + the elevation (so height-elevation is the change in Y)*/
 	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/2.0f)+1.0f;
-	//float height = 1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
-	//int toReturn = glGenLists(1); //TODO find out what I wanna do with the lists here
-	//glNewList(toReturn, GL_COMPILE);
-	glBegin(GL_QUADS);
 
+	glBegin(GL_QUADS);
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
 		if(i %2==0){
@@ -105,16 +103,50 @@ int Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
 
 	glEnd();
 
-	if(rand()%10 > 2){
+	return height;
+}
 
-		generateBlock(shrinkPoints(floor),height);
+void Building::parseChar(char c) {
+	switch (c) {
+	case 'E':
 
+		break;
 	}
+}
 
+void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
+	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
 
-	//glEndList();
-	//return toReturn;
-	return 0;
+	float height = generateBlock(floor, 0.0f);
+	for (int i = 0; i < input.length(); i++) {
+		switch (input[i]) {
+		case 'S':
+			floor = shrinkPoints(floor);
+			break;
+		case 'E':
+			height = generateBlock(floor, height);
+			break;
+		case 'R':
+			generatePointRoof(floor, height);
+			return;
+		}
+	
+	}
+}
+
+void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
+	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.0f)+0.3f;
+	vec2 mid = centerPoint(points);
+	vec3 peak = vec3(mid.x, elevation +height,mid.y);
+	int n = points.size();
+	glBegin(GL_TRIANGLES);
+		for (int i = 0; i < n; i++) {
+			glVertex3f(points[i].x, elevation, points[i].y);
+			glVertex3f(peak.x, peak.y, peak.z);
+			glVertex3f(points[(i + 1) % n].x, elevation, points[(i + 1) % n].y );
+		}
+	glEnd();
+
 }
 
 
@@ -129,6 +161,8 @@ vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
 	}
 	return smallPoints;
 }
+
+
 /*Returns a vec2 that represents a point in the center of the
  * shape created by *points.
  */

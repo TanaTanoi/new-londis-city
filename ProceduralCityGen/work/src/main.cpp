@@ -75,7 +75,8 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-	int testList = generateRandomBuildings();
+	//int testList = generateRandomBuildings();
+	int testList = generateBuildingFromString("ESESSSSR");
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	initLighting();
@@ -170,6 +171,30 @@ int generateRandomBuildings() {
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
 			building.generateBlock(points,-1.0f);
+		}
+	}
+	glEndList();
+	return toReturn;
+}
+
+int generateBuildingFromString(string input) {
+	/*Generate a random bunch of floor plans*/
+	int toReturn = glGenLists(1);
+	float size = 0.6f;
+	float disp = 1.2f;
+	float building_size = 1.2f;
+	glNewList(toReturn, GL_COMPILE);
+	vector<vec2> points;
+	for (float i = -size; i < size; i += disp) {
+		for (float j = -size; j < size; j += disp) {
+			points.clear();
+			points.push_back(vec2(i, j));
+			points.push_back(vec2(i + building_size, j));
+			points.push_back(vec2(i + building_size, j + building_size));
+			points.push_back(vec2(i, j + building_size));
+			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
+			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
+			building.generateFromString(points, input);
 		}
 	}
 	glEndList();
