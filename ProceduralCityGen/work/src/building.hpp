@@ -19,7 +19,7 @@
 
 class Building {
 private:
-
+	void initTexture(void);
 
 
 public:

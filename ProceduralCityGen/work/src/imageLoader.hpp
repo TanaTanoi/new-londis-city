@@ -16,7 +16,7 @@
 
 #include "comp308.hpp"
 
-#include <stb_image.h>
+#include "../ext/stb/stb_image.h"
 
 
 struct image {
