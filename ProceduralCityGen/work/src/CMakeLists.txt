@@ -10,6 +10,7 @@ SET(headers
 	"building.hpp"
 	"shaderLoader.hpp"
 	"imageLoader.hpp"
+	"section.hpp"
 )
 
 
