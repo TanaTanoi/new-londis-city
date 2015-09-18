@@ -17,6 +17,7 @@ SET(headers
 SET(sources
 	"main.cpp"
 	"building.cpp"
+	"section.cpp"
 )
 
 # Add executable target and link libraries
