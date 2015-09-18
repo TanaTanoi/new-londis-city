@@ -6,7 +6,6 @@
 # TODO list your header files (.hpp) here
 SET(headers
 	"comp308.hpp"
-	"geometry.hpp"
 	"main.hpp"
 	"building.hpp"
 )
@@ -15,7 +14,6 @@ SET(headers
 # TODO list your source files (.cpp) here
 SET(sources
 	"main.cpp"
-	"geometry.cpp"
 	"building.cpp"
 )
 

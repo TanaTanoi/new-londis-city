@@ -17,7 +17,6 @@
 #include <string>
 
 #include "comp308.hpp"
-#include "geometry.hpp"
 #include "main.hpp"
 #include "building.hpp"
 using namespace std;
