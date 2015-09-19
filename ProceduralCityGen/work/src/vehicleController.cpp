@@ -41,7 +41,7 @@ void VehicleController::initVehicles() {
 
 }
 
-void VehicleController::initTexture(std::string filename, int index) {
+void VehicleController::initTexture(string filename, int index) {
 
 	/**
 	image tex(filename);
@@ -70,17 +70,18 @@ void VehicleController::renderVehicles() {
 
 }
 
-void VehicleController::renderVehicle(Vehicle* vehicle, comp308::vec3 translate,
-		comp308::vec3 rotate, int texture) {
+void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
+		vec3 rotate, int texture) {
 
 }
 
-void VehicleController::readConfig(std::string filename) {
+void VehicleController::readConfig(string filename) {
 
 	ifstream file(filename);
 	string line;
 
 	if (!file.is_open()) {
+		cout << "In here" << endl;
 		cerr << "Failed to open file " << filename << endl;
 		throw runtime_error("Error :: could not open file.");
 	}
@@ -96,7 +97,7 @@ void VehicleController::readConfig(std::string filename) {
 	cout << "Finished reading vehicle files" << endl;
 }
 
-void VehicleController::readTextures(std::string filename) {
+void VehicleController::readTextures(string filename) {
 
 	ifstream file(filename);
 	string line;

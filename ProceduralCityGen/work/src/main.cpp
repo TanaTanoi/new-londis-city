@@ -89,8 +89,8 @@ int main(int argc, char **argv) {
 
 	// Create vehicle controller
 	g_vehicleCtrl = new VehicleController(
-			"..\work\res\assets\vehicle_config.txt",
-			"..\work\res\assets\tex_config.txt", vector<vec3>(), vec3());
+			"../work/res/assets/vehicle_config.txt",
+			"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
 
 	while (!glfwWindowShouldClose(window)) {
 

@@ -1,1 +1,1 @@
-"..\work\res\textures\example.jpg"
+"../work/res/textures/example.jpg"
