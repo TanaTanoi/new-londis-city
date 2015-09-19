@@ -78,8 +78,8 @@ int main(int argc, char **argv) {
 
 
 	glEnable(GL_SMOOTH);
-	//int testList = generateRandomBuildings();
-	testList = generateBuildingFromString("SEESER");
+	//int testList = building.generateRandomBuildings();
+	testList = building.generateBuildingFromString("SEESER");
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	initLighting();
@@ -132,7 +132,6 @@ void init() {
 
 	/*Create a new building object*/
 	building = Building();
-	generator = Generator();
 }
 
 void initLighting() {
@@ -143,16 +142,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	//glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0); // f yo light 0
 
-	float light_position[] = { 0.0f, 20.0f, 0.0f, 1.0f };
+	float light_position[] = { 0.0f, 3.0f, 0.0f, 1.0f };
 	vec3 diff = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { diff.x, diff.y, diff.z };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 46.0);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 4.0);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 100.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 8.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
@@ -161,12 +160,12 @@ void initLighting() {
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 }
-void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
-{
+
+/*Method taken from the internet that replicates gluPerspective using glFrustum*/
+void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar){
 	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
 
-	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
 	fH = tan(fovY / 360 * pi) * zNear;
 	fW = fH * aspect;
 
@@ -185,69 +184,23 @@ void setupCamera() {
 
 }
 
-/*Returns a display list */
-int generateRandomBuildings() {
-	/*Generate a random bunch of floor plans*/
-	int toReturn = glGenLists(1);
-	float size = 2.4f;
-	float disp = 1.2f;
-	float building_size = 1.2f;
-	glNewList(toReturn, GL_COMPILE);
-
-	vector<vec2> points;
-	for (float i = -size; i <= size; i += disp) {
-		for (float j = -size; j <= i; j += disp) {
-			points.clear();
-			points.push_back(vec2(i, j));
-			points.push_back(vec2(i + building_size, j));
-			points.push_back(vec2(i + building_size, j + building_size));
-			points.push_back(vec2(i, j + building_size));
-			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
-			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.extendBuilding(points, -1.0f);
-		}
-	}
-	glEndList();
-	return toReturn;
-}
-
-int generateBuildingFromString(string input) {
-	/*Generate a random bunch of floor plans*/
-	int toReturn = glGenLists(1);
-	float size =8.0f;
-	float disp = 1.0f;
-	float building_size = 1.2f;
-	vector<vec2> points;
-
-
-	glNewList(toReturn, GL_COMPILE);
-	for(float i = -size; i <=size;i+=disp){
-		for(float j = - size; j <size;j+=disp){
-			points = generator.generateFloorPlan(vec2(i,j),disp/2.0f,rand()%3+3);
-			building.generateFromString(points, generator.generateRandomString( 10 - (abs(i)*abs(j))/2  ));
-		}
-	}
-	glEndList();
-	return toReturn;
-}
-
 /*Returns a display list of a hexagon shaped building */
-int generateFullyRandomBuilding(float x, float y) {
-	/*Generate a random bunch of floor plans*/
-	int toReturn = glGenLists(1);
-	vector<vec2> points;
-	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
-	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
-	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
-	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
-
-	vec2 mid = building.centerPoint(points);
-	float radius = hypot(mid.x-points[0].x,mid.y-points[0].y);
-	glNewList(toReturn, GL_COMPILE);
-		building.generateFromString(generator.generateFloorPlan(vec2(x,y),radius,rand()%3+3), generator.generateRandomString(rand()%6+2));
-	glEndList();
-	return toReturn;
-}
+//int generateFullyRandomBuilding(float x, float y) {
+//	/*Generate a random bunch of floor plans*/
+//	int toReturn = glGenLists(1);
+//	vector<vec2> points;
+//	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
+//	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
+//	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
+//	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
+//
+//	vec2 mid = building.centerPoint(points);
+//	float radius = hypot(mid.x-points[0].x,mid.y-points[0].y);
+//	glNewList(toReturn, GL_COMPILE);
+//		building.generateFromString(generator.generateFloorPlan(vec2(x,y),radius,rand()%3+3), generator.generateRandomString(rand()%6+2));
+//	glEndList();
+//	return toReturn;
+//}
 
 /**
  * Basic method that draws a grid specified by grid_size and square_size
@@ -281,7 +234,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
 	}else if (button == GLFW_MOUSE_BUTTON_2 && action){
-		 testList = generateFullyRandomBuilding(0,0);
+		 testList = building.generateRandomBuildings();
 	}
 }
 

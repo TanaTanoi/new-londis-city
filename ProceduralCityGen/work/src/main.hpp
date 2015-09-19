@@ -52,10 +52,9 @@ void init(void);
 
 /*Rendering delcarations*/
 void drawGrid(double,double);
-int generateRandomBuildings(void);
 int generateBuildingFromString(std::string);
 
-int generateHexagonBuilding(float,float);
+//int generateHexagonBuilding(float,float);
 
 /*Callback delcarations*/
 void mouseButtonCallback(GLFWwindow* , int , int , int );

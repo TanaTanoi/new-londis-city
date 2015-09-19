@@ -19,6 +19,7 @@
 #include "building.hpp"
 #include "imageLoader.hpp"
 #include "shaderLoader.hpp"
+#include "generator.h"
 using namespace std;
 using namespace comp308;
 
@@ -47,7 +48,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 	vector<vec3> bot;
 	vector<vec3> top;
 	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
-	float height = 0.5f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+	float height = BLOCK_SIZE;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
 		bot.push_back(vec3(v2.x, elevation, v2.y));
@@ -120,7 +121,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 
 
 void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
-	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.0f)+0.3f;
+	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 0.3f)+0.3f;
 	vec2 mid = centerPoint(points);
 	vec3 peak = vec3(mid.x, elevation +height,mid.y);
 	int n = points.size();
@@ -131,7 +132,11 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 			glVertex3f(points[(i + 1) % n].x, elevation, points[(i + 1) % n].y );
 		}
 	glEnd();
-
+	glLineWidth(2.0f);
+	glBegin(GL_LINES);
+		glVertex3f(peak.x, peak.y, peak.z);
+		glVertex3f(peak.x, peak.y+0.3f, peak.z);
+	glEnd();
 }
 
 void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float elevation){
@@ -216,3 +221,50 @@ vec2 Building::centerPoint(vector<vec2> points){
 
 }
 
+
+/*Returns a display list */
+int Building::generateRandomBuildings() {
+	/*Generate a random bunch of floor plans*/
+	int toReturn = glGenLists(1);
+	float size = 2.4f;
+	float disp = 1.2f;
+	float building_size = 1.2f;
+	glNewList(toReturn, GL_COMPILE);
+
+	vector<vec2> points;
+	for (float i = -size; i <= size; i += disp) {
+		for (float j = -size; j <= i; j += disp) {
+			points.clear();
+			points.push_back(vec2(i, j));
+			points.push_back(vec2(i + building_size, j));
+			points.push_back(vec2(i + building_size, j + building_size));
+			points.push_back(vec2(i, j + building_size));
+			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
+			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
+			extendBuilding(points, -1.0f);
+		}
+	}
+	glEndList();
+	return toReturn;
+}
+
+
+int Building::generateBuildingFromString(string input) {
+	/*Generate a random bunch of floor plans*/
+	int toReturn = glGenLists(1);
+	float size = 8.0f;
+	float disp = 1.0f;
+	float building_size = 1.2f;
+	vector<vec2> points;
+
+
+	glNewList(toReturn, GL_COMPILE);
+	for (float i = -size; i <= size; i += disp) {
+		for (float j = -size; j <size; j += disp) {
+			points = Generator::generateFloorPlan(vec2(i, j), disp / 2.0f, rand() % 3 + 3);
+			generateFromString(points, Generator::generateRandomString(10 - (abs(i)*abs(j)) / 2));
+		}
+	}
+	glEndList();
+	return toReturn;
+}

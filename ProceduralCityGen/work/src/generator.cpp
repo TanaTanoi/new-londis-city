@@ -73,7 +73,7 @@ string LSystemLookup(char c) {
 
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomString(int itrs) {
-	itrs = max(min(itrs, 7),2);
+	itrs = max(min(itrs, 6),2);
 	string result = "*";
 	for (int i = 0; i < itrs; i++) {
 		string next = "";
@@ -96,17 +96,17 @@ vector<vec2> Generator::generateFloorPlan(vec2 center, float radius, int n){
 	if( n <=3)n=4;
 	vector<vec2> points;
 	float dr = 180-((n-2)*180)/n;
-	vec2 dir = vec2(0,radius);//direction for next point from center
+	double randx = rand() % 20+1;
+	double randy = rand() % 20 + 1;
+	vec2 dir = normalize(vec2(randx, randy));//direction for next point from center
+	dir *= radius;
 	float theta = radians(dr);
 	float cs = cos(theta);
 	float sn = sin(theta);
 	for(int i = 0; i < n;i++){
-
 		points.push_back(center+dir);
 		//rotate dir by function of n
-
 		vec2 newDir = vec2((dir.x * cs) - (dir.y * sn), (dir.x * sn) + (dir.y * cs));
-		cout<<"Direction "<< dir.x << " " << dir.y<<endl;
 		dir = newDir;
 	}
 //	points.push_back(center);
