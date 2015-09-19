@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
 
 
-
+	glEnable(GL_SMOOTH);
 	//int testList = generateRandomBuildings();
 	testList = generateBuildingFromString("SEESER");
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
@@ -137,28 +137,28 @@ void init() {
 
 void initLighting() {
 	float direction[] = { 0.0f, 0.0f, -1.0f, 0.0f };
-	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 0.2f };
-	float ambient[] = { 0.0f, 0.4f, 0.2f, 0.4f };
-	float specular[] = { 0.5, 0.5, 1.0, 0.1 };
+	float diffintensity[] = { 0.2f, 0.2f, 0.2f, 0.2f };
+	float ambient[] = { 0.2f, 0.2f, 0.2f, 0.4f };
+	float specular[] = { 1, 1, 1, 0.1f };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-	float light_position[] = { 1.0f, 10.0f, 0.0f, 1.0f };
+	float light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	vec3 diff = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
-	float spotlight_position[] = { diff.x, diff.y, diff.z };
-	glEnable(GL_LIGHT1);
+	float spotlight_direction[] = { diff.x, diff.y, diff.z };
+
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 46.0);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 4.0);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_position);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
-
+	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 }
 
@@ -200,14 +200,19 @@ int generateRandomBuildings() {
 int generateBuildingFromString(string input) {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
-	float size = 0.6f;
-	float disp = 1.2f;
+	float size =4.0f;
+	float disp = 1.0f;
 	float building_size = 1.2f;
 	vector<vec2> points;
-	points = generator.generateFloorPlan(vec2(0,0),1.0f,6);
+
+
 	glNewList(toReturn, GL_COMPILE);
-	points = generator.generateFloorPlan(vec2(0,0),1.0f,24);
-	building.generateFromString(points, generator.generateRandomString(4));
+	for(float i = -size; i <=size;i+=disp){
+		for(float j = - size; j <size;j+=disp){
+			points = generator.generateFloorPlan(vec2(i,j),disp/2.0f,rand()%3+3);
+			building.generateFromString(points, generator.generateRandomString(4));
+		}
+	}
 	glEndList();
 	return toReturn;
 }
