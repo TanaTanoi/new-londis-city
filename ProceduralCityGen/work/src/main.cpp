@@ -201,6 +201,7 @@ int generateBuildingFromString(string input) {
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
+	/**
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <= size; j += disp) {
 			points.clear();
@@ -214,6 +215,9 @@ int generateBuildingFromString(string input) {
 					generator.generateRandomString(4));
 		}
 	}
+	**/
+	points = generator.generateFloorPlan(vec2(0,0),1.0f,24);
+	building.generateFromString(points, generator.generateRandomString(4));
 	glEndList();
 	return toReturn;
 }

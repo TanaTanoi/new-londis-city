@@ -71,3 +71,28 @@ string Generator::generateRandomString(int itrs) {
 	cout << "Returning " << result;
 	return result;
 }
+/*Returns a floor plan based on *n the number of edges it should have
+ * and a *radius.
+ * REQUIRES n > 2
+ */
+vector<vec2> Generator::generateFloorPlan(vec2 center, float radius, int n){
+	if( n <=2)n=3;
+	vector<vec2> points;
+	float dr = 180-((n-2)*180)/n;
+	vec2 dir = vec2(0,radius);//direction for next point from center
+	for(int i = 0; i < n;i++){
+
+		points.push_back(center+dir);
+		//rotate dir by function of n
+		float theta = radians(dr);
+		float cs = cos(theta);
+		float sn = sin(theta);
+		vec2 newDir = vec2((dir.x * cs) - (dir.y * sn), (dir.x * sn) + (dir.y * cs));
+		cout<<"Direction "<< dir.x << " " << dir.y<<endl;
+		dir = newDir;
+	}
+//	points.push_back(center);
+
+
+	return points;
+}

@@ -15,9 +15,6 @@
 #                                         (_____|              #
 #                                                              #
 ################################################################
-#                          Created by:                         #
-#                    Ben Allen & Joshua Scott                  #
-################################################################
 
 # require new behaviour of: CMP0054
 cmake_minimum_required(VERSION 3.1)
@@ -50,15 +47,15 @@ find_package(OpenGL REQUIRED)
 #########################################################
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw")
 include_directories("${PROJECT_SOURCE_DIR}/ext/glfw/include")
-#########################################################
-# Include STB Subproject
-#########################################################
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
+
 #########################################################
 # Include GLEW Subproject
 #########################################################
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-1.10.0")
-
+#########################################################
+# Include STB Subproject
+#########################################################
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 #########################################################
 # Set Compiler Flags
 #########################################################
