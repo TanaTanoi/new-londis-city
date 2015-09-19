@@ -20,9 +20,13 @@
 #include "main.hpp"
 #include "building.hpp"
 #include "generator.h"
+#include "vehicle.hpp"
+
 using namespace std;
 using namespace comp308;
 
+// TODO make this class - Cam
+VehicleController *g_vehicleCtrl = nullptr;
 
 //Main program
 //
@@ -32,7 +36,6 @@ int main(int argc, char **argv) {
 
 	/*Running some checks*/
 
-
 	GLFWwindow* window;
 
 	/* Initialize the library */
@@ -40,7 +43,8 @@ int main(int argc, char **argv) {
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(g_winWidth, g_winHeight, "Procedural City Generator", nullptr, nullptr);
+	window = glfwCreateWindow(g_winWidth, g_winHeight,
+			"Procedural City Generator", nullptr, nullptr);
 	if (!window) {
 		glfwTerminate();
 		return -1;
@@ -60,7 +64,6 @@ int main(int argc, char **argv) {
 	/*Test for joysticks/controllers */
 	joystick = glfwJoystickPresent(GLFW_JOYSTICK_1);
 	cout << joystick << " joystick.." << endl;
-
 
 	/*Setup callback functions*/
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -84,6 +87,11 @@ int main(int argc, char **argv) {
 		cout << generator.generateRandomString(i) << endl;
 	}
 
+	// Create vehicle controller
+	g_vehicleCtrl = new VehicleController(
+			"..\work\res\assets\vehicle_config.txt",
+			"..\work\res\assets\tex_config.txt", vector<vec3>(), vec3());
+
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
@@ -104,6 +112,8 @@ int main(int argc, char **argv) {
 		// woo poll events
 	}
 
+	// Delete pointers
+	delete g_vehicleCtrl;
 
 	glfwTerminate();
 
@@ -123,29 +133,30 @@ void init() {
 }
 
 void initLighting() {
-	float direction[]	  = {0.0f, 0.0f, -1.0f, 0.0f};
-	float diffintensity[] = {0.7f, 0.7f, 0.7f, 0.2f};
-	float ambient[]       = {0.0f, 0.4f, 0.2f, 0.4f};
+	float direction[] = { 0.0f, 0.0f, -1.0f, 0.0f };
+	float diffintensity[] = { 0.7f, 0.7f, 0.7f, 0.2f };
+	float ambient[] = { 0.0f, 0.4f, 0.2f, 0.4f };
 	float specular[] = { 0.5, 0.5, 1.0, 0.1 };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-	float light_position[] = { 1.0f, 10.0f, 0.0f,1.0f};
-	vec3 diff = (vec3(0,0,0)-vec3(light_position[0],light_position[1],light_position[2]));
-	float spotlight_position[] = { diff.x, diff.y, diff.z};
-    glEnable(GL_LIGHT1);
-    glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 46.0);
-    glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 4.0);
-    glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,spotlight_position);
+	float light_position[] = { 1.0f, 10.0f, 0.0f, 1.0f };
+	vec3 diff = (vec3(0, 0, 0)
+			- vec3(light_position[0], light_position[1], light_position[2]));
+	float spotlight_position[] = { diff.x, diff.y, diff.z };
+	glEnable(GL_LIGHT1);
+	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 46.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 4.0);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_position);
 
-    glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 
-    glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 }
 
 void setupCamera() {
@@ -175,7 +186,7 @@ int generateRandomBuildings() {
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateBlock(points,-1.0f);
+			building.generateBlock(points, -1.0f);
 		}
 	}
 	glEndList();
@@ -190,8 +201,8 @@ int generateBuildingFromString(string input) {
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i <=size; i += disp) {
-		for (float j = -size; j <=size; j += disp) {
+	for (float i = -size; i <= size; i += disp) {
+		for (float j = -size; j <= size; j += disp) {
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -199,7 +210,8 @@ int generateBuildingFromString(string input) {
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateFromString(points, generator.generateRandomString(4));
+			building.generateFromString(points,
+					generator.generateRandomString(4));
 		}
 	}
 	glEndList();
@@ -212,15 +224,14 @@ int generateHexagonBuilding(float x, float y) {
 	int toReturn = glGenLists(1);
 	vector<vec2> points;
 
-	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
+	points.push_back(vec2(x, y) - vec2(1.0f, 2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
 	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
 	points.push_back(vec2(x, y) - vec2(1.0f, 2.0f));
 
-
 	glNewList(toReturn, GL_COMPILE);
-	building.generateBlock(points,0.0f);
+	building.generateBlock(points, 0.0f);
 	glEndList();
 	return toReturn;
 }
@@ -261,8 +272,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 
 void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	if (m_LeftButton) {
-		rotation.x += (m_pos.x-xpos);
-		rotation.y += (m_pos.y-ypos );
+		rotation.x += (m_pos.x - xpos);
+		rotation.y += (m_pos.y - ypos);
 	}
 	m_pos = vec2(xpos, ypos);
 }
@@ -271,8 +282,7 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {
 		zoom *= 1.1;
-	}
-	else {
+	} else {
 		zoom /= 1.1;
 	}
 }
@@ -288,10 +298,10 @@ void joystickEventsPoll() {
 	int count;
 	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
 	if (count > 0) {
-		c_LSpos = vec2((float)((int)(axes[0]*100))/100.0f, (float)((int)(axes[1] * 100)) / 100.0f);
+		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
+				(float) ((int) (axes[1] * 100)) / 100.0f);
 		rotation.x += (0.0f - c_LSpos.x);
 		rotation.y += (0.0f - c_LSpos.y);
-
 
 	}
 }

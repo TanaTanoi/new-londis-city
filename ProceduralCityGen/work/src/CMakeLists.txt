@@ -12,6 +12,7 @@ SET(headers
 	"imageLoader.hpp"
 	"section.hpp"
 	"generator.h"
+	"vehicle.hpp"
 )
 
 
@@ -21,6 +22,7 @@ SET(sources
 	"building.cpp"
 	"section.cpp"
 	"generator.cpp"
+	"vehicleController.cpp"
 )
 
 # Add executable target and link libraries
