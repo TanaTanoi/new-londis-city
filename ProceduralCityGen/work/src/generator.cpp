@@ -49,6 +49,7 @@ string LSystemLookup(char c) {
 	}else {
 		return "" + c;
 	}
+	return "" + c;
 }
 
 

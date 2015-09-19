@@ -31,7 +31,7 @@ line SectionDivider::findLongestEdge(section *s) {
 }
 
 /**
-* Divides the sections 
+* Divides the sections
 */
 
 void SectionDivider::divideSection(section s) {
@@ -40,11 +40,11 @@ void SectionDivider::divideSection(section s) {
 
 /**
 * Recursively divides sections by extending a perpendicular bisector
-* of the longest edge slightly off centre. Continuely recurses until 
+* of the longest edge slightly off centre. Continuely recurses until
 * it is smaller than the largest acceptable size for a section.
 */
 
-void SectionDivider::recDivideSection(section *s) {	
+void SectionDivider::recDivideSection(section *s) {
 	vector<section> lots = splitSection(s);
 
 	for (section l : lots) {
@@ -90,7 +90,8 @@ vector<section> SectionDivider::splitSection(section *s) {
 
 		}
 	}
-	
+	vector<section> x;
+	return x;
 
 }
 
