@@ -11,7 +11,7 @@
 #include <sstream>
 #include <string>
 #include <stdexcept>
-#include <unistd.h>
+//#include <unistd.h> ??
 
 #include "comp308.hpp"
 #include "vehicle.hpp"
@@ -89,11 +89,9 @@ void VehicleController::readConfig(string filename) {
 	string line;
 
 	if (!file.is_open()) {
-		cout << "In here" << endl;
 		cerr << "Failed to open file " << filename << endl;
 		throw runtime_error("Error :: could not open file.");
 	}
-
 	while (file.good()) {
 
 		// Read the line

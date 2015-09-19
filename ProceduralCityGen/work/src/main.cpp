@@ -88,10 +88,10 @@ int main(int argc, char **argv) {
 
 
 	// Create vehicle controller
-	g_vehicleCtrl = new VehicleController(
-			"../work/res/assets/vehicle_config.txt",
-			"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
-
+	//g_vehicleCtrl = new VehicleController(
+	//		"../work/res/assets/vehicle_config.txt",
+	//		"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
+	
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
@@ -101,22 +101,22 @@ int main(int argc, char **argv) {
 
 		setupCamera();
 		initLighting();
+		glTranslatef(0, -5, 0);
 		drawGrid(10, 1);
 		glCallList(testList);
 
 		// Draw vehicles
-		g_vehicleCtrl->renderVehicles();
+		//g_vehicleCtrl->renderVehicles();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 		/* Poll for and process events */
 		glfwPollEvents();
 		joystickEventsPoll();
-		// woo poll events
 	}
 
 	// Delete pointers
-	delete g_vehicleCtrl;
+	//delete g_vehicleCtrl;
 
 	glfwTerminate();
 
@@ -143,9 +143,9 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 
-	float light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	float light_position[] = { 0.0f, 20.0f, 0.0f, 1.0f };
 	vec3 diff = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { diff.x, diff.y, diff.z };
@@ -161,13 +161,27 @@ void initLighting() {
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 }
+void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+{
+	const GLdouble pi = 3.1415926535897932384626433832795;
+	GLdouble fW, fH;
 
+	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+	fH = tan(fovY / 360 * pi) * zNear;
+	fW = fH * aspect;
+
+	glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+}
 void setupCamera() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	perspectiveGL(20.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glScalef(zoom, zoom, zoom);
-	glRotatef(rotation.y, 1.0f, 0.0f, 0.0f);
-	glRotatef(rotation.x, 0.0f, 1.0f, 0.0f);
+	
+	glTranslatef(0, 0, -50*zoom);
+	glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
+	glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
 
 }
 
@@ -190,7 +204,7 @@ int generateRandomBuildings() {
 			points.push_back(vec2(i, j + building_size));
 			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
 			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateBlock(points, -1.0f);
+			building.extendBuilding(points, -1.0f);
 		}
 	}
 	glEndList();
@@ -200,7 +214,7 @@ int generateRandomBuildings() {
 int generateBuildingFromString(string input) {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
-	float size =4.0f;
+	float size =8.0f;
 	float disp = 1.0f;
 	float building_size = 1.2f;
 	vector<vec2> points;
@@ -210,7 +224,7 @@ int generateBuildingFromString(string input) {
 	for(float i = -size; i <=size;i+=disp){
 		for(float j = - size; j <size;j+=disp){
 			points = generator.generateFloorPlan(vec2(i,j),disp/2.0f,rand()%3+3);
-			building.generateFromString(points, generator.generateRandomString(4));
+			building.generateFromString(points, generator.generateRandomString( 10 - (abs(i)*abs(j))/2  ));
 		}
 	}
 	glEndList();
@@ -282,9 +296,9 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {
-		zoom *= 1.1;
-	} else {
 		zoom /= 1.1;
+	} else {
+		zoom *= 1.1;
 	}
 }
 

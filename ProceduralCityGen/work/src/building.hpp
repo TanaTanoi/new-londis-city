@@ -20,11 +20,11 @@
 class Building {
 private:
 	GLuint g_shader = 0;
-	void initShader(void);
+	void initShader(void);//not currently working
 	void initTexture(void);//not currently working
 
 public:
-	float generateBlock(std::vector<comp308::vec2>, float);
+	float extendBuilding(std::vector<comp308::vec2>, float);
 	std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
 	comp308::vec2 centerPoint(std::vector<comp308::vec2>);
 	void generateFromString(std::vector<comp308::vec2>, std::string);

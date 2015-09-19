@@ -1,12 +1,17 @@
+#pragma once
 /*
  * vehicle.hpp
  *
  *  Created on: 19/09/2015
  *      Author: bryerscame
  */
-
-// #ifndef SRC_VEHICLE_HPP_
-// #define SRC_VEHICLE_HPP_
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include "comp308.hpp"
 
 struct vertex {
 	int p = 0; // index for point in m_points

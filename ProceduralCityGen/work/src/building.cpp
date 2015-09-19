@@ -36,14 +36,13 @@ void Building::initShader() {
 void Building::initTexture() {//TODO this method
 }
 
-/*Generates a block from the given floor plan *floor from the given
- * height; *elevation.
+/*From the given floor plan, extrude to create a block of height 0.5f
+ *
  * *floor must be a list of points where a wall is connected between
  * point i and point i +1 (where last and first point are connected)
- *
  */
-float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
-	glUseProgram(g_shader);
+float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
+	//glUseProgram(g_shader);
 	int n = floor.size();
 	vector<vec3> bot;
 	vector<vec3> top;
@@ -58,11 +57,6 @@ float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation)
 	glBegin(GL_QUADS);
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
-		if(i %2==0){
-			glColor3f(0.7f,0.1f,0.4f);
-		}else{
-			glColor3f(0.1f,0.2f,0.9f);
-		}
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
 		vec3 botr = bot[(i + 1) % n];
@@ -102,14 +96,14 @@ float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation)
 void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
 	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
 
-	float height = generateBlock(floor, 0.0f);
+	float height = extendBuilding(floor, 0.0f);
 	for (int i = 0; i < input.length(); i++) {
 		switch (input[i]) {
 		case 'S':
 			floor = shrinkPoints(floor);
 			break;
 		case 'E':
-			height = generateBlock(floor, height);
+			height = extendBuilding(floor, height);
 			break;
 		case 'R':
 			if(rand()%2==0){
@@ -196,10 +190,9 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
 	vec2 mid = centerPoint(points);
 	vector<vec2> smallPoints;
-	float dist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
+	float dist = 0.15f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
 	for(vec2 v2:points){
 		vec2 diff = (mid - v2)*dist;
-
 		smallPoints.push_back(v2+diff);
 	}
 	return smallPoints;

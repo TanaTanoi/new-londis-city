@@ -16,17 +16,20 @@ string LSystemLookup(char c) {
 		case 0://30% chance of staying same
 		case 1:
 		case 2:
+		case 6:
+		case 8:
 			return "E";
 		case 3:
 		case 4://30% chance of increasing in height
 		case 5:
 			return "EE";
-		case 6:
+		
 		case 7://30% chance of shrinking
-		case 8:
+		
 			return "ES";
 		case 9://10% chance for roof
-			return "ER";
+		//	return "ER";
+			return c + "";
 		}
 	}else if (c == 'S') {
 		switch ((int)(rand() % 10)) {
@@ -39,15 +42,30 @@ string LSystemLookup(char c) {
 		case 5:
 			return "SE";
 		case 6://10% chance for roof
-			return "R";
+			//return "R";
 		case 7://20% chance for double shrink
 		case 8:
-			return "SS";
+			return "S";
 		case 9:
-			return "SES";
+			return "SE";
 		}
-	}else {
-		return "" + c;
+	}else if (c =='*'){
+		switch ((int)(rand() % 10)) {
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			return "S*";
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			return "E*";
+		case 8:
+		case 9:
+			return "R";
+
+		}
 	}
 	return "" + c;
 }
@@ -55,38 +73,38 @@ string LSystemLookup(char c) {
 
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomString(int itrs) {
-	string result = "E";
+	itrs = max(min(itrs, 7),2);
+	string result = "*";
 	for (int i = 0; i < itrs; i++) {
 		string next = "";
 		for (int c = 0; c < result.length(); c++) {
 			string addition = LSystemLookup(result[c]);
 			next = next + addition;
-			if (addition[addition.size() - 1] == 'R') {
-				return next;
-			}
 		}
 		result = next;
-		cout << "Result is " << result << " after " << i << " iterations" << endl;
+		//cout << "Result is " << result << " after " << i << " iterations" << endl;
 	}
-	cout << "Returning " << result;
+	cout << "Returning " << result << endl;
 	return result;
 }
+
 /*Returns a floor plan based on *n the number of edges it should have
  * and a *radius.
  * REQUIRES n > 2
  */
 vector<vec2> Generator::generateFloorPlan(vec2 center, float radius, int n){
-	if( n <=2)n=3;
+	if( n <=3)n=4;
 	vector<vec2> points;
 	float dr = 180-((n-2)*180)/n;
 	vec2 dir = vec2(0,radius);//direction for next point from center
+	float theta = radians(dr);
+	float cs = cos(theta);
+	float sn = sin(theta);
 	for(int i = 0; i < n;i++){
 
 		points.push_back(center+dir);
 		//rotate dir by function of n
-		float theta = radians(dr);
-		float cs = cos(theta);
-		float sn = sin(theta);
+
 		vec2 newDir = vec2((dir.x * cs) - (dir.y * sn), (dir.x * sn) + (dir.y * cs));
 		cout<<"Direction "<< dir.x << " " << dir.y<<endl;
 		dir = newDir;
