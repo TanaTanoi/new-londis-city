@@ -19,8 +19,9 @@
 
 class Building {
 private:
+	GLuint g_shader = 0;
+	void initShader(void);
 	void initTexture(void);//not currently working
-	void parseChar(char);
 
 public:
 	float generateBlock(std::vector<comp308::vec2>, float);
@@ -28,4 +29,6 @@ public:
 	comp308::vec2 centerPoint(std::vector<comp308::vec2>);
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);
+	void generateFlatPointRoof(std::vector<comp308::vec2>,float);
+	Building(void);
 };
