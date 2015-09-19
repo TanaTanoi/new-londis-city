@@ -22,39 +22,33 @@
 using namespace std;
 using namespace comp308;
 
+Building::Building(){
+//	initShader();
+}
+
+
 GLuint g_texture = 0;
-
-void Building::initTexture() {
-	//image tex("../work/res/textures/example.jpg");
-//		glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-//		glGenTextures(1, &g_texture); // Generate texture ID
-//		glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
-//
-//		// Setup sampling strategies
-//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		// Finnaly, actually fill the data into our texture
-//		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-//
-//		cout << tex.w << endl;
+void Building::initShader() {
+	//Gets stuck here, i.e. cout won't print
+	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
+	cout<<"Initd shader"<<endl;
+}
+void Building::initTexture() {//TODO this method
 }
 
 /*Generates a block from the given floor plan *floor from the given
- * height *elevation.
+ * height; *elevation.
  * *floor must be a list of points where a wall is connected between
  * point i and point i +1 (where last and first point are connected)
  *
  */
 float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation) {
+	glUseProgram(g_shader);
 	int n = floor.size();
 	vector<vec3> bot;
 	vector<vec3> top;
-	/*Height is a value between 1 and 2 + the elevation (so height-elevation is the change in Y)*/
-	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/2.0f)+1.0f;
+	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
+	float height = 0.5f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
 		bot.push_back(vec3(v2.x, elevation, v2.y));
@@ -76,8 +70,7 @@ float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation)
 		vec3 normal = cross((botl - topr), (topl - topr));
 		normal = normalize(normal);
 		//glTexCoord2d(0, 0);
-		glNormal3f(normal.x, normal.y, normal.z);
-
+		glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
 		glVertex3f(topl.x, topl.y, topl.z);
 		glVertex3f(botl.x, botl.y, botl.z);
 		glVertex3f(botr.x, botr.y, botr.z);
@@ -103,14 +96,9 @@ float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation)
 	return height;
 }
 
-void Building::parseChar(char c) {
-	switch (c) {
-	case 'E':
-
-		break;
-	}
-}
-
+/*Generates a building based on the instructions from the input string,
+ * and the floor points.
+ */
 void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
 	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
 
@@ -124,12 +112,18 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			height = generateBlock(floor, height);
 			break;
 		case 'R':
-			generatePointRoof(floor, height);
+			if(rand()%2==0){
+				generatePointRoof(floor, height);
+			}else{
+				generateFlatPointRoof(floor,height);
+			}
 			return;
 		}
 
 	}
 }
+
+
 
 void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
 	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.0f)+0.3f;
@@ -143,6 +137,58 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 			glVertex3f(points[(i + 1) % n].x, elevation, points[(i + 1) % n].y );
 		}
 	glEnd();
+
+}
+
+void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float elevation){
+	int n = points.size();
+		vector<vec3> bot;
+		vector<vec2> topPlan = shrinkPoints(shrinkPoints(points));
+		vector<vec3> top;
+		/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
+		float height = 0.2f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+		height+=elevation;
+		for (int i = 0;i<n;i++) {
+			bot.push_back(vec3(points[i].x, elevation, points[i].y));
+			top.push_back(vec3(topPlan[i].x, height, topPlan[i].y));
+		}
+
+		glBegin(GL_QUADS);
+		/*n amount of walls*/
+		for (int i = 0; i < n; i++) {
+			if(i %2==0){
+				glColor3f(0.7f,0.1f,0.4f);
+			}else{
+				glColor3f(0.1f,0.2f,0.9f);
+			}
+			vec3 topl = top[i];
+			vec3 topr = top[(i + 1) % n];
+			vec3 botr = bot[(i + 1) % n];
+			vec3 botl = bot[i];
+			vec3 normal = cross((botl - topr), (topl - topr));
+			normal = normalize(normal);
+			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
+			glVertex3f(topl.x, topl.y, topl.z);
+			glVertex3f(botl.x, botl.y, botl.z);
+			glVertex3f(botr.x, botr.y, botr.z);
+			glVertex3f(topr.x, topr.y, topr.z);
+		}
+		glEnd();
+		glBegin(GL_POLYGON);
+		/*roof*/
+		glColor3f(0,0,0);
+		glNormal3f(0, 1, 0);
+		for (vec3 roofpart : top) {
+			glVertex3f(roofpart.x, roofpart.y, roofpart.z);
+		}
+		glEnd();
+		glBegin(GL_POLYGON);
+		glNormal3f(0, -1, 0);
+		for (vec3 floorPoint: bot) {
+			glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
+		}
+
+		glEnd();
 
 }
 
@@ -164,17 +210,16 @@ vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
  * shape created by *points.
  */
 vec2 Building::centerPoint(vector<vec2> points){
-	vec2 max = points[0];
-	vec2 min = max;
-	for(int i = 1; i < points.size();i++){
-		if(points[i].x > max.x && points[i].y > max.y){
-			max = points[i];
-		}
-		if(points[i].x < min.x && points[i].y < min.y){
-			min= points[i];
-		}
+	float x = 0;
+	float y = 0;
+
+	for(int i = 0; i < points.size();i++){
+		x+=points[i].x;
+		y+=points[i].y;
 	}
-	vec2 mid = ((max - min)/2) + min;
-	return mid;
+	y/=points.size();
+	x/=points.size();
+	return vec2(x,y);
+
 }
 
