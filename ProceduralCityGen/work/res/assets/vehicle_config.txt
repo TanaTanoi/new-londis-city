@@ -1,1 +1,1 @@
-"../work/res/assets/bunny.obj"
+../work/res/assets/bunny.obj

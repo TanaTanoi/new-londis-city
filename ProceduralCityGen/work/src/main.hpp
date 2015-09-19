@@ -17,6 +17,8 @@
 #include "comp308.hpp"
 #include "building.hpp"
 #include "generator.h"
+#include "vehicle.hpp"
+
 /*Fields */
 double g_winWidth 	= 640;
 double g_winHeight 	= 480;
@@ -38,6 +40,7 @@ int joystick;
 
 Building building;
 Generator generator;
+VehicleController *g_vehicleCtrl = nullptr;
 
 /*-----------------
 Method declarations

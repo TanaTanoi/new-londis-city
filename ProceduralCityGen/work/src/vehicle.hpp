@@ -79,7 +79,7 @@ public:
 	void renderVehicles();
 
 	// Render a specific vehicle given a transformation and a texture
-	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, int);
+	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int);
 
 	// Delete all pointers
 	void cleanUp();

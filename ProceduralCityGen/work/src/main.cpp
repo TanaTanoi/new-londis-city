@@ -20,13 +20,10 @@
 #include "main.hpp"
 #include "building.hpp"
 #include "generator.h"
-#include "vehicle.hpp"
 
 using namespace std;
 using namespace comp308;
 
-// TODO make this class - Cam
-VehicleController *g_vehicleCtrl = nullptr;
 
 //Main program
 //
@@ -103,6 +100,9 @@ int main(int argc, char **argv) {
 		initLighting();
 		drawGrid(10, 1);
 		glCallList(testList);
+
+		// Draw vehicles
+		g_vehicleCtrl->renderVehicles();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);

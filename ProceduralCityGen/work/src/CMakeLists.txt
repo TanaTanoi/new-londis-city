@@ -23,6 +23,7 @@ SET(sources
 	"section.cpp"
 	"generator.cpp"
 	"vehicleController.cpp"
+	"vehicle.cpp"
 )
 
 # Add executable target and link libraries

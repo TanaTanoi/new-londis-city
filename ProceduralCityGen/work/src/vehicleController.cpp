@@ -32,11 +32,11 @@ VehicleController::VehicleController(string vehicles, string textures,
 void VehicleController::initVehicles() {
 
 	// TODO will have to change this according to the size of the map
-	int size = 10, index;
+	int size = 1, index;
 
 	for (int i = 0; i < size; i++) {
 		index = rand() % m_filenames_car.size();
-		// m_vehicles[i] = Vehicle(index);
+		m_vehicles.push_back(Vehicle(m_filenames_car[index]));
 	}
 
 }
@@ -68,11 +68,19 @@ void VehicleController::initTexture(string filename, int index) {
 
 void VehicleController::renderVehicles() {
 
+	for (Vehicle v : m_vehicles)
+		renderVehicle(&v, vec3(), vec3(), vec3(0.1, 0.1, 0.1), -1);
 }
 
 void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
-		vec3 rotate, int texture) {
+		vec3 rotate, vec3 scale, int texture) {
 
+	glPushMatrix();
+	glTranslatef(translate.x, translate.y, translate.z);
+	glRotatef(rotate.x, rotate.y, rotate.z, 1);
+	glScalef(scale.x, scale.y, scale.z);
+	vehicle->renderVehicle();
+	glPopMatrix();
 }
 
 void VehicleController::readConfig(string filename) {
@@ -114,14 +122,15 @@ void VehicleController::readTextures(string filename) {
 		m_filenames_tex.push_back(line);
 	}
 
-	cout << "Finished reading vehicle files" << endl;
-
 	m_textures = new GLuint[m_filenames_tex.size()];
 
 	for (int i = 0; i < m_filenames_tex.size(); i++)
 		initTexture(m_filenames_tex[i], i + 1);
+
+	cout << "Finished reading texture files" << endl;
 }
 
 void VehicleController::cleanUp() {
+
 
 }
