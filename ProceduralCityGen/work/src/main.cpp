@@ -24,7 +24,7 @@
 using namespace std;
 using namespace comp308;
 
-
+int testList;
 //Main program
 //
 int main(int argc, char **argv) {
@@ -75,14 +75,17 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+
+
+
 	//int testList = generateRandomBuildings();
-	int testList = generateBuildingFromString("SEESER");
+	testList = generateBuildingFromString("SEESER");
 //	int testList = generateHexagonBuilding(0.0f,0.0f);
 	/* Loop until the user closes the window */
 	initLighting();
-	for (int i = 0; i < 5; i++) {
-		cout << generator.generateRandomString(i) << endl;
-	}
+
+
+
 
 	// Create vehicle controller
 	g_vehicleCtrl = new VehicleController(
@@ -176,6 +179,7 @@ int generateRandomBuildings() {
 	float disp = 1.2f;
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
+
 	vector<vec2> points;
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <= i; j += disp) {
@@ -199,23 +203,9 @@ int generateBuildingFromString(string input) {
 	float size = 0.6f;
 	float disp = 1.2f;
 	float building_size = 1.2f;
-	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	/**
-	for (float i = -size; i <= size; i += disp) {
-		for (float j = -size; j <= size; j += disp) {
-			points.clear();
-			points.push_back(vec2(i, j));
-			points.push_back(vec2(i + building_size, j));
-			points.push_back(vec2(i + building_size, j + building_size));
-			points.push_back(vec2(i, j + building_size));
-			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
-			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateFromString(points,
-					generator.generateRandomString(4));
-		}
-	}
-	**/
+	points = generator.generateFloorPlan(vec2(0,0),1.0f,6);
+	glNewList(toReturn, GL_COMPILE);
 	points = generator.generateFloorPlan(vec2(0,0),1.0f,24);
 	building.generateFromString(points, generator.generateRandomString(4));
 	glEndList();
@@ -223,19 +213,19 @@ int generateBuildingFromString(string input) {
 }
 
 /*Returns a display list of a hexagon shaped building */
-int generateHexagonBuilding(float x, float y) {
+int generateFullyRandomBuilding(float x, float y) {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
 	vector<vec2> points;
-
-	points.push_back(vec2(x, y) - vec2(1.0f, 2.0f));
+	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
 	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
 	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
-	points.push_back(vec2(x, y) - vec2(1.0f, 2.0f));
 
+	vec2 mid = building.centerPoint(points);
+	float radius = hypot(mid.x-points[0].x,mid.y-points[0].y);
 	glNewList(toReturn, GL_COMPILE);
-	building.generateBlock(points, 0.0f);
+		building.generateFromString(generator.generateFloorPlan(vec2(x,y),radius,rand()%3+3), generator.generateRandomString(rand()%6+2));
 	glEndList();
 	return toReturn;
 }
@@ -271,6 +261,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
+	}else if (button == GLFW_MOUSE_BUTTON_2 && action){
+		 testList = generateFullyRandomBuilding(0,0);
 	}
 }
 
