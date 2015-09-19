@@ -32,7 +32,6 @@ int main(int argc, char **argv) {
 
 	/*Running some checks*/
 
-
 	GLFWwindow* window;
 
 	/* Initialize the library */
@@ -190,18 +189,20 @@ int generateBuildingFromString(string input) {
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
 	vector<vec2> points;
-	for (float i = -size; i <=size; i += disp) {
-		for (float j = -size; j <=size; j += disp) {
-			points.clear();
-			points.push_back(vec2(i, j));
-			points.push_back(vec2(i + building_size, j));
-			points.push_back(vec2(i + building_size, j + building_size));
-			points.push_back(vec2(i, j + building_size));
-			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
-			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
-			building.generateFromString(points, generator.generateRandomString(4));
-		}
-	}
+//	for (float i = -size; i <=size; i += disp) {
+//		for (float j = -size; j <=size; j += disp) {
+//			points.clear();
+//			points.push_back(vec2(i, j));
+//			points.push_back(vec2(i + building_size, j));
+//			points.push_back(vec2(i + building_size, j + building_size));
+//			points.push_back(vec2(i, j + building_size));
+//			glColor3f(i + 1, j + 1, (i + j) / 2 + 1);
+//			glColor3f((i + size) / 2, (i + size) / 2, (i + size) / 2);
+//			building.generateFromString(points, generator.generateRandomString(4));
+//		}
+//	}
+	points = generator.generateFloorPlan(vec2(0,0),1.0f,24);
+	building.generateFromString(points, generator.generateRandomString(4));
 	glEndList();
 	return toReturn;
 }

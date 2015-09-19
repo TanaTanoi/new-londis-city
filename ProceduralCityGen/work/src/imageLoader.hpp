@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
 //
 // This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty. 
+// Victoria University of Wellington, without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from
 // the use of this software.
 //
@@ -59,11 +59,11 @@ struct image {
 		image r(width, height, n);
 
 		for (int y = 0; y < height; y++) {
-			if ((y+yoffset) >= h) continue; 
+			if ((y+yoffset) >= h) continue;
 			for(int x = 0; x < width; x++) {
-				if ((x+xoffset) >= w) continue; 
+				if ((x+xoffset) >= w) continue;
 				for (int i = 0; i < n; i++) {
-					r.data[ (y*width*n) + (x*n) + i ] = 
+					r.data[ (y*width*n) + (x*n) + i ] =
 						data[ ((y+yoffset)*w*n) + ((x+xoffset)*n) + i ];
 				}
 			}

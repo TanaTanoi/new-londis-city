@@ -18,33 +18,30 @@
 #include "comp308.hpp"
 #include "building.hpp"
 #include "imageLoader.hpp"
-
+#include "shaderLoader.hpp"
 using namespace std;
 using namespace comp308;
 
-//GLuint g_texture = 0;
+GLuint g_texture = 0;
 
 void Building::initTexture() {
-	//image tex = image("../work/res/textures/example.jpg");
+	//image tex("../work/res/textures/example.jpg");
+//		glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+//		glGenTextures(1, &g_texture); // Generate texture ID
+//		glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
+//
+//		// Setup sampling strategies
+//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	//glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-	//glGenTextures(1, &g_texture); // Generate texture ID
-	//glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
-
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	//// Setup sampling strategies
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	//// Finnaly, actually fill the data into our texture
-	////gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-
-	//cout << tex.w << endl;
+		// Finnaly, actually fill the data into our texture
+//		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
+//
+//		cout << tex.w << endl;
 }
-
 
 /*Generates a block from the given floor plan *floor from the given
  * height *elevation.
@@ -80,7 +77,7 @@ float Building::generateBlock(std::vector<comp308::vec2> floor, float elevation)
 		normal = normalize(normal);
 		//glTexCoord2d(0, 0);
 		glNormal3f(normal.x, normal.y, normal.z);
-		
+
 		glVertex3f(topl.x, topl.y, topl.z);
 		glVertex3f(botl.x, botl.y, botl.z);
 		glVertex3f(botr.x, botr.y, botr.z);
@@ -130,7 +127,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			generatePointRoof(floor, height);
 			return;
 		}
-	
+
 	}
 }
 
