@@ -135,22 +135,22 @@ void init() {
 
 void initLighting() {
 	float direction[] = { 0.0f, 0.0f, -1.0f, 0.0f };
-	float diffintensity[] = { 0.2f, 0.2f, 0.2f, 0.2f };
-	float ambient[] = { 0.2f, 0.2f, 0.2f, 0.4f };
-	float specular[] = { 1, 1, 1, 0.1f };
+	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	float specular[] = { 1, 1, 1, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0); // f yo light 0
 
 	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
-	vec3 diff = (vec3(0, 0, 0)
+	vec3 differenace = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
-	float spotlight_direction[] = { diff.x, diff.y, diff.z };
+	float spotlight_direction[] = { differenace.x, differenace.y, differenace.z };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 64.0);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0.5f);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);

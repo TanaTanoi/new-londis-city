@@ -30,7 +30,7 @@ struct buildingLOD {
 	int high;
 };
 
-const float BLOCK_SIZE = 0.5f;
+const float BLOCK_SIZE = 0.3f;
 
 class Building {
 private:

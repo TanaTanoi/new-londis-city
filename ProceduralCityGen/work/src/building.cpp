@@ -115,7 +115,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			}
 			return;
 		case 'D':
-			if (floor.size() == 4) { floor = subdivide(floor)[0]; }
+			if (floor.size() == 4) { floor = subdivide(floor)[rand()%2]; }
 		}
 
 	}
@@ -317,15 +317,25 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	minDist /= 2;
 	srand(parameters->seed);
-	if ((rand()%2==0)) {//50% chance to generate differently shaped building
+	if ((rand() % 5 == 0)) {//20% chance to generate differently shaped building
+		srand(rand());//increase randomness
+		floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
+	}
+	else if (rand() % 5 <= 2) {//%40% chance to have smaller area 
+		floorPlan = shrinkPoints(floorPlan);
+	}else if(rand()%5==3){//10% chance to have a different orientated area
+		floorPlan = Generator::generateFloorPlan(center, minDist,4);
+	}else{				//10% chance to generate building in same floor plan
 		srand(rand());
-		floorPlan = Generator::generateFloorPlan(center,minDist, rand() % 4 + 4);
-	}else{				//50% chance to generate building in same floor plan
+		if (rand() % 2 == 0) {	//50% chance to be normal square
 
+		}else {					//50% chance to be different square
+			floorPlan = Generator::cutEdges(floorPlan);
+		}
 	}
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
-	generateFromString(floorPlan, Generator::generateRandomString(rand() % 4 + 1));//TODO fix this so the iterations are a function of height
+	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
 	glEndList();
 
 }
@@ -335,15 +345,17 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	vector<vector<vec2>> result;
 	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
-	vec2 cutP1 = ((points[1] - points[0]) / 2.0f) + points[0];
-	vec2 cutP2 = ((points[3] - points[2]) / 2.0f) + points[2];
+	float cutDist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.5f) + 1.5f;
+	vec2 cutP1 = ((points[1] - points[0]) / cutDist) + points[0];
+	vec2 cutP2 = ((points[2] - points[3]) / cutDist) + points[3];
 	result.push_back(vector<vec2>());
 	result.push_back(vector<vec2>());
 
-	result[0].push_back(points[0]);
+	
 	result[0].push_back(cutP1);
 	result[0].push_back(cutP2);
 	result[0].push_back(points[3]);
+	result[0].push_back(points[0]);
 
 	result[1].push_back(cutP2);
 	result[1].push_back(cutP1);

@@ -21,6 +21,8 @@ class Generator {
 private:
 
 public:
-	static std::string generateRandomString(int);
+	static std::string generateRandomBuildingString(int);
+	static std::string generateResdidentialBuildingString(int);
 	static std::vector<comp308::vec2> generateFloorPlan(comp308::vec2,float,int);
+	static std::vector<comp308::vec2> cutEdges(std::vector<comp308::vec2> points);
 };
