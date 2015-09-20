@@ -33,21 +33,21 @@ string LSystemLookup(char c) {
 		}
 	}else if (c == 'S') {
 		switch ((int)(rand() % 10)) {
-		case 0://20% chance to stay same
+		case 0://40% chance to stay same
 		case 1:
+		case 6:
+		case 7:
 			return "S";
 		case 2://40% chance to increase in height
 		case 3:
 		case 4:
+		
+			return "SE";
+		case 8://20% chance to subDivide
 		case 5:
-			return "SE";
-		case 6://10% chance for roof
-			//return "R";
-		case 7://20% chance for double shrink
-		case 8:
-			return "S";
+			return "SD";
 		case 9:
-			return "SE";
+			return "DE";
 		}
 	}else if (c =='*'){
 		switch ((int)(rand() % 10)) {

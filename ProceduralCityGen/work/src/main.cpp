@@ -141,16 +141,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	//glEnable(GL_LIGHT0); // f yo light 0
+	glEnable(GL_LIGHT0); // f yo light 0
 
-	float light_position[] = { 0.0f, 3.0f, 0.0f, 1.0f };
+	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
 	vec3 diff = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { diff.x, diff.y, diff.z };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 100.0);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 8.0);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 64.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
@@ -215,7 +215,10 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
 	}else if (button == GLFW_MOUSE_BUTTON_2 && action){
-		 testList = building.generateRandomBuildings();
+		string input;
+		cout << "Enter an input seed: ";
+		cin >> input;
+		testList = building.generateBuildingFromString(input);
 	}
 }
 

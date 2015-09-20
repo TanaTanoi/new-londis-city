@@ -41,6 +41,8 @@ private:
 public:
 	float extendBuilding(std::vector<comp308::vec2>, float);
 	std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
+	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
+
 	comp308::vec2 centerPoint(std::vector<comp308::vec2>);
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
@@ -51,5 +53,7 @@ public:
 	Building(void);
 
 	void generateBuilding(buildingParams*, buildingLOD*);
+
+	
 
 };

@@ -114,6 +114,8 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 				generateFlatPointRoof(floor,height);
 			}
 			return;
+		case 'D':
+			if (floor.size() == 4) { floor = subdivide(floor)[0]; }
 		}
 
 	}
@@ -250,37 +252,30 @@ int Building::generateRandomBuildings() {
 }
 
 int Building::basicHashcode(string input) {
-	//string current = "";//should be a string made of numbers by the end
-	//for (int i = 0; i < input.length(); i++) {
-	//	int c = input[i];
-	//	cout << "c is " << c << endl;
-	//	current += to_string(c);
-
-	//}
-	//return stoi(current);
 	int current = 0;
 	for (int i = 0; i < input.length(); i++) {
 		int c = input[i];
-		cout << "c is " << c << endl;
 		current += c;
 
 	}
+	cout << "Hash code for " << input << " is " << current << endl;
 	return current;
 }
 
 int Building::generateBuildingFromString(string input) {
-	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
+	/*Size of buildings and stuff for this thing*/
 	float size = 8.0f;
 	float disp = 1.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
 
 	vector<buildingLOD> buildings;
-	int randStringInc = Building::basicHashcode(input);
+	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
+	srand(randStringInc);								//Reset srand	
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <size; j += disp) {
-			//square floor plan
+			//create a bounding box-like area 
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -288,6 +283,7 @@ int Building::generateBuildingFromString(string input) {
 			points.push_back(vec2(i, j + building_size));
 			buildingParams p;
 			p.boundingArea = points;
+			//Make next building based on next number (TODO might be worth making own random function? just for fun)
 			srand(randStringInc+=rand()%rand());
 			p.seed = rand();// % ();
 			cout << p.seed << " ";
@@ -299,6 +295,7 @@ int Building::generateBuildingFromString(string input) {
 	}
 	glNewList(toReturn, GL_COMPILE);
 	cout << "Total buildings: " << buildings.size() << endl;
+	//Compile all buildings into one display list and return
 	for (buildingLOD b : buildings) {
 		glCallList(b.low);
 	}
@@ -332,4 +329,26 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	glEndList();
 
 }
+/*Subdivides the input 4 point floor plan into 2 sets of floor plans
+ * Returns a vector of floor plans where index 0 is first half, 1 i second
+ */
+vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
+	vector<vector<vec2>> result;
+	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
+	vec2 cutP1 = ((points[1] - points[0]) / 2.0f) + points[0];
+	vec2 cutP2 = ((points[3] - points[2]) / 2.0f) + points[2];
+	result.push_back(vector<vec2>());
+	result.push_back(vector<vec2>());
 
+	result[0].push_back(points[0]);
+	result[0].push_back(cutP1);
+	result[0].push_back(cutP2);
+	result[0].push_back(points[3]);
+
+	result[1].push_back(cutP2);
+	result[1].push_back(cutP1);
+	result[1].push_back(points[1]);
+	result[1].push_back(points[2]);
+
+	return result;
+}
