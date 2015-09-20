@@ -79,8 +79,7 @@ int main(int argc, char **argv) {
 
 	glEnable(GL_SMOOTH);
 	//int testList = building.generateRandomBuildings();
-	testList = building.generateBuildingFromString("SEESER");
-//	int testList = generateHexagonBuilding(0.0f,0.0f);
+	testList = building.generateBuildingFromString("TANA");
 	/* Loop until the user closes the window */
 	initLighting();
 
@@ -101,7 +100,7 @@ int main(int argc, char **argv) {
 
 		setupCamera();
 		initLighting();
-		glTranslatef(0, -5, 0);
+		glTranslatef(0, -2, 0);
 		drawGrid(10, 1);
 		glCallList(testList);
 
@@ -184,24 +183,6 @@ void setupCamera() {
 
 }
 
-/*Returns a display list of a hexagon shaped building */
-//int generateFullyRandomBuilding(float x, float y) {
-//	/*Generate a random bunch of floor plans*/
-//	int toReturn = glGenLists(1);
-//	vector<vec2> points;
-//	points.push_back(vec2(x, y) - vec2(1.0f,2.0f));
-//	points.push_back(vec2(x, y) - vec2(0.0f, 2.0f));
-//	points.push_back(vec2(x, y) - vec2(0.0f, 0.0f));
-//	points.push_back(vec2(x, y) - vec2(1.0f, 0.0f));
-//
-//	vec2 mid = building.centerPoint(points);
-//	float radius = hypot(mid.x-points[0].x,mid.y-points[0].y);
-//	glNewList(toReturn, GL_COMPILE);
-//		building.generateFromString(generator.generateFloorPlan(vec2(x,y),radius,rand()%3+3), generator.generateRandomString(rand()%6+2));
-//	glEndList();
-//	return toReturn;
-//}
-
 /**
  * Basic method that draws a grid specified by grid_size and square_size
  */
@@ -229,7 +210,7 @@ void drawGrid(double grid_size, double square_size) {
 }
 //action = state, 1 is down, 0 is release
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-	cout << button << " " << action << " " << mods << endl;
+	//cout << button << " " << action << " " << mods << endl;
 
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
@@ -250,7 +231,7 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {
 		zoom /= 1.1;
-	} else {
+	}else{
 		zoom *= 1.1;
 	}
 }

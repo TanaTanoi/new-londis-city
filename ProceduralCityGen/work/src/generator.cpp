@@ -84,7 +84,6 @@ string Generator::generateRandomString(int itrs) {
 		result = next;
 		//cout << "Result is " << result << " after " << i << " iterations" << endl;
 	}
-	cout << "Returning " << result << endl;
 	return result;
 }
 

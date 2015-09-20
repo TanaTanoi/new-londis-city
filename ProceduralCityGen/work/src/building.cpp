@@ -28,7 +28,8 @@ Building::Building(){
 }
 
 
-GLuint g_texture = 0;
+//GLuint g_texture = 0;
+
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -118,8 +119,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 	}
 }
 
-
-
+/*Generates a pointed roof from the input*/
 void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
 	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 0.3f)+0.3f;
 	vec2 mid = centerPoint(points);
@@ -139,6 +139,7 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 	glEnd();
 }
 
+/*Generates a truncated pointed roof*/
 void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float elevation){
 	int n = points.size();
 		vector<vec3> bot;
@@ -191,7 +192,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 
 }
 
-
+/*Shrinks the input points by a factor of 0.15 and returns the result*/
 vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
 	vec2 mid = centerPoint(points);
 	vector<vec2> smallPoints;
@@ -222,7 +223,7 @@ vec2 Building::centerPoint(vector<vec2> points){
 }
 
 
-/*Returns a display list */
+/*Returns a display list containing fully random buildings */
 int Building::generateRandomBuildings() {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
@@ -248,23 +249,87 @@ int Building::generateRandomBuildings() {
 	return toReturn;
 }
 
+int Building::basicHashcode(string input) {
+	//string current = "";//should be a string made of numbers by the end
+	//for (int i = 0; i < input.length(); i++) {
+	//	int c = input[i];
+	//	cout << "c is " << c << endl;
+	//	current += to_string(c);
+
+	//}
+	//return stoi(current);
+	int current = 0;
+	for (int i = 0; i < input.length(); i++) {
+		int c = input[i];
+		cout << "c is " << c << endl;
+		current += c;
+
+	}
+	return current;
+}
 
 int Building::generateBuildingFromString(string input) {
 	/*Generate a random bunch of floor plans*/
 	int toReturn = glGenLists(1);
 	float size = 8.0f;
 	float disp = 1.0f;
-	float building_size = 1.2f;
+	float building_size = 1.0f;
 	vector<vec2> points;
 
-
-	glNewList(toReturn, GL_COMPILE);
+	vector<buildingLOD> buildings;
+	int randStringInc = Building::basicHashcode(input);
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <size; j += disp) {
-			points = Generator::generateFloorPlan(vec2(i, j), disp / 2.0f, rand() % 3 + 3);
-			generateFromString(points, Generator::generateRandomString(10 - (abs(i)*abs(j)) / 2));
+			//square floor plan
+			points.clear();
+			points.push_back(vec2(i, j));
+			points.push_back(vec2(i + building_size, j));
+			points.push_back(vec2(i + building_size, j + building_size));
+			points.push_back(vec2(i, j + building_size));
+			buildingParams p;
+			p.boundingArea = points;
+			srand(randStringInc+=rand()%rand());
+			p.seed = rand();// % ();
+			cout << p.seed << " ";
+			buildingLOD result;
+			buildings.push_back(result);
+			generateBuilding(&p,&result);
 		}
+		cout << endl;
+	}
+	glNewList(toReturn, GL_COMPILE);
+	cout << "Total buildings: " << buildings.size() << endl;
+	for (buildingLOD b : buildings) {
+		glCallList(b.low);
 	}
 	glEndList();
 	return toReturn;
 }
+
+
+
+/*Takes a parameters struct and creates a building based on that.
+Result display lists are saved in the *result struct */
+void Building::generateBuilding(buildingParams* parameters, buildingLOD* result) {
+	vector<vec2> floorPlan = parameters->boundingArea;
+	//Get min distance
+	vec2 center = centerPoint(floorPlan);
+	float minDist = 100000.0f;
+	for (vec2 v : floorPlan) {
+		minDist = min(minDist, hypot(v.x-center.x,v.y-center.y));
+	}
+	minDist /= 2;
+	srand(parameters->seed);
+	if ((rand()%2==0)) {//50% chance to generate differently shaped building
+		srand(rand());
+		floorPlan = Generator::generateFloorPlan(center,minDist, rand() % 4 + 4);
+	}else{				//50% chance to generate building in same floor plan
+
+	}
+	result->low = glGenLists(1);
+	glNewList(result->low, GL_COMPILE);
+	generateFromString(floorPlan, Generator::generateRandomString(rand() % 4 + 1));//TODO fix this so the iterations are a function of height
+	glEndList();
+
+}
+
