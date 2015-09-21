@@ -272,10 +272,10 @@ int Building::generateBuildingFromString(string input) {
 
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
-	srand(randStringInc);								//Reset srand	
+	srand(randStringInc);								//Reset srand
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <size; j += disp) {
-			//create a bounding box-like area 
+			//create a bounding box-like area
 			points.clear();
 			points.push_back(vec2(i, j));
 			points.push_back(vec2(i + building_size, j));
@@ -284,7 +284,7 @@ int Building::generateBuildingFromString(string input) {
 			buildingParams p;
 			p.boundingArea = points;
 			//Make next building based on next number (TODO might be worth making own random function? just for fun)
-			srand(randStringInc+=rand()%rand());
+			srand(randStringInc+=rand()%(rand()/50));
 			p.seed = rand();// % ();
 			cout << p.seed << " ";
 			buildingLOD result;
@@ -313,7 +313,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	vec2 center = centerPoint(floorPlan);
 	float minDist = 100000.0f;
 	for (vec2 v : floorPlan) {
-		minDist = min(minDist, hypot(v.x-center.x,v.y-center.y));
+		minDist = min(minDist, (float)hypot(v.x-center.x,v.y-center.y));
 	}
 	minDist /= 2;
 	srand(parameters->seed);
@@ -321,7 +321,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		srand(rand());//increase randomness
 		floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
 	}
-	else if (rand() % 5 <= 2) {//%40% chance to have smaller area 
+	else if (rand() % 5 <= 2) {//%40% chance to have smaller area
 		floorPlan = shrinkPoints(floorPlan);
 	}else if(rand()%5==3){//10% chance to have a different orientated area
 		floorPlan = Generator::generateFloorPlan(center, minDist,4);
@@ -351,7 +351,7 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	result.push_back(vector<vec2>());
 	result.push_back(vector<vec2>());
 
-	
+
 	result[0].push_back(cutP1);
 	result[0].push_back(cutP2);
 	result[0].push_back(points[3]);

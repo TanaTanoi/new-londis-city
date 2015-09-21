@@ -18,16 +18,16 @@ string LSystemLookup(char c) {
 		case 1:
 		case 2:
 		case 6:
+
 			return "E";
 		case 8:
 		case 3:
-		case 4://40% chance of increasing in height
-		case 5:
+		case 4:
+		case 9://40% chance of increasing in height
 			return "EE";
+		case 5:
 		case 7://10% chance of shrinking
 			return "ES";
-		case 9://10% chance for roof
-			return c + "";
 		}
 	}else if (c == 'S') {
 		switch ((int)(rand() % 10)) {
@@ -39,7 +39,7 @@ string LSystemLookup(char c) {
 		case 2://40% chance to increase in height
 		case 3:
 		case 4:
-		
+
 			return "SE";
 		case 8://20% chance to subDivide
 		case 5:
@@ -58,12 +58,11 @@ string LSystemLookup(char c) {
 			return "ED*";
 		case 5:
 		case 6:
-		case 7:
 			return "E*";
+		case 7:
 		case 8:
 		case 9:
 			return "R";
-
 		}
 	}
 	return "" + c;

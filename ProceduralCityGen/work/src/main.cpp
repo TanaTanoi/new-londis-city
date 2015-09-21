@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 
 	glEnable(GL_SMOOTH);
 	//int testList = building.generateRandomBuildings();
-	testList = building.generateBuildingFromString("TANA");
+	testList = building.generateBuildingFromString("abc");
 	/* Loop until the user closes the window */
 	initLighting();
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	//g_vehicleCtrl = new VehicleController(
 	//		"../work/res/assets/vehicle_config.txt",
 	//		"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
-	
+
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
@@ -176,7 +176,7 @@ void setupCamera() {
 	perspectiveGL(20.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	
+
 	glTranslatef(0, 0, -50*zoom);
 	glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
 	glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
