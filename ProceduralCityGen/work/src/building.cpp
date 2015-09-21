@@ -52,6 +52,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 	float height = BLOCK_SIZE;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
+		
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
@@ -59,6 +60,12 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 	glBegin(GL_QUADS);
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
+		if (i % 2 == 0) {
+			glColor3f(1.0f, 0.5f, 0.1f);
+		}
+		else {
+			glColor3f(0.1f, 0.2f, 0.9f);
+		}
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
 		vec3 botr = bot[(i + 1) % n];
@@ -71,6 +78,8 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		glVertex3f(botl.x, botl.y, botl.z);
 		glVertex3f(botr.x, botr.y, botr.z);
 		glVertex3f(topr.x, topr.y, topr.z);
+		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
+		
 	}
 	glEnd();
 	glBegin(GL_POLYGON);
@@ -113,9 +122,11 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			}else{
 				generateFlatPointRoof(floor,height);
 			}
-			return;
+			//return;
+			break;
 		case 'D':
 			if (floor.size() == 4) { floor = subdivide(floor)[rand()%2]; }
+			break;
 		}
 
 	}
@@ -141,6 +152,50 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 	glEnd();
 }
 
+void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
+	
+	float bottom = elevation+(BLOCK_SIZE*0.2f);
+	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));
+	float dist = (float)hypot(a.x - b.x, b.y - a.y);
+	float margin = dist;//this will become the start point along the wall
+	int i;				//i is the amount of window spaces available
+	for (i = 0; margin > WINDOW_WIDTH;i++) {
+		margin -= WINDOW_WIDTH;
+	}
+	margin /= 4;
+	if (i % 2 == 0) {	//if even, then we want to add half the window_width to the margin to offset it
+		margin += WINDOW_WIDTH / 2.0f;
+		i--;			//i is now uneven (which is good)
+	}
+	
+	//i = (int)(i / 2) + 1;	//this is the amount of windows we will place
+	vec2 direction = b - a;
+	if (length(direction) <= 1) {
+		direction *= (1 / length(direction));
+	}else{
+		direction = normalize(direction);
+	}
+	float curCol[4];
+	glGetFloatv(GL_CURRENT_COLOR, curCol);
+	glColor3f(curCol[0]*0.9f, curCol[1] * 0.9f, curCol[2] * 0.9f);
+	
+	for (int j = 0; j < i; j+=2) {
+		vec2 start = (direction*margin) + (direction*WINDOW_WIDTH*j)+a;
+		vec2 end = (direction*margin) + (direction*WINDOW_WIDTH)+start;
+		
+		vec3 topL = vec3(start.x, top, start.y)		 + normal*0.001f;
+		vec3 topR = vec3(end.x, top, end.y)			 + normal*0.001f;
+		vec3 botR = vec3(end.x, bottom, end.y)		 + normal*0.001f;
+		vec3 botL = vec3(start.x, bottom, start.y)	 + normal*0.001f;
+
+		glNormal3f(normal.x, normal.y, normal.z);
+		glVertex3f(topL.x, topL.y, topL.z);
+		glVertex3f(botL.x, botL.y, botL.z);
+		glVertex3f(botR.x, botR.y, botR.z);
+		glVertex3f(topR.x, topR.y, topR.z);
+	}	
+}
+
 /*Generates a truncated pointed roof*/
 void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float elevation){
 	int n = points.size();
@@ -159,7 +214,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 		/*n amount of walls*/
 		for (int i = 0; i < n; i++) {
 			if(i %2==0){
-				glColor3f(0.7f,0.1f,0.4f);
+				glColor3f(1.0f, 0.5f, 0.1f);
 			}else{
 				glColor3f(0.1f,0.2f,0.9f);
 			}
@@ -283,9 +338,8 @@ int Building::generateBuildingFromString(string input) {
 			points.push_back(vec2(i, j + building_size));
 			buildingParams p;
 			p.boundingArea = points;
-			//Make next building based on next number (TODO might be worth making own random function? just for fun)
-			srand(randStringInc+=rand()%(rand()/50));
-			p.seed = rand();// % ();
+			srand(randStringInc+=14);
+			p.seed = rand();
 			cout << p.seed << " ";
 			buildingLOD result;
 			buildings.push_back(result);
@@ -328,7 +382,11 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}else{				//10% chance to generate building in same floor plan
 		srand(rand());
 		if (rand() % 2 == 0) {	//50% chance to be normal square
-
+			result->low = glGenLists(1);
+			glNewList(result->low, GL_COMPILE);
+			generateResdientialBuilding(floorPlan);
+			glEndList();
+			return;
 		}else {					//50% chance to be different square
 			floorPlan = Generator::cutEdges(floorPlan);
 		}
@@ -339,6 +397,34 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	glEndList();
 
 }
+
+void Building::generateResdientialBuilding(vector<vec2> points) {
+	//set first two points to subdivion of original floor
+	vector<vector<vec2>> tiers = subdivide(points);
+	tiers.push_back(subdivide(tiers[1])[1]);
+	tiers[1] = subdivide(tiers[1])[0];
+
+	srand(rand());
+	int n = rand() % 10 + 5;		//between 5 and 15
+	float cur_elev = 0.0f;
+	//extend main tier random amount of times
+	for(int i = 0; i < n ;i++){
+		cur_elev = extendBuilding(tiers[0], cur_elev);
+	}
+	n = rand() % (n-((int)(n *0.75) -1)) + (int)(n *0.75);//between 3/4 and n (inclusive)
+	cur_elev = 0.0f;
+	for (int i = 0; i < n; i++) {
+		cur_elev = extendBuilding(tiers[1], cur_elev);
+	}
+	n = rand() % (n - ((int)(n *0.75) - 1)) + (int)(n *0.75);//between 3n/4 and n (inclusive)
+	cur_elev = 0.0f;
+	for (int i = 0; i < n; i++) {
+		cur_elev = extendBuilding(tiers[2], cur_elev);
+	}
+
+
+}
+
 /*Subdivides the input 4 point floor plan into 2 sets of floor plans
  * Returns a vector of floor plans where index 0 is first half, 1 i second
  */
@@ -351,16 +437,16 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	result.push_back(vector<vec2>());
 	result.push_back(vector<vec2>());
 
+	int i = cutDist>=2.0f;
+	result[i].push_back(cutP1);
+	result[i].push_back(cutP2);
+	result[i].push_back(points[3]);
+	result[i].push_back(points[0]);
 
-	result[0].push_back(cutP1);
-	result[0].push_back(cutP2);
-	result[0].push_back(points[3]);
-	result[0].push_back(points[0]);
-
-	result[1].push_back(cutP2);
-	result[1].push_back(cutP1);
-	result[1].push_back(points[1]);
-	result[1].push_back(points[2]);
+	result[!i].push_back(cutP2);
+	result[!i].push_back(cutP1);
+	result[!i].push_back(points[1]);
+	result[!i].push_back(points[2]);
 
 	return result;
 }

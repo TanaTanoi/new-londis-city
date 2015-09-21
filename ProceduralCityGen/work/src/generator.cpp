@@ -18,13 +18,12 @@ string LSystemLookup(char c) {
 		case 1:
 		case 2:
 		case 6:
-
 			return "E";
 		case 8:
-		case 3:
 		case 4:
 		case 9://40% chance of increasing in height
 			return "EE";
+		case 3:
 		case 5:
 		case 7://10% chance of shrinking
 			return "ES";
@@ -39,7 +38,6 @@ string LSystemLookup(char c) {
 		case 2://40% chance to increase in height
 		case 3:
 		case 4:
-
 			return "SE";
 		case 8://20% chance to subDivide
 		case 5:
@@ -71,9 +69,10 @@ string LSystemLookup(char c) {
 
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomBuildingString(int itrs) {
-	itrs = max(min(itrs, 6),2);
-	string result = "*";
+	itrs = max(min(itrs, 6),3);
+	string result = "*";			//axoim
 	for (int i = 0; i < itrs; i++) {
+		//for each string
 		string next = "";
 		for (int c = 0; c < result.length(); c++) {
 			string addition = LSystemLookup(result[c]);
@@ -85,7 +84,7 @@ string Generator::generateRandomBuildingString(int itrs) {
 }
 
 string Generator::generateResdidentialBuildingString(int itrs) {
-	itrs = max(min(itrs, 6), 2);
+	itrs = max(min(itrs, 6), 3);
 	string result = "";
 	for (int i = 0; i < rand() % 12; i++) {
 		result += "E";

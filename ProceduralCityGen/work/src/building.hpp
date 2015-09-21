@@ -31,7 +31,7 @@ struct buildingLOD {
 };
 
 const float BLOCK_SIZE = 0.3f;
-
+const float WINDOW_WIDTH = 0.1f;
 class Building {
 private:
 	GLuint g_shader = 0;
@@ -49,10 +49,13 @@ public:
 	int generateBuildingFromString(std::string);
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);
+	void generateWindows(comp308::vec2,comp308::vec2 , float , comp308::vec3 );
 	void generateFlatPointRoof(std::vector<comp308::vec2>,float);
 	Building(void);
 
 	void generateBuilding(buildingParams*, buildingLOD*);
+
+	void generateResdientialBuilding(std::vector<comp308::vec2> points);
 
 	
 

@@ -158,6 +158,9 @@ void initLighting() {
 	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
+	//Allows lighting without textures or colours (temporary solution)
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/
