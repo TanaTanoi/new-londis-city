@@ -28,7 +28,7 @@ Building::Building(){
 }
 
 
-//GLuint g_texture = 0;
+GLuint g_texture = 0;
 
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
@@ -36,6 +36,24 @@ void Building::initShader() {
 	cout<<"Initd shader"<<endl;
 }
 void Building::initTexture() {//TODO this method
+
+//	image tex("../work/res/textures/brick.jpg");
+//
+//	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+//	glGenTextures(1, &g_texture); // Generate texture ID
+//	glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
+//
+//	// Setup sampling strategies
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//
+//	// Finnaly, actually fill the data into our texture
+//	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
+//
+//	cout << tex.w << endl;
 }
 
 /*From the given floor plan, extrude to create a block of height 0.5f
@@ -87,15 +105,20 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 
 	}
 	glEnd();
-	glBegin(GL_POLYGON);
+	glBegin(GL_TRIANGLES);
 	/*roof*/
 	glColor3f(0,0,0);
 	glNormal3f(0, 1, 0);
-	for (vec3 roofpart : top) {
-		glVertex3f(roofpart.x, roofpart.y, roofpart.z);
+	vec3 mid3d = vec3(mid.x,elevation,mid.y);
+	for(int i = 0; i < n;i++){
+		vec3 p1 = top[i];
+		vec3 p2 = top[(i+1)%n];
+		glVertex3f(p1.x,p1.y,p1.z);
+		glVertex3f(p2.x,p2.y,p2.z);
+		glVertex3f(mid3d.x,mid3d.y,mid3d.z);
 	}
 	glEnd();
-	glBegin(GL_POLYGON);
+	glBegin(GL_TRIANGLES);
 	glNormal3f(0, -1, 0);
 	for (vec3 floorPoint: bot) {
 		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
@@ -219,7 +242,8 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 		vector<vec2> topPlan = shrinkPoints(shrinkPoints(points));
 		vector<vec3> top;
 		/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
-		float height = 0.2f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+		vec2 mid = centerPoint(points);
+		float height = abs(length(points[0]-mid))/2.0f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 		height+=elevation;
 		for (int i = 0;i<n;i++) {
 			bot.push_back(vec3(points[i].x, elevation, points[i].y));
@@ -247,15 +271,20 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 			glVertex3f(topr.x, topr.y, topr.z);
 		}
 		glEnd();
-		glBegin(GL_POLYGON);
+		glBegin(GL_TRIANGLES);
 		/*roof*/
 		glColor3f(0,0,0);
 		glNormal3f(0, 1, 0);
-		for (vec3 roofpart : top) {
-			glVertex3f(roofpart.x, roofpart.y, roofpart.z);
-		}
+		vec3 mid3d = vec3(mid.x,elevation,mid.y);
+			for(int i = 0; i < n;i++){
+				vec3 p1 = top[i];
+				vec3 p2 = top[(i+1)%n];
+				glVertex3f(p1.x,p1.y,p1.z);
+				glVertex3f(p2.x,p2.y,p2.z);
+				glVertex3f(mid3d.x,mid3d.y,mid3d.z);
+			}
 		glEnd();
-		glBegin(GL_POLYGON);
+		glBegin(GL_TRIANGLES);
 		glNormal3f(0, -1, 0);
 		for (vec3 floorPoint: bot) {
 			glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
@@ -385,7 +414,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	for (vec2 v : floorPlan) {
 		minDist = min(minDist, (float)hypot(v.x-center.x,v.y-center.y));
 	}
-	minDist /= 2;
+	minDist /= 1.5f;
 	srand(parameters->seed);
 	if ((rand() % 5 == 0)) {//20% chance to generate differently shaped building
 		srand(rand());//increase randomness

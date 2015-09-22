@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 		setupCamera();
 		initLighting();
 		glTranslatef(0, -2, 0);
-		drawGrid(10, 1);
+		drawGrid(40, 1);
 		glCallList(testList);
 
 		// Draw vehicles
