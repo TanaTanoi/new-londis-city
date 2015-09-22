@@ -32,6 +32,7 @@ struct buildingLOD {
 
 const float BLOCK_SIZE = 0.3f;
 const float WINDOW_WIDTH = 0.1f;
+const float EXTRUDE_THRESHOLD = 0.2f;
 class Building {
 private:
 	GLuint g_shader = 0;
@@ -57,6 +58,6 @@ public:
 
 	void generateResdientialBuilding(std::vector<comp308::vec2> points);
 
-	
+
 
 };

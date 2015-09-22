@@ -46,13 +46,15 @@ void Building::initTexture() {//TODO this method
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 	//glUseProgram(g_shader);
 	int n = floor.size();
+	vec2 mid = centerPoint(floor);
+	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
 	vector<vec3> bot;
 	vector<vec3> top;
 	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
 	float height = BLOCK_SIZE;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
-		
+
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
@@ -65,6 +67,9 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		}
 		else {
 			glColor3f(0.1f, 0.2f, 0.9f);
+//			glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
+//					static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
+//					static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
 		}
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
@@ -79,7 +84,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		glVertex3f(botr.x, botr.y, botr.z);
 		glVertex3f(topr.x, topr.y, topr.z);
 		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
-		
+
 	}
 	glEnd();
 	glBegin(GL_POLYGON);
@@ -153,21 +158,24 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 }
 
 void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
-	
-	float bottom = elevation+(BLOCK_SIZE*0.2f);
-	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));
-	float dist = (float)hypot(a.x - b.x, b.y - a.y);
-	float margin = dist;//this will become the start point along the wall
-	int i;				//i is the amount of window spaces available
-	for (i = 0; margin > WINDOW_WIDTH;i++) {
+
+	float bottom = elevation+(BLOCK_SIZE*0.2f);						//the bottom and top of the windows
+	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));		//
+
+	float dist = (float)hypot(a.x - b.x, b.y - a.y);				//length of the wall
+
+	float margin = dist;					//this will become the start point along the wall
+	int i;									//i is the amount of window spaces available
+	for (i = 0; margin > WINDOW_WIDTH;i++) {//keep going until we have no more window spaces
 		margin -= WINDOW_WIDTH;
 	}
-	margin /= 4;
+	//margin is now the left over space that doesn't become a window
+	margin /= 2.0f;//margin is now the start point along the wall's distance (not sure if /4 or /2)
 	if (i % 2 == 0) {	//if even, then we want to add half the window_width to the margin to offset it
 		margin += WINDOW_WIDTH / 2.0f;
 		i--;			//i is now uneven (which is good)
 	}
-	
+
 	//i = (int)(i / 2) + 1;	//this is the amount of windows we will place
 	vec2 direction = b - a;
 	if (length(direction) <= 1) {
@@ -178,11 +186,19 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 	float curCol[4];
 	glGetFloatv(GL_CURRENT_COLOR, curCol);
 	glColor3f(curCol[0]*0.9f, curCol[1] * 0.9f, curCol[2] * 0.9f);
-	
+//	glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
+//			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
+//			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
+
 	for (int j = 0; j < i; j+=2) {
+		if((j/2)%2 == 0){
+			glColor3f(1,0,0);
+		}else{
+			glColor3f(0,1,0);
+		}
 		vec2 start = (direction*margin) + (direction*WINDOW_WIDTH*j)+a;
-		vec2 end = (direction*margin) + (direction*WINDOW_WIDTH)+start;
-		
+		vec2 end = (direction*WINDOW_WIDTH)+start;
+
 		vec3 topL = vec3(start.x, top, start.y)		 + normal*0.001f;
 		vec3 topR = vec3(end.x, top, end.y)			 + normal*0.001f;
 		vec3 botR = vec3(end.x, bottom, end.y)		 + normal*0.001f;
@@ -193,7 +209,7 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 		glVertex3f(botL.x, botL.y, botL.z);
 		glVertex3f(botR.x, botR.y, botR.z);
 		glVertex3f(topR.x, topR.y, topR.z);
-	}	
+	}
 }
 
 /*Generates a truncated pointed roof*/
@@ -320,7 +336,7 @@ int Building::basicHashcode(string input) {
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
 	/*Size of buildings and stuff for this thing*/
-	float size = 8.0f;
+	float size = 16.0f;
 	float disp = 1.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -340,7 +356,7 @@ int Building::generateBuildingFromString(string input) {
 			p.boundingArea = points;
 			srand(randStringInc+=14);
 			p.seed = rand();
-			cout << p.seed << " ";
+//			cout << p.seed << " ";
 			buildingLOD result;
 			buildings.push_back(result);
 			generateBuilding(&p,&result);

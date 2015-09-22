@@ -128,7 +128,8 @@ void init() {
 	glDepthFunc(GL_LEQUAL);
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	/*Create a new building object*/
 	building = Building();
 }
@@ -160,7 +161,7 @@ void initLighting() {
 	glEnable(GL_LIGHTING);
 	//Allows lighting without textures or colours (temporary solution)
 	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+	glColorMaterial(GL_FRONT, GL_AMBIENT);
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/
