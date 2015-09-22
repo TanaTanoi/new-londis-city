@@ -390,7 +390,7 @@ int Building::generateBuildingFromString(string input) {
 			buildings.push_back(result);
 			generateBuilding(&p,&result);
 		}
-		cout << endl;
+		//cout << endl;
 	}
 	glNewList(toReturn, GL_COMPILE);
 	cout << "Total buildings: " << buildings.size() << endl;
@@ -446,32 +446,36 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 void Building::generateResdientialBuilding(vector<vec2> points) {
 	//set first two points to subdivion of original floor
 	vector<vector<vec2>> tiers = subdivide(points);
-	tiers.push_back(subdivide(tiers[1])[1]);
-	tiers[1] = subdivide(tiers[1])[0];
+	vector<vec2> temp = tiers[0];
+	tiers = subdivide(tiers[1]);
+	tiers.push_back(temp);
+	//tiers.push_back(subdivide(tiers[1])[1]);
+	//tiers[1] = subdivide(tiers[1])[0];
 
 	srand(rand());
 	int n = rand() % 10 + 5;		//between 5 and 15
 	float cur_elev = 0.0f;
 	//extend main tier random amount of times
 	for(int i = 0; i < n ;i++){
-		cur_elev = extendBuilding(tiers[0], cur_elev);
+		cur_elev = extendBuilding(tiers[2], cur_elev);
 	}
 	n = rand() % (n-((int)(n *0.75) -1)) + (int)(n *0.75);//between 3/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
-		cur_elev = extendBuilding(tiers[1], cur_elev);
+		cur_elev = extendBuilding(tiers[0], cur_elev);
 	}
 	n = rand() % (n - ((int)(n *0.75) - 1)) + (int)(n *0.75);//between 3n/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
-		cur_elev = extendBuilding(tiers[2], cur_elev);
+		cur_elev = extendBuilding(tiers[1], cur_elev);
 	}
 
 
 }
 
 /*Subdivides the input 4 point floor plan into 2 sets of floor plans
- * Returns a vector of floor plans where index 0 is first half, 1 i second
+ * Returns a vector of floor plans where index 0 is the larger half
+ * and index 1 is the smaller 
  */
 vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	vector<vector<vec2>> result;
