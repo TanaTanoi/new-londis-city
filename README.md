@@ -1,2 +1,5 @@
 # new-londis-city
-COMP308 Final Project - Procedural City Generation 
+Procedural City Generation Project
+Hannah Craighead - Road Map creation
+Tana Tanoi - Building Generation
+Cameron Bryers - Traffic Simulation
