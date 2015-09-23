@@ -15,12 +15,14 @@
 #pragma once
 
 #include "comp308.hpp"
-
+#include <vector>
 #include "../ext/stb/stb_image.h"
 
 
 struct image {
-	int w, h, n;
+	int w;
+	int h;
+	int n;
 	std::vector<unsigned char> data;
 
 	image(int w_, int h_, int n_) : w(w_), h(h_), n(n_), data(w*h*n, 0) {}

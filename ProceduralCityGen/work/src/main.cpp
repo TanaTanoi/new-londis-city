@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 		}else if(mode == 1){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
-			glViewport(0, 0, screenwidth, screenheight);   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
+			glViewport(0, 0, g_winWidth, g_winHeight);   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
