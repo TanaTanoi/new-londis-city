@@ -20,11 +20,13 @@
 #include "main.hpp"
 #include "building.hpp"
 #include "generator.h"
+#include "section.hpp"
 
 using namespace std;
 using namespace comp308;
 
 int testList;
+SectionDivider *g_sections = nullptr;
 
 //0, bmode, 1, rmode, 2 cmode
 int mode = 0;
@@ -85,7 +87,8 @@ int main(int argc, char **argv) {
 	if(argc > 1 && argv[1] == BMODE ){
 		testList = building.generateBuildingFromString("test");
 	}else if(argv[1] == RMODE){
-
+		g_sections = new SectionDivider();
+		g_sections->testSection();
 	}else if(argv[1] == CMODE){
 
 	}
@@ -118,7 +121,7 @@ int main(int argc, char **argv) {
 			drawGrid(40, 1);
 			glCallList(testList);
 		}else if(mode == 1){
-
+			g_sections->renderTest();
 		}else if(mode == 2){
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
@@ -132,7 +135,7 @@ int main(int argc, char **argv) {
 
 	// Delete pointers
 	//delete g_vehicleCtrl;
-
+	delete g_sections;
 	glfwTerminate();
 
 }

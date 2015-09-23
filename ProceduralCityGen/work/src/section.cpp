@@ -17,14 +17,14 @@ SectionDivider::SectionDivider() {};
 /**
 * Finds the longest edge in a section and returns it
 */
-line SectionDivider::findLongestEdge(section *s) {
+line* SectionDivider::findLongestEdge(section *s) {
 	float maxLength = 0.0f;
-	line longLine;
+	line* longLine;
 
 	for (int i = 0; i < (int)s->lines.size(); i++) {
 		if (s->lines[i].length > maxLength) {
 			maxLength = s->lines[i].length;
-			longLine = s->lines[i];
+			longLine = &(s->lines[i]);
 		}
 	}
 	return longLine;
@@ -57,42 +57,60 @@ void SectionDivider::recDivideSection(section *s) {
 	}
 }
 
+/**
+ Finds whether two lines intersect
+*/
+
+bool SectionDivider::intersects(line* lon,float m_l, float c_l, line* other) {
+	float m = (other->end.y - other->start.y) / (other->end.x - other->start.x);
+	float c = other->end.y - m*other->end.x;
+
+	if (lon != other){
+		// Calculates the intersection point
+		float x = (c - c_l) / (m_l - m);
+		float y = m_l * x + c_l;
+
+		// Now uses the intersection point of these two lines to determine if this is
+		//the line it should split
+
+		if (x >= max(other->start.x, other->end.x) && x <= min(other->start.x, other->end.x)
+			&& y >= max(other->start.y, other->start.y) && y <= min(other->start.y, other->start.y)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 vector<section> SectionDivider::splitSection(section *s) {
-	line l = findLongestEdge(s);
-	vec2 lineVec = vec2(l.x2-l.x1, l.y2-l.y1);
+	line* l = findLongestEdge(s);
+	vec2 lineVec =  l->end - l->start;
 	vec2 perpBi = vec2(-lineVec.y, lineVec.x); // gets perpendicular bisector to longest edge
 
 	// Randomly decides a position around the centre of the longest edge
 	// to extend the bisector from. This will be within the middle third of the section
 
 	float random = ((float)rand() / (RAND_MAX)) + 1;
-	float centre = l.length*(1.0f / 3.0f) + random * (l.length*(1.0f / 3.0f));
+	float centre = l->length*(1.0f / 3.0f) + random * (l->length*(1.0f / 3.0f));
 
-	float m_l = (l.y2 - l.y1) / (l.x2 - l.x1);
-	float c_l = l.y2 - m_l*l.x2;
+	float m_l = (l->end.y - l->start.y) / (l->end.x - l->start.x);
+	float c_l = l->end.y - m_l*l->end.x;
+
 	// Now finds the first intersection point with another line within the section
+	vector<line *> intersectors;
 	for (int i = 0; i < (int)s->lines.size(); i++) {
-		// need a check here to see if they are the same
-		line other = s->lines[i];
-		float m = (other.y2 - other.y1) / (other.x2 - other.x1);
-		float c = other.y2 - m_l*other.x2;
-
-		if (m != m_l && c != c_l) {
-			float x = (c - c_l) / (m_l - m);
-			float y = m_l * x + c_l;
-			// Now uses the intersection point of these two lines to determine if this is
-			//the line it should split
-
-			if (x >= max(other.x1, other.x2) && x <= min(other.x1, other.x2)
-				&& y >= max(other.y1, other.y2) && y <= min(other.y1, other.y2)) {
-
-			}
-
+		if (intersects(l, m_l, c_l, &(s->lines[i]))) {
+			intersectors.push_back(&(s->lines[i]));
 		}
 	}
+	free(l); // frees pointer
+	
 	vector<section> x;
 	return x;
 
+}
+
+void SectionDivider::testSection() {
+	line a = {vec2()};
 }
 
 
