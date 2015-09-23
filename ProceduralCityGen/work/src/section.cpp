@@ -103,6 +103,9 @@ vector<section> SectionDivider::splitSection(section *s) {
 		}
 	}
 	free(l); // frees pointer
+
+	// Now cretes two new sections from the split
+
 	
 	vector<section> x;
 	return x;
