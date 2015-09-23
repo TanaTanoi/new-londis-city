@@ -12,7 +12,7 @@ struct line {
 
 struct section {
 	std::vector<line> lines;
-	float area;
+	//float area;
 	//Building:: building;
 };
 

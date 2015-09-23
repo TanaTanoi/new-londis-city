@@ -121,6 +121,18 @@ int main(int argc, char **argv) {
 			drawGrid(40, 1);
 			glCallList(testList);
 		}else if(mode == 1){
+
+			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
+			glViewport(0, 0, screenwidth, screenheight);   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
+
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+
 			g_sections->renderTest();
 		}else if(mode == 2){
 			// Draw vehicles

@@ -48,12 +48,12 @@ void SectionDivider::recDivideSection(section *s) {
 	vector<section> lots = splitSection(s);
 
 	for (section l : lots) {
-		if (l.area <= goalArea) {
-			sections.push_back(l);
-		}
-		else {
-			recDivideSection(&l);
-		}
+		//if (l.area <= goalArea) {
+	//		sections.push_back(l);
+		//}
+	//	else {
+	//		recDivideSection(&l);
+	//	}
 	}
 }
 
@@ -110,7 +110,29 @@ vector<section> SectionDivider::splitSection(section *s) {
 }
 
 void SectionDivider::testSection() {
-	line a = {vec2()};
+	line a = {vec2(100,100),vec2(400,100)};
+	line b = { vec2(100,100), vec2(150,300) };
+	line c = {vec2(150,300), vec2(350,300)};
+	line d = { vec2(350,300), vec2(400,100) };
+
+	vector<line> lines = vector<line>();
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(b);
+
+	section s = { lines };
+	sections.push_back(s);
+}
+
+void SectionDivider::renderTest() {
+	section s = sections.back();
+	glBegin(GL_LINES);
+	for (line l : s.lines) {
+		glVertex2f(l.start.x, l.start.y);
+		glVertex2f(l.end.x, l.end.y);
+	}
+	glEnd();
 }
 
 
