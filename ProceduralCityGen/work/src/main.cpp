@@ -25,6 +25,9 @@ using namespace std;
 using namespace comp308;
 
 int testList;
+
+//0, bmode, 1, rmode, 2 cmode
+int mode = 0;
 //Main program
 //
 int main(int argc, char **argv) {
@@ -75,16 +78,25 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	string BMODE = "B";
+	string RMODE = "R";
+	string CMODE = "C";
+	init();
+	if(argc > 1 && argv[1] == BMODE ){
+		testList = building.generateBuildingFromString("test");
+	}else if(argv[1] == RMODE){
+
+	}else if(argv[1] == CMODE){
+
+	}
+
 
 
 	glEnable(GL_SMOOTH);
 	//int testList = building.generateRandomBuildings();
-	testList = building.generateBuildingFromString("abc");
+
 	/* Loop until the user closes the window */
 	initLighting();
-
-
-
 
 	// Create vehicle controller
 	//g_vehicleCtrl = new VehicleController(
@@ -98,15 +110,19 @@ int main(int argc, char **argv) {
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-		setupCamera();
-		initLighting();
-		glTranslatef(0, -2, 0);
-		drawGrid(40, 1);
-		glCallList(testList);
+		if(mode == 0){
 
-		// Draw vehicles
-		//g_vehicleCtrl->renderVehicles();
+			setupCamera();
+			initLighting();
+			glTranslatef(0, -2, 0);
+			drawGrid(40, 1);
+			glCallList(testList);
+		}else if(mode == 1){
 
+		}else if(mode == 2){
+			// Draw vehicles
+			//g_vehicleCtrl->renderVehicles();
+		}
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 		/* Poll for and process events */
@@ -132,6 +148,7 @@ void init() {
 	glCullFace(GL_BACK);
 	/*Create a new building object*/
 	building = Building();
+	building.initTexture();
 }
 
 void initLighting() {
@@ -142,7 +159,7 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	glEnable(GL_LIGHT0); // f yo light 0
+	glEnable(GL_LIGHT0);
 
 	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
 	vec3 differenace = (vec3(0, 0, 0)
@@ -160,8 +177,8 @@ void initLighting() {
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
 	//Allows lighting without textures or colours (temporary solution)
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT);
+//	glEnable(GL_COLOR_MATERIAL);
+//	glColorMaterial(GL_FRONT, GL_AMBIENT);
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/

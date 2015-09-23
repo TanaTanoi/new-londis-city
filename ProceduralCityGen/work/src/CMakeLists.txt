@@ -30,3 +30,4 @@ SET(sources
 # You do not need to touch this
 add_executable(${COMP308_ASSIGNMENT} ${headers} ${sources})
 target_link_libraries(${COMP308_ASSIGNMENT} PRIVATE glew glfw ${GLFW_LIBRARIES})
+target_link_libraries(${COMP308_ASSIGNMENT} PRIVATE stb)

@@ -16,9 +16,9 @@
 #include <string>
 
 #include "comp308.hpp"
-#include "building.hpp"
 #include "imageLoader.hpp"
 #include "shaderLoader.hpp"
+#include "building.hpp"
 #include "generator.h"
 using namespace std;
 using namespace comp308;
@@ -28,32 +28,56 @@ Building::Building(){
 }
 
 
-GLuint g_texture = 0;
+GLuint tex_wall = 0;
+GLuint tex_window = 0;
 
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
-	cout<<"Initd shader"<<endl;
+	cout<<"Init shader"<<endl;
 }
 void Building::initTexture() {//TODO this method
 
-//	image tex("../work/res/textures/brick.jpg");
-//
-//	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
-//	glGenTextures(1, &g_texture); // Generate texture ID
-//	glBindTexture(GL_TEXTURE_2D, g_texture); // Bind it as a 2D texture
-//
-//	// Setup sampling strategies
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//
-//	// Finnaly, actually fill the data into our texture
-//	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-//
-//	cout << tex.w << endl;
+	image tex2("../work/res/textures/glass01.jpg");
+
+	glActiveTexture(GL_TEXTURE1); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+	glGenTextures(1, &tex_window); // Generate texture ID
+	glBindTexture(GL_TEXTURE_2D, tex_window); // Bind it as a 2D texture
+
+	// Setup sampling strategies
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Finnaly, actually fill the data into our texture
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex2.w, tex2.h, tex2.glFormat(), GL_UNSIGNED_BYTE, tex2.dataPointer());
+
+	cout << tex2.w << endl;
+
+
+	image tex("../work/res/textures/example.jpg");
+
+	glActiveTexture(GL_TEXTURE0); // Use slot 0, need to use GL_TEXTURE1 ... etc if using more than one texture PER OBJECT
+	glGenTextures(1, &tex_wall); // Generate texture ID
+	glBindTexture(GL_TEXTURE_2D, tex_wall); // Bind it as a 2D texture
+
+	// Setup sampling strategies
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Finnaly, actually fill the data into our texture
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
+
+	cout << tex.w << endl;
+
+
+
+
 }
 
 /*From the given floor plan, extrude to create a block of height 0.5f
@@ -62,7 +86,6 @@ void Building::initTexture() {//TODO this method
  * point i and point i +1 (where last and first point are connected)
  */
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
-	//glUseProgram(g_shader);
 	int n = floor.size();
 	vec2 mid = centerPoint(floor);
 	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
@@ -77,7 +100,20 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
 
+	glEnable(GL_TEXTURE_2D);
+			// Use Texture as the color
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			// Set the location for binding the texture
+			glActiveTexture(GL_TEXTURE0);
+			// Bind the texture
+			glBindTexture(GL_TEXTURE_2D, tex_wall);
+
 	glBegin(GL_QUADS);
+
+
+
+//	glUseProgram(g_shader);
+//	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
 		if (i % 2 == 0) {
@@ -97,10 +133,17 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		normal = normalize(normal);
 		//glTexCoord2d(0, 0);
 		glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
-		glVertex3f(topl.x, topl.y, topl.z);
-		glVertex3f(botl.x, botl.y, botl.z);
-		glVertex3f(botr.x, botr.y, botr.z);
+		glTexCoord2f(1,0);
 		glVertex3f(topr.x, topr.y, topr.z);
+		glTexCoord2f(1,1);
+		glVertex3f(botr.x, botr.y, botr.z);
+		glTexCoord2f(0,1);
+		glVertex3f(botl.x, botl.y, botl.z);
+		glTexCoord2f(0,0);
+		glVertex3f(topl.x, topl.y, topl.z);
+
+
+
 		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
@@ -113,12 +156,14 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 	for(int i = 0; i < n;i++){
 		vec3 p1 = top[i];
 		vec3 p2 = top[(i+1)%n];
-		glVertex3f(p1.x,p1.y,p1.z);
-		glVertex3f(p2.x,p2.y,p2.z);
 		glVertex3f(mid3d.x,mid3d.y,mid3d.z);
+		glVertex3f(p2.x,p2.y,p2.z);
+		glVertex3f(p1.x,p1.y,p1.z);
+
+
 	}
 	glEnd();
-	glBegin(GL_TRIANGLES);
+	glBegin(GL_POLYGON);
 	glNormal3f(0, -1, 0);
 	for (vec3 floorPoint: bot) {
 		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
@@ -213,6 +258,15 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 //			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
 //			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
 
+//	glEnable(GL_TEXTURE_2D);
+//	// Use Texture as the color
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	// Set the location for binding the texture
+	glActiveTexture(GL_TEXTURE1);
+	// Bind the texture
+	glBindTexture(GL_TEXTURE_2D, tex_window);
+
+
 	for (int j = 0; j < i; j+=2) {
 		if((j/2)%2 == 0){
 			glColor3f(1,0,0);
@@ -228,10 +282,17 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 		vec3 botL = vec3(start.x, bottom, start.y)	 + normal*0.001f;
 
 		glNormal3f(normal.x, normal.y, normal.z);
-		glVertex3f(topL.x, topL.y, topL.z);
-		glVertex3f(botL.x, botL.y, botL.z);
-		glVertex3f(botR.x, botR.y, botR.z);
+		glTexCoord2f(1,0);
 		glVertex3f(topR.x, topR.y, topR.z);
+		glTexCoord2f(1,1);
+		glVertex3f(botR.x, botR.y, botR.z);
+		glTexCoord2f(0,1);
+		glVertex3f(botL.x, botL.y, botL.z);
+		glTexCoord2f(0,0);
+		glVertex3f(topL.x, topL.y, topL.z);
+
+
+
 	}
 }
 
@@ -365,7 +426,7 @@ int Building::basicHashcode(string input) {
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
 	/*Size of buildings and stuff for this thing*/
-	float size = 16.0f;
+	float size = 2.0f;
 	float disp = 1.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -475,7 +536,7 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
 
 /*Subdivides the input 4 point floor plan into 2 sets of floor plans
  * Returns a vector of floor plans where index 0 is the larger half
- * and index 1 is the smaller 
+ * and index 1 is the smaller
  */
 vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	vector<vector<vec2>> result;

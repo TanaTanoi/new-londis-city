@@ -53,9 +53,11 @@ include_directories("${PROJECT_SOURCE_DIR}/ext/glfw/include")
 #########################################################
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glew-1.10.0")
 #########################################################
+
 # Include STB Subproject
 #########################################################
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
+
 #########################################################
 # Set Compiler Flags
 #########################################################

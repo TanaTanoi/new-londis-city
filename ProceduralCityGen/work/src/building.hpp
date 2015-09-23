@@ -17,7 +17,6 @@
 
 #include "comp308.hpp"
 
-
 struct buildingParams {
 	std::vector<comp308::vec2> boundingArea;	//the area in which this building is limited
 	unsigned int seed = 0;								//the seed for generation
@@ -34,12 +33,16 @@ const float BLOCK_SIZE = 0.3f;
 const float WINDOW_WIDTH = 0.1f;
 const float EXTRUDE_THRESHOLD = 0.2f;
 class Building {
+
 private:
 	GLuint g_shader = 0;
+
 	void initShader(void);//not currently working
-	void initTexture(void);//not currently working
+
 
 public:
+	void initTexture(void);//not currently working
+
 	float extendBuilding(std::vector<comp308::vec2>, float);
 	std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
 	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
