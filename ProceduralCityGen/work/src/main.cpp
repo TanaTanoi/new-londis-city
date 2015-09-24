@@ -83,14 +83,18 @@ int main(int argc, char **argv) {
 	string BMODE = "B";
 	string RMODE = "R";
 	string CMODE = "C";
-	init();
+
 	if(argc > 1 && argv[1] == BMODE ){
+		init();
 		testList = building.generateBuildingFromString("test");
+		mode = 0;
+		initLighting();
 	}else if(argv[1] == RMODE){
 		g_sections = new SectionDivider();
 		g_sections->testSection();
+		mode = 1;
 	}else if(argv[1] == CMODE){
-
+		mode = 2;
 	}
 
 
@@ -99,7 +103,6 @@ int main(int argc, char **argv) {
 	//int testList = building.generateRandomBuildings();
 
 	/* Loop until the user closes the window */
-	initLighting();
 
 	// Create vehicle controller
 	//g_vehicleCtrl = new VehicleController(
@@ -131,7 +134,6 @@ int main(int argc, char **argv) {
 
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
-
 
 			g_sections->renderTest();
 		}else if(mode == 2){
@@ -177,9 +179,9 @@ void initLighting() {
 	glEnable(GL_LIGHT0);
 
 	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
-	vec3 differenace = (vec3(0, 0, 0)
+	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
-	float spotlight_direction[] = { differenace.x, differenace.y, differenace.z };
+	float spotlight_direction[] = { difference.x, difference.y, difference.z };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90.0);
@@ -191,9 +193,6 @@ void initLighting() {
 	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
-	//Allows lighting without textures or colours (temporary solution)
-//	glEnable(GL_COLOR_MATERIAL);
-//	glColorMaterial(GL_FRONT, GL_AMBIENT);
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/

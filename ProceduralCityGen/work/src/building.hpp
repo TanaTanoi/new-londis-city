@@ -16,10 +16,11 @@
 #include <vector>
 
 #include "comp308.hpp"
-
+enum building_type { SKYSCRAPER = 0, RESIDENTIAL = 1, INDUSTRIAL = 2};
 struct buildingParams {
 	std::vector<comp308::vec2> boundingArea;	//the area in which this building is limited
 	unsigned int seed = 0;								//the seed for generation
+	building_type b_type = SKYSCRAPER;// = building_type.SKYSCRAPER;
 
 };
 
@@ -29,16 +30,25 @@ struct buildingLOD {
 	int high;
 };
 
+
+
 const float BLOCK_SIZE = 0.3f;
 const float WINDOW_WIDTH = 0.1f;
 const float EXTRUDE_THRESHOLD = 0.2f;
+
+const int tex_wall_num = 2;
+const int tex_window_num = 2;
+
+
 class Building {
 
 private:
 	GLuint g_shader = 0;
-
+	int cur_tex_wall = 0;	//what type of wall to use
+	int cur_tex_wall_num = 1;//what wall texture to use
+	int cur_tex_win = 0;	//what type of window to use
+	int cur_tex_win_num = 0;//what window texture to use
 	void initShader(void);//not currently working
-
 
 public:
 	void initTexture(void);//not currently working

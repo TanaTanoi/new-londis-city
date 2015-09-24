@@ -28,8 +28,8 @@ Building::Building(){
 }
 
 
-GLuint tex_wall[2];
-GLuint tex_window = 0;
+GLuint tex_wall[2][2];
+GLuint tex_window[2][2];
 
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
@@ -61,10 +61,15 @@ void Building::initTexture() {
 
 	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
-
-	glGenTextures(2, tex_wall);
-	loadTexture(tex_wall[0], "../work/res/textures/brick001.jpg");
-	loadTexture(tex_wall[1], "../work/res/textures/glass01.jpg");
+	for(int i = 0; i < 2;i++){
+		glGenTextures(2, tex_wall[i]);
+		glGenTextures(2, tex_window[i]);
+	}
+	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
+	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
+	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
+	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
+	loadTexture(tex_window[0][0], "../work/res/textures/glass01.jpg");
 }
 
 /*From the given floor plan, extrude to create a block of height 0.5f
@@ -72,6 +77,28 @@ void Building::initTexture() {
  * *floor must be a list of points where a wall is connected between
  * point i and point i +1 (where last and first point are connected)
  */
+vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
+	vector<vector<vec2>> result;
+	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
+	float cutDist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.5f) + 1.5f;
+	vec2 cutP1 = ((points[1] - points[0]) / cutDist) + points[0];
+	vec2 cutP2 = ((points[2] - points[3]) / cutDist) + points[3];
+	result.push_back(vector<vec2>());
+	result.push_back(vector<vec2>());
+
+	int i = cutDist>=2.0f;
+	result[i].push_back(cutP1);
+	result[i].push_back(cutP2);
+	result[i].push_back(points[3]);
+	result[i].push_back(points[0]);
+
+	result[!i].push_back(cutP2);
+	result[!i].push_back(cutP1);
+	result[!i].push_back(points[1]);
+	result[!i].push_back(points[2]);
+
+	return result;
+}
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 
 	int n = floor.size();
@@ -96,7 +123,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		vec3 normal = cross((botl - topr), (topl - topr));
 		normal = normalize(normal);
 		//Use texture
-		glBindTexture(GL_TEXTURE_2D,tex_wall[0]);
+		glBindTexture(GL_TEXTURE_2D,tex_wall[cur_tex_wall][cur_tex_wall_num]);
 		glBegin(GL_QUADS);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
 			glTexCoord2f(1,0);
@@ -110,6 +137,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		glEnd();
 
 		//Generate windows
+		if(cur_tex_wall!=SKYSCRAPER)
 		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
@@ -223,7 +251,7 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 //			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
 //			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
 
-	glBindTexture(GL_TEXTURE_2D,tex_wall[1]);
+	glBindTexture(GL_TEXTURE_2D,tex_window[cur_tex_win][cur_tex_win_num]);
 	glBegin(GL_QUADS);
 	for (int j = 0; j < i; j+=2) {
 		if((j/2)%2 == 0){
@@ -402,13 +430,11 @@ int Building::generateBuildingFromString(string input) {
 			p.boundingArea = points;
 			srand(randStringInc+=14);
 			p.seed = rand();
-			p.b_type = rand()%3;
-//			cout << p.seed << " ";
+			p.b_type = static_cast<building_type>(rand()%2);
 			buildingLOD result;
 			buildings.push_back(result);
 			generateBuilding(&p,&result);
 		}
-		//cout << endl;
 	}
 	glNewList(toReturn, GL_COMPILE);
 	cout << "Total buildings: " << buildings.size() << endl;
@@ -434,13 +460,14 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	minDist /= 1.5f;
 	srand(parameters->seed);
-	if ((rand() % 5 == 0)) {//20% chance to generate differently shaped building
+	int chance = rand()%5;
+	if (chance == 0) {//20% chance to generate differently shaped building
 		srand(rand());//increase randomness
 		floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
 	}
-	else if (rand() % 5 <= 2) {//%40% chance to have smaller area
+	else if (chance <= 2) {//%40% chance to have smaller area
 		floorPlan = shrinkPoints(floorPlan);
-	}else if(rand()%5==3){//10% chance to have a different orientated area
+	}else if(chance==3){//10% chance to have a different orientated area
 		floorPlan = Generator::generateFloorPlan(center, minDist,4);
 	}else{				//10% chance to generate building in same floor plan
 		srand(rand());
@@ -454,6 +481,10 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 			floorPlan = Generator::cutEdges(floorPlan);
 		}
 	}
+
+	cur_tex_wall = parameters->b_type;
+	cur_tex_wall_num = rand()%2;
+
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
 	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
@@ -495,25 +526,3 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
  * Returns a vector of floor plans where index 0 is the larger half
  * and index 1 is the smaller
  */
-vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
-	vector<vector<vec2>> result;
-	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
-	float cutDist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.5f) + 1.5f;
-	vec2 cutP1 = ((points[1] - points[0]) / cutDist) + points[0];
-	vec2 cutP2 = ((points[2] - points[3]) / cutDist) + points[3];
-	result.push_back(vector<vec2>());
-	result.push_back(vector<vec2>());
-
-	int i = cutDist>=2.0f;
-	result[i].push_back(cutP1);
-	result[i].push_back(cutP2);
-	result[i].push_back(points[3]);
-	result[i].push_back(points[0]);
-
-	result[!i].push_back(cutP2);
-	result[!i].push_back(cutP1);
-	result[!i].push_back(points[1]);
-	result[!i].push_back(points[2]);
-
-	return result;
-}
