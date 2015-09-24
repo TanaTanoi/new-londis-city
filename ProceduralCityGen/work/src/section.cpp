@@ -122,7 +122,7 @@ void SectionDivider::testSection() {
 	lines.push_back(a);
 	lines.push_back(b);
 	lines.push_back(c);
-	lines.push_back(b);
+	lines.push_back(d);
 
 	section s = { lines };
 	sections.push_back(s);
@@ -131,6 +131,7 @@ void SectionDivider::testSection() {
 void SectionDivider::renderTest() {
 	section s = sections.back();
 	glBegin(GL_LINES);
+	
 	for (line l : s.lines) {
 		glVertex2f(l.start.x, l.start.y);
 		glVertex2f(l.end.x, l.end.y);
