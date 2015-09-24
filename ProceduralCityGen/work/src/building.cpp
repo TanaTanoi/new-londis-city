@@ -37,6 +37,7 @@ void Building::initShader() {
 	cout<<"Init shader"<<endl;
 }
 
+/*Loads the given texture into the given GLunit */
 void loadTexture(GLuint texture, const char* filename){
 
 	image tex(filename);
@@ -50,12 +51,10 @@ void loadTexture(GLuint texture, const char* filename){
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(), GL_UNSIGNED_BYTE, tex.dataPointer());
-
 }
 
-void Building::initTexture() {//TODO this method
+void Building::initTexture() {
 
 	initShader();
 	glUseProgram(g_shader);
@@ -88,44 +87,15 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
-
-//	glEnable(GL_TEXTURE_2D);
-//			// Use Texture as the color
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//	// Set the location for binding the texture
-//	glActiveTexture(GL_TEXTURE0);
-//	// Bind the texture
-//	glBindTexture(GL_TEXTURE_2D, tex_wall[0]);
-//	glEnable(GL_TEXTURE_2D);
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//
-//	glActiveTexture(GL_TEXTURE0);
-//	glBindTexture(GL_TEXTURE_2D, tex_wall[0]);
-
-
-
-
-
-//	glUseProgram(g_shader);
-//	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
-		if (i % 2 == 0) {
-			glColor3f(1.0f, 0.5f, 0.1f);
-		}
-		else {
-			glColor3f(0.1f, 0.2f, 0.9f);
-//			glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
-//					static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
-//					static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
-		}
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
 		vec3 botr = bot[(i + 1) % n];
 		vec3 botl = bot[i];
 		vec3 normal = cross((botl - topr), (topl - topr));
 		normal = normalize(normal);
-		//glTexCoord2d(0, 0);
+		//Use texture
 		glBindTexture(GL_TEXTURE_2D,tex_wall[0]);
 		glBegin(GL_QUADS);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
@@ -139,7 +109,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 			glVertex3f(topl.x, topl.y, topl.z);
 		glEnd();
 
-
+		//Generate windows
 		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
@@ -412,7 +382,7 @@ int Building::basicHashcode(string input) {
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
 	/*Size of buildings and stuff for this thing*/
-	float size = 2.0f;
+	float size = 10.0f;
 	float disp = 1.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -432,6 +402,7 @@ int Building::generateBuildingFromString(string input) {
 			p.boundingArea = points;
 			srand(randStringInc+=14);
 			p.seed = rand();
+			p.b_type = rand()%3;
 //			cout << p.seed << " ";
 			buildingLOD result;
 			buildings.push_back(result);
