@@ -7,30 +7,44 @@
 struct line {
 	comp308::vec2 start;
 	comp308::vec2 end;
+	int ID;
 	float length;
 };
 
 struct section {
-	std::vector<line> lines;
+	std::vector<line *> lines;
 	//float area;
 	//Building:: building;
+};
+
+struct lot{
+	section boundingBox;
+	std::vector<section *> sections;
 };
 
 class SectionDivider {
 private:
 	float goalArea;
+	std::vector<lot> lots;
+	//for testing
 	std::vector<section> sections;
 
-	line* findLongestEdge(section *);
+	//Section Methods
+	line* findLongestEdge(section);
 	void recDivideSection(section *);
 	std::vector<section> splitSection(section *);
 	void renderSection(section *);
 	bool intersects(line *, float, float, line *);
 
+	//Lot Methods
+
+
 public:
 	SectionDivider();
+
+	void cleanUp();
 	void renderSections();
-	void divideSection(section);
-	void testSection(); // for testing 
-	void renderTest(); // for testing 
+	void divideLot(lot);
+	void testSection(); // for testing
+	void renderTest(); // for testing
 };
