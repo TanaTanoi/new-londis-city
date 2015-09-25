@@ -122,13 +122,17 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		vec3 botl = bot[i];
 		vec3 normal = cross((botl - topr), (topl - topr));
 		normal = normalize(normal);
+
+		float len = abs(length(botl-botr));	//length of the wall
+		len /=tex_wall_width;	//the proportion of the wall
+
 		//Use texture
 		glBindTexture(GL_TEXTURE_2D,tex_wall[cur_tex_wall][cur_tex_wall_num]);
 		glBegin(GL_QUADS);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
-			glTexCoord2f(1,0);
+			glTexCoord2f(len,0);
 			glVertex3f(topr.x, topr.y, topr.z);
-			glTexCoord2f(1,1);
+			glTexCoord2f(len,1);
 			glVertex3f(botr.x, botr.y, botr.z);
 			glTexCoord2f(0,1);
 			glVertex3f(botl.x, botl.y, botl.z);

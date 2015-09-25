@@ -46,6 +46,9 @@ private:
 	GLuint g_shader = 0;
 	int cur_tex_wall = 0;	//what type of wall to use
 	int cur_tex_wall_num = 1;//what wall texture to use
+
+	float tex_wall_width = 0.5f;
+
 	int cur_tex_win = 0;	//what type of window to use
 	int cur_tex_win_num = 0;//what window texture to use
 	void initShader(void);//not currently working

@@ -19,10 +19,11 @@ uniform sampler2D texture0;
 
 // Values passed in from the vertex shader
 varying vec3 vNormal;
+varying vec3 vLightDir;
 varying vec3 vPosition;
 varying vec2 vTextureCoord0;
-
+float intensity;
 void main() {
-
-    gl_FragColor = texture2D(texture0, vTextureCoord0);
+	intensity = max(dot(vLightDir,vNormal),0.4);
+    gl_FragColor.rgba = texture2D(texture0, vTextureCoord0).rgba*intensity;
 }
