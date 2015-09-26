@@ -6,8 +6,11 @@
  */
 
 #include "comp308.hpp"
+#include <cmath>
+#include <algorithm>
 
-using namespace comp308
+using namespace comp308;
+using namespace std;
 
 namespace util{
 
