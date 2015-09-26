@@ -12,14 +12,15 @@ struct line {
 };
 
 struct section {
-	std::vector<line *> lines;
+	std::vector<line > lines;
+	int ID;
 	//float area;
 	//Building:: building;
 };
 
 struct lot{
 	section boundingBox;
-	std::vector<section *> sections;
+	std::vector<section > sections;
 };
 
 class SectionDivider {
@@ -30,7 +31,7 @@ private:
 	std::vector<section> sections;
 
 	//Section Methods
-	line* findLongestEdge(section);
+	line findLongestEdge(section);
 	void recDivideSection(section *);
 	std::vector<section> splitSection(section *);
 	void renderSection(section *);

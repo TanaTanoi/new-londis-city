@@ -17,13 +17,14 @@ SectionDivider::SectionDivider() {};
 /**
 * Finds the longest edge in a section and returns it
 */
-line* SectionDivider::findLongestEdge(section s) {
+line SectionDivider::findLongestEdge(section s) {
 	float maxLength = 0.0f;
-	line* longLine;
+	line longLine;
 
 	for (int i = 0; i < (int)s.lines.size(); i++) {
-		if (s.lines[i]->length > maxLength) {
-			maxLength = s.lines[i]->length;
+		int newLength = abs(length(s.lines[i].start-s.lines[i].end));
+		if (newLength > maxLength) {
+			maxLength = newLength;
 			longLine = s.lines[i];
 		}
 	}
@@ -118,25 +119,17 @@ void SectionDivider::testSection() {
 	line c = {vec2(150,300), vec2(350,300),2};
 	line d = { vec2(350,300), vec2(400,100),3 };
 
-	line* aa = (line *) malloc(sizeof(line));
-	line* bb = (line *) malloc(sizeof(line));
-	line* cc = (line *) malloc(sizeof(line));
-	line* dd = (line *) malloc(sizeof(line));
-
-	aa = &a; bb = &b; cc = &c; dd = &d;
-
-
-	vector<line *> lines = vector<line *>();
-	lines.push_back(aa);
-	lines.push_back(bb);
-	lines.push_back(cc);
-	lines.push_back(dd);
+	vector<line > lines = vector<line >();
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(d);
 
 	section s = { lines };
 	sections.push_back(s);
 
-		for (line* l : sections[0].lines) {
-		cout << l->ID << endl;
+		for (line l : sections[0].lines) {
+		cout << l.ID << endl;
 		}
 }
 
@@ -144,28 +137,31 @@ void SectionDivider::renderTest() {
 	//section s = sections.back();
 	glBegin(GL_LINES);
 
-	line* longLine = findLongestEdge(sections[0]);
-	cout << longLine->ID << endl;
-	for (line* l : sections[0].lines) {
-		cout << longLine->ID << endl;
-		if(longLine == l){
+//	line longLine = findLongestEdge(sections[0]);
+	int longID  = findLongestEdge(sections[0]).ID;
+//	cout << "LongLIne: " << longLine.ID << endl;
+	for (line l : sections[0].lines) {
+//		cout <<"Checking ID "<< l.ID << endl;
+		if(longID == l.ID){ // draw green if longest line
 			glColor3f(0.0,1.0,0.0);
+//			cout <<"Drawing longest line: "<< l.ID << endl;
 		}
 		else{
-			glColor3f(1.0,0.0,0.0);
+//			cout <<"Not     longest line: "<< l.ID << endl;
+			glColor3f(1.0,0.0,0.0); // otherwise draw red
 		}
 
-		glVertex2f(l->start.x, l->start.y);
-		glVertex2f(l->end.x, l->end.y);
+		glVertex2f(l.start.x, l.start.y);
+		glVertex2f(l.end.x, l.end.y);
 	}
 	glEnd();
 	}
 
-void SectionDivider::cleanUp(){
-	for(line * l : sections[0].lines){
-		free(l);
-	}
-}
+//void SectionDivider::cleanUp(){
+//	for(line * l : sections[0].lines){
+//		free(l);
+//	}
+//}
 
 
 
