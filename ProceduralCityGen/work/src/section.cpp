@@ -85,7 +85,7 @@ vector<section> SectionDivider::splitSection(section s) {
 	vector<line> intersectors;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
 		if(s.lines[0].ID != l.ID){
-			if (intersects(s.lines[i],perpBi)) {
+			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) {
 				intersectors.push_back(s.lines[i]);
 			}
 		}
@@ -98,7 +98,7 @@ vector<section> SectionDivider::splitSection(section s) {
 	line toCut = intersects[0];
 
 	section a, b; // the two new sections
-	line bi = {getIntersection(toCut,perpBi), getIntersection(l,perpBi)};
+	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY))};
 
 	vector<section> x;
 	return x;
