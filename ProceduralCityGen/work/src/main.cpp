@@ -149,7 +149,6 @@ int main(int argc, char **argv) {
 
 	// Delete pointers
 	//delete g_vehicleCtrl;
-	g_sections->cleanUp();
 	delete g_sections;
 	glfwTerminate();
 
