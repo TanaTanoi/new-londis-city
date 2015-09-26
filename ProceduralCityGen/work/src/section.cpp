@@ -39,48 +39,33 @@ line SectionDivider::findLongestEdge(section s) {
 //	recDivideSection(&l.boundingBox);
 //}
 //
-///**
-//* Recursively divides sections by extending a perpendicular bisector
-//* of the longest edge slightly off centre. Continuely recurses until
-//* it is smaller than the largest acceptable size for a section.
-//*/
-//
-//void SectionDivider::recDivideSection(section *s) {
-//	vector<section> lots = splitSection(s);
-//
-//	for (section l : lots) {
-//		//if (l.area <= goalArea) {
-//	//		sections.push_back(l);
-//		//}
-//	//	else {
-//	//		recDivideSection(&l);
-//	//	}
-//	}
-//}
+
+/**
+* Recursively divides sections by extending a perpendicular bisector
+* of the longest edge slightly off centre. Continuely recurses until
+* it is smaller than the largest acceptable size for a section.
+*/
+
+void SectionDivider::recDivideSection(section *s) {
+	vector<section> lots = splitSection(s);
+	for (section l : lots) {
+
+
+
+//		if (l.area <= goalArea) {
+//			sections.push_back(l);
+//		}
+//		else {
+//			recDivideSection(&l);
+//		}
+	}
+}
 //
 ///**
 // Finds whether two lines intersect
 //*/
 //
-//bool SectionDivider::intersects(line* lon,float m_l, float c_l, line* other) {
-//	float m = (other->end.y - other->start.y) / (other->end.x - other->start.x);
-//	float c = other->end.y - m*other->end.x;
-//
-//	if (lon != other){
-//		// Calculates the intersection point
-//		float x = (c - c_l) / (m_l - m);
-//		float y = m_l * x + c_l;
-//
-//		// Now uses the intersection point of these two lines to determine if this is
-//		//the line it should split
-//
-//		if (x >= max(other->start.x, other->end.x) && x <= min(other->start.x, other->end.x)
-//			&& y >= max(other->start.y, other->start.y) && y <= min(other->start.y, other->start.y)) {
-//			return true;
-//		}
-//	}
-//	return false;
-//}
+
 //
 //vector<section> SectionDivider::splitSection(section *s) {
 //	line* l = findLongestEdge(s);
@@ -93,8 +78,7 @@ line SectionDivider::findLongestEdge(section s) {
 //	float random = ((float)rand() / (RAND_MAX)) + 1;
 //	float centre = l->length*(1.0f / 3.0f) + random * (l->length*(1.0f / 3.0f));
 //
-//	float m_l = (l->end.y - l->start.y) / (l->end.x - l->start.x);
-//	float c_l = l->end.y - m_l*l->end.x;
+//
 //
 //	// Now finds the first intersection point with another line within the section
 //	vector<line *> intersectors;
