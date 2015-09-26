@@ -95,7 +95,7 @@ vector<section> SectionDivider::splitSection(section s) {
 
 	// Now creates two new sections from the split
 
-	line toCut = intersects[0];
+	line toCut = intersectors[0];
 
 	section a, b; // the two new sections
 	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY))};

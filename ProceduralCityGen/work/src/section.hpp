@@ -32,10 +32,10 @@ private:
 
 	//Section Methods
 	line findLongestEdge(section);
-	void recDivideSection(section *);
-	std::vector<section> splitSection(section *);
-	void renderSection(section *);
-	bool intersects(line *, float, float, line *);
+	void recDivideSection(section);
+	std::vector<section> splitSection(section);
+	void renderSection(section);
+	//bool intersects(line *, float, float, line *);
 
 	//Lot Methods
 
