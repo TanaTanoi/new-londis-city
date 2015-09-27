@@ -79,8 +79,6 @@ vector<section> SectionDivider::splitSection(section s) {
 
 	float centreY = m*centreX + c;
 
-
-
 	// Now finds the first intersection point with another line within the section
 	vector<line> intersectors;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
@@ -98,11 +96,71 @@ vector<section> SectionDivider::splitSection(section s) {
 	line toCut = intersectors[0];
 
 	section a, b; // the two new sections
-	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY))};
+	
+	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};	
+
+	a = getInnerSection(s, bi, toCut, l);
+	b = getInnerSection(s, bi, l, toCut);
 
 	vector<section> x;
+	x.push_back(a);
+	x.push_back(b);
+
 	return x;
 
+}
+
+section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
+	section a;
+	a.lines.push_back(bi);
+	int lineID = toCut.ID;
+	int newID = 1;
+
+	// Add first half line
+	vec2 start = getSharedPoint(bi, toCut);
+	vec2 end;
+	if (lineID >= (int)s.lines.size()) {
+		end = getSharedPoint(toCut, s.lines[0]);
+	}
+	else {
+		end = getSharedPoint(toCut, s.lines[lineID]);
+	}
+
+	line startHalf = { start,end,newID++ };
+	a.lines.push_back(startHalf);
+
+	//Adds all whole middle lines
+	while (lineID != longLine.ID) {
+		// Get correct lineID
+		lineID++;
+		if (lineID >= (int)s.lines.size()) {
+			lineID = 0;
+		}
+		//Add line
+		line toAdd = s.lines[lineID];
+		toAdd.ID = newID; // Gives line appropriate ID
+		a.lines.push_back(toAdd);
+		// Increment new ID
+		newID++;
+	}
+
+	// Add last half line
+
+	vec2 start2 = getSharedPoint(bi, longLine);
+	vec2 end2;
+	if (lineID >= (int)s.lines.size()) {
+		end2 = getSharedPoint(longLine, s.lines[0]);
+	}
+	else {
+		end2 = getSharedPoint(longLine, s.lines[lineID]);
+	}
+
+	line endHalf = { start2,end2,newID++ };
+	a.lines.push_back(endHalf);
+	
+	// Needs to calculate area here
+	
+	return a;
 }
 
 void SectionDivider::testSection() {
@@ -120,9 +178,17 @@ void SectionDivider::testSection() {
 	section s = { lines };
 	sections.push_back(s);
 
-	for (line l : sections[0].lines) {
-		cout << l.ID << endl;
+	splitSection(s);
+}
+
+vec2 SectionDivider::getSharedPoint(line a, line b) {
+	if ((a.start.x == b.start.x && a.start.y == b.start.y )||( a.start.x == b.end.x && a.start.y == b.end.y)){
+		return a.start;
 	}
+	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
+		return a.end;
+	}
+	return vec2(0,0);
 }
 
 void SectionDivider::renderTest() {

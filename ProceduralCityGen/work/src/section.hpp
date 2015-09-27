@@ -35,6 +35,8 @@ private:
 	void recDivideSection(section);
 	std::vector<section> splitSection(section);
 	void renderSection(section);
+	comp308::vec2 getSharedPoint(line a, line b);
+	section getInnerSection(section, line, line, line);
 	//bool intersects(line *, float, float, line *);
 
 	//Lot Methods
