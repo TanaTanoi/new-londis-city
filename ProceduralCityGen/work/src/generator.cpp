@@ -137,7 +137,14 @@ vector<vec2> Generator::cutEdges(vector<vec2> points) {
 	return result;
 }
 
+/*Generates a modern floorPlan for testing combinePlans*/
+vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
+	vector<vec2> shapeA = generateFloorPlan(center, radius, 4);
+	vector<vec2> shapeB = generateFloorPlan(center, radius/1.2f, 8);
+	return combinePlans(shapeA, shapeB);
+}
 
+/*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
 	vector<vec2> newPlan;

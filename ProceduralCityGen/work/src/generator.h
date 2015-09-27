@@ -24,6 +24,7 @@ public:
 	static std::string generateRandomBuildingString(int);
 	static std::string generateResdidentialBuildingString(int);
 	static std::vector<comp308::vec2> generateFloorPlan(comp308::vec2,float,int);
+	static std::vector<comp308::vec2> generateModernFloorPlan(comp308::vec2, float);
 	static std::vector<comp308::vec2> cutEdges(std::vector<comp308::vec2> points);
 	static std::vector<comp308::vec2> combinePlans(std::vector<comp308::vec2>, std::vector<comp308::vec2>);
 
