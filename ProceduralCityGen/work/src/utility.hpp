@@ -6,6 +6,7 @@
  */
 
 #include "comp308.hpp"
+#include "section.hpp"
 #include <cmath>
 #include <algorithm>
 
@@ -29,6 +30,45 @@ vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
 	float y = m_l * x + c_l;
 
 	return vec2(x,y);
+}
+
+/*REQUIRES: The lines to actually intersect
+Intersection method given two lines, represented by 2 start and end vectors*/
+vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
+	vec2 e1 = getEquation(a1, a2);
+	vec2 e2 = getEquation(b1, b2);
+	//If paralell lines
+	//get x value in which they meet
+	float x = (e2.y - e1.y) / (e1.x - e2.x);
+	//then also find the y value
+	float y = e1.x * x + e1.y;
+
+	return vec2(x, y);
+}
+
+/*Tests if the two lines, represented as two vec2s each, intersect within the bounds of the points*/
+bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
+	vec2 e1 = getEquation(a1, a2);
+	vec2 e2 = getEquation(b1, b2);
+	//If paralell lines
+	if (e1.x == e2.x) {
+		return false;
+	}
+	float x = (e2.y - e1.y) / (e1.x - e2.x);
+	//if x is out of bounds
+	if (x < a1.x || x > a2.x) {
+		return false;
+	}
+	//Return true if not parallel and if the point is within the bounds.
+	return true;
+}
+
+/*Returns a vec2 where r.x = gradient and r.y = y-offset*/
+vec2 getEquation(vec2 a, vec2 b) {
+	vec2 equation;
+	equation.x = (b.y - a.y) / (b.x - a.x);
+	equation.y = (a.y - (equation.x*a.x));
+	return equation;
 }
 
 bool intersects(line lon, vec2 cut, vec2 cutPoint) {
