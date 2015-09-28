@@ -148,57 +148,57 @@ vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
 	vector<vec2> newPlan;
-	int n1 = shapeA.size();
-	int n2 = shapeB.size();
-	//current shape we are tracing
-	int curShape = 0;
-	
-	int index = 0;
-	vec2 currentPoint = shapeA[index];
-	//while we don't contain the next point in the trace (currentPoint)
-	while (find(newPlan.begin(), newPlan.end(), currentPoint) != newPlan.end()) {
-		//add the point
-		newPlan.push_back(currentPoint);
-		//check this line against the other shape for intersections
-		bool hasIntersection = false;
-		for (int j = 0; j < n2; j++) {
-			//if we are currently on the first shape
-			if (curShape == 0) {
-				if (util::intersects(currentPoint, shapeA[(index + 1) % n1], shapeB[j], shapeB[(j + 1) % n2])) {
-					//if we find an intersection, add it
-					newPlan.push_back(util::getIntersection(currentPoint, shapeA[(index + 1) % n1], shapeB[j], shapeB[(j + 1) % n2]));
-					//and then add point on second shape
-					index = (j + 1) % n2;
-					hasIntersection = true;
-					break;
-				}
-			}else {//if we are on the second shape
-				if (util::intersects(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1])) {
-					//if we find an intersection, add it
-					newPlan.push_back(util::getIntersection(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1]));
-					//and then add point on second shape
-					newPlan.push_back(shapeA[(j + 1) % n1]);
-					index = (j + 1) % n1;
-					hasIntersection = true;
-					break;
-				}
-			}
-		}
-		if (hasIntersection) {
-			//swap shape we are currently on
-			curShape = !curShape;
-
-		}else {
-			if (curShape == 0) {
-				index = (index + 1) % n1;
-				currentPoint = shapeA[index];
-			}else {
-				index = (index + 1) % n2;
-				currentPoint = shapeB[index];
-			}
-		}
-
-	}
+//	int n1 = shapeA.size();
+//	int n2 = shapeB.size();
+//	//current shape we are tracing
+//	int curShape = 0;
+//
+//	int index = 0;
+//	vec2 currentPoint = shapeA[index];
+//	//while we don't contain the next point in the trace (currentPoint)
+//	while (find(newPlan.begin(), newPlan.end(), currentPoint) != newPlan.end()) {
+//		//add the point
+//		newPlan.push_back(currentPoint);
+//		//check this line against the other shape for intersections
+//		bool hasIntersection = false;
+//		for (int j = 0; j < n2; j++) {
+//			//if we are currently on the first shape
+//			if (curShape == 0) {
+//				if (util::intersects(currentPoint, shapeA[(index + 1) % n1], shapeB[j], shapeB[(j + 1) % n2])) {
+//					//if we find an intersection, add it
+//					newPlan.push_back(util::getIntersection(currentPoint, shapeA[(index + 1) % n1], shapeB[j], shapeB[(j + 1) % n2]));
+//					//and then add point on second shape
+//					index = (j + 1) % n2;
+//					hasIntersection = true;
+//					break;
+//				}
+//			}else {//if we are on the second shape
+//				if (util::intersects(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1])) {
+//					//if we find an intersection, add it
+//					newPlan.push_back(util::getIntersection(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1]));
+//					//and then add point on second shape
+//					newPlan.push_back(shapeA[(j + 1) % n1]);
+//					index = (j + 1) % n1;
+//					hasIntersection = true;
+//					break;
+//				}
+//			}
+//		}
+//		if (hasIntersection) {
+//			//swap shape we are currently on
+//			curShape = !curShape;
+//
+//		}else {
+//			if (curShape == 0) {
+//				index = (index + 1) % n1;
+//				currentPoint = shapeA[index];
+//			}else {
+//				index = (index + 1) % n2;
+//				currentPoint = shapeB[index];
+//			}
+//		}
+//
+//	}
 
 	return newPlan;
 

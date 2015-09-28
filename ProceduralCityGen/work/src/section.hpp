@@ -1,18 +1,14 @@
+#pragma once
+
+
 #include <vector>
 #include "building.hpp"
+#include "utility.hpp"
 
-/**
-		A line represents a single line in a section outline
-*/
-struct line {
-	comp308::vec2 start;
-	comp308::vec2 end;
-	int ID;
-	float length;
-};
+
 
 struct section {
-	std::vector<line > lines;
+	std::vector<util::line > lines;
 	int ID;
 	//float area;
 	//Building:: building;
@@ -31,12 +27,12 @@ private:
 	std::vector<section> sections;
 
 	//Section Methods
-	line findLongestEdge(section);
+	util::line findLongestEdge(section);
 	void recDivideSection(section);
 	std::vector<section> splitSection(section);
 	void renderSection(section);
-	comp308::vec2 getSharedPoint(line a, line b);
-	section getInnerSection(section, line, line, line);
+	comp308::vec2 getSharedPoint(util::line a, util::line b);
+	section getInnerSection(section, util::line, util::line, util::line);
 	//bool intersects(line *, float, float, line *);
 
 	//Lot Methods

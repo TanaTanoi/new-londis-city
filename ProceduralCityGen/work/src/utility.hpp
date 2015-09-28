@@ -4,20 +4,38 @@
  *  Created on: 26/09/2015
  *      Author: craighhann
  */
+#pragma once
 
 #include "comp308.hpp"
-#include "section.hpp"
 #include <cmath>
 #include <algorithm>
-
+#include <string>
+#include <vector>
 using namespace comp308;
 using namespace std;
 
 namespace util{
 
+/**
+		A line represents a single line in a section outline
+*/
+struct line {
+	comp308::vec2 start;
+	comp308::vec2 end;
+	int ID;
+	float length;
+};
 
 
-vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
+/*Returns a vec2 where r.x = gradient and r.y = y-offset*/
+inline vec2 getEquation(vec2 a, vec2 b) {
+	vec2 equation;
+	equation.x = (b.y - a.y) / (b.x - a.x);
+	equation.y = (a.y - (equation.x*a.x));
+	return equation;
+}
+
+inline vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
 	float m_l = (l.end.y - l.start.y) / (l.start.x, l.end.x - l.start.x);
 	float c_l = l.end.y - m_l*l.end.x;
 
@@ -34,7 +52,7 @@ vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
 
 /*REQUIRES: The lines to actually intersect
 Intersection method given two lines, represented by 2 start and end vectors*/
-vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
+inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
 	//If paralell lines
@@ -47,7 +65,7 @@ vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 }
 
 /*Tests if the two lines, represented as two vec2s each, intersect within the bounds of the points*/
-bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
+inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
 	//If paralell lines
@@ -63,15 +81,9 @@ bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	return true;
 }
 
-/*Returns a vec2 where r.x = gradient and r.y = y-offset*/
-vec2 getEquation(vec2 a, vec2 b) {
-	vec2 equation;
-	equation.x = (b.y - a.y) / (b.x - a.x);
-	equation.y = (a.y - (equation.x*a.x));
-	return equation;
-}
 
-bool intersects(line lon, vec2 cut, vec2 cutPoint) {
+
+inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 
 	vec2 intersection = getIntersection(lon,cut,cutPoint);
 

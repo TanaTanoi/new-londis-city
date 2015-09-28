@@ -96,8 +96,8 @@ vector<section> SectionDivider::splitSection(section s) {
 	line toCut = intersectors[0];
 
 	section a, b; // the two new sections
-	
-	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};	
+
+	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};
 
 	a = getInnerSection(s, bi, toCut, l);
 	b = getInnerSection(s, bi, l, toCut);
@@ -157,9 +157,9 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 
 	line endHalf = { start2,end2,newID++ };
 	a.lines.push_back(endHalf);
-	
+
 	// Needs to calculate area here
-	
+
 	return a;
 }
 
