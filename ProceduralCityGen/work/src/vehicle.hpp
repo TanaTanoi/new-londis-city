@@ -23,6 +23,10 @@ struct triangle {
 	vertex v[3]; //requires 3 verticies
 };
 
+enum Direction {
+	NORTH, EAST, SOUTH, WEST
+};
+
 // This class will expand on the geometry class
 class Vehicle {
 
@@ -38,6 +42,16 @@ private:
 	// IDs for the display list to render
 	GLuint m_displayListPoly = 0; // DisplayList for Polygon
 
+	// Current transformations
+	comp308::vec3 m_pos, m_rot, m_scale;
+
+	// Direction that the vehicle is facing
+	Direction m_direction = NORTH;
+
+	bool m_isMoving = false;
+	float m_velocity = 0;
+
+	void init(std::string);
 	void readOBJ(std::string);
 
 	void createNormals();
@@ -46,9 +60,24 @@ private:
 public:
 
 	Vehicle(std::string);
+	Vehicle(std::string, comp308::vec3, comp308::vec3, comp308::vec3);
 
 	void renderVehicle();
 	void handleCommand(int);
+
+	// Getters and setters
+	const comp308::vec3& getPos() const;
+	void setPos(const comp308::vec3& pos);
+	const comp308::vec3& getRot() const;
+	void setRot(const comp308::vec3& rot);
+	const comp308::vec3& getScale() const;
+	void setScale(const comp308::vec3& scale);
+	Direction getDirection() const;
+	void setDirection(Direction);
+	bool isIsMoving() const;
+	void setIsMoving(bool);
+	float getVelocity() const;
+	void setVelocity(float);
 };
 
 // Controller for vehicles
@@ -75,6 +104,9 @@ private:
 	void readTextures(std::string);
 	void initVehicles();
 	void initTexture(std::string, int);
+
+	float disToNextVehicle(Vehicle*);
+	void interpolate(comp308::vec3*, comp308::vec3*);
 
 public:
 

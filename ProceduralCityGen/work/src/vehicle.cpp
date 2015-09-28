@@ -20,6 +20,21 @@ using namespace std;
 using namespace comp308;
 
 Vehicle::Vehicle(string filename) {
+	init(filename);
+	m_pos = vec3();
+	m_rot = vec3();
+	m_scale = vec3(0.1, 0.1, 0.1);
+}
+
+// Moves the starting position of the vehicle
+Vehicle::Vehicle(string filename, vec3 start_pos, vec3 start_rot, vec3 scale) {
+	init(filename);
+	m_pos = start_pos;
+	m_rot = start_rot;
+	m_scale = scale;
+}
+
+void Vehicle::init(string filename) {
 	m_filename = filename;
 	readOBJ(filename);
 	if (m_triangles.size() > 0) {
@@ -218,9 +233,60 @@ void Vehicle::createDisplayListPoly() {
 }
 
 void Vehicle::renderVehicle() {
+	glPushMatrix();
+	glScalef(m_scale.x, m_scale.y, m_scale.z);
 	glShadeModel(GL_SMOOTH);
 	glCallList(m_displayListPoly);
+	glPopMatrix();
+}
+
+const comp308::vec3& Vehicle::getPos() const {
+	return m_pos;
+}
+
+void Vehicle::setPos(const comp308::vec3& pos) {
+	m_pos = pos;
+}
+
+const comp308::vec3& Vehicle::getRot() const {
+	return m_rot;
+}
+
+void Vehicle::setRot(const comp308::vec3& rot) {
+	m_rot = rot;
+}
+
+const comp308::vec3& Vehicle::getScale() const {
+	return m_scale;
+}
+
+void Vehicle::setScale(const comp308::vec3& scale) {
+	m_scale = scale;
 }
 
 void Vehicle::handleCommand(int command) {
+}
+
+Direction Vehicle::getDirection() const {
+	return m_direction;
+}
+
+void Vehicle::setDirection(Direction direction = NORTH) {
+	m_direction = direction;
+}
+
+bool Vehicle::isIsMoving() const {
+	return m_isMoving;
+}
+
+void Vehicle::setIsMoving(bool isMoving = false) {
+	m_isMoving = isMoving;
+}
+
+float Vehicle::getVelocity() const {
+	return m_velocity;
+}
+
+void Vehicle::setVelocity(float velocity = 0) {
+	m_velocity = velocity;
 }
