@@ -26,6 +26,11 @@ struct line {
 	float length;
 };
 
+class noIntersectionException : public exception
+{
+	const char* what() const throw() { return "The lines were parallel"; }
+};
+
 
 /*Returns a vec2 where r.x = gradient and r.y = y-offset*/
 inline vec2 getEquation(vec2 a, vec2 b) {
@@ -41,21 +46,31 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 }
 
 inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
-	cout << "Line ID " << l.ID;
+	//cout << "Line ID " << l.ID;
 	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 	float c_l = l.end.y - m_l*l.end.x;
-	cout << "Original line "<< m_l << "  " << c_l << endl;
-	cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
+	//cout << "Original line "<< m_l << "  " << c_l << endl;
+	//cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
 
-	float m = cutDir.y/cutDir.x;
-	if(cutDir.x == 0){ // vertical line
-		cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
-		return vec2(cutPoint.x,l.start.y);
-	}
+	float m = cutDir.y/cutDir.x;	
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
 
+	if (m == m_l || m == -m_l) { // two parallel lines
+		throw noIntersectionException();
+	}
 
-	cout << "Bisector line "<< m << "  " << c << endl;
+	if (l.end.x == l.start.x) { // line is vertical
+		float y = m*l.start.x + c; // finds appropriate y value on other line
+		return vec2(l.start.x, y);
+	}
+	
+	if (cutDir.x == 0) { // other line is vertical
+		//cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
+		float y = m_l*cutPoint.x + c_l; // finds appropriate y value on  line
+		return vec2(cutPoint.x, y);
+	}
+
+	//cout << "Bisector line "<< m << "  " << c << endl;
 
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
@@ -64,20 +79,33 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	return vec2(x,y);
 }
 
-//inline vec2 getIntersection(line l, line o){
-//	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
-//	float c_l = l.end.y - m_l*l.end.x;
-//
-//	float m = (o.end.y - o.start.y) / (o.end.x - o.start.x);
-//
-//	float c = o.end.y - m*o.end.x;
-//
-//	// Calculates the intersection point
-//	float x = (c - c_l) / (m_l - m);
-//	float y = m_l * x + c_l;
-//
-//	return vec2(x,y);
-//}
+inline vec2 getIntersection(line l, line o){
+	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+	float c_l = l.end.y - m_l*l.end.x;
+
+	float m = (o.end.y - o.start.y) / (o.end.x - o.start.x);
+	float c = o.end.y - m*o.end.x;
+
+	if (m == m_l) {
+		throw noIntersectionException();
+	}
+	if (l.end.x == l.start.x) { // line is vertical
+		float y = m*l.start.x + c; // finds appropriate y value on other line
+		return vec2(l.start.x, y);
+	}
+
+	if (o.end.x == o.start.x) { // other line is vertical
+						 //cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
+		float y = m_l*o.start.x + c_l; // finds appropriate y value on  line
+		return vec2(o.start.x, y);
+	}	
+
+	// Calculates the intersection point
+	float x = (c - c_l) / (m_l - m);
+	float y = m_l * x + c_l;
+
+	return vec2(x,y);
+}
 
 /*REQUIRES: The lines to actually intersect
 Intersection method given two lines, represented by 2 start and end vectors*/
@@ -142,12 +170,18 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
 
-	vec2 intersection = getIntersection(lon,cut,cutPoint);
+	vec2 intersection;
+	try {
+		intersection = getIntersection(lon, cut, cutPoint);
+	}
+	catch (const noIntersectionException &e) { return false; } // This was a set of two parallel lines
+	
 	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
 
+	
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.start.y) && intersection.y >= min(lon.start.y, lon.start.y)) {
 		return true;
