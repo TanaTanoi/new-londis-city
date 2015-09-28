@@ -139,27 +139,27 @@ vector<vec2> Generator::cutEdges(vector<vec2> points) {
 /*Generates a modern floorPlan for testing combinePlans*/
 vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
 	cout<<"Generating modern floors"<<endl;
-	//vector<vec2> shapeA = generateFloorPlan(center+vec2(2.0f,2.0f), 2.0f, 4);
-	//vector<vec2> shapeB = generateFloorPlan(center, 2.0f, 4);
-	vector<vec2> shapeA = vector<vec2>();
-	
-	shapeA.push_back(vec2(1,0 ));
-	shapeA.push_back(vec2(1,1));
-	shapeA.push_back(vec2(0,1));
-	shapeA.push_back(vec2(0, 0));
-	vector<vec2> shapeB = vector<vec2>();
-	shapeB.push_back(vec2(-0.5f, -0.5f));
-	shapeB.push_back(vec2(0.5f,-0.5f));
-	shapeB.push_back(vec2(0.5f,0.5f));
-	shapeB.push_back(vec2(-0.5f,0.5f));
-	glBegin(GL_LINES);
-	for (int i = 0; i < 4; i++) {
-		glVertex3f(shapeA[i].x, 1.0f, shapeA[i].y);
-		glVertex3f(shapeA[(i + 1) % 4].x, 1.0f, shapeA[(i+1)%4].y);
-		glVertex3f(shapeB[i].x, 1.0f, shapeB[i].y);
-		glVertex3f(shapeB[(i + 1) % 4].x, 1.0f, shapeB[(i + 1) % 4].y);
-	}
-	glEnd();
+	vector<vec2> shapeA = generateFloorPlan(center+vec2(2.0f,2.0f), 2.0f, 5);
+	vector<vec2> shapeB = generateFloorPlan(center, 2.0f, 4);
+	//vector<vec2> shapeA = vector<vec2>();
+	//
+	//shapeA.push_back(vec2(1,0 ));
+	//shapeA.push_back(vec2(1,1));
+	//shapeA.push_back(vec2(0,1));
+	//shapeA.push_back(vec2(0, 0));
+	//vector<vec2> shapeB = vector<vec2>();
+	//shapeB.push_back(vec2(-0.5f, -0.5f));
+	//shapeB.push_back(vec2(0.5f,-0.5f));
+	//shapeB.push_back(vec2(0.5f,0.5f));
+	//shapeB.push_back(vec2(-0.5f,0.5f));
+	//glBegin(GL_LINES);
+	//for (int i = 0; i < 4; i++) {
+	//	glVertex3f(shapeA[i].x, 1.0f, shapeA[i].y);
+	//	glVertex3f(shapeA[(i + 1) % 4].x, 1.0f, shapeA[(i+1)%4].y);
+	//	glVertex3f(shapeB[i].x, 1.0f, shapeB[i].y);
+	//	glVertex3f(shapeB[(i + 1) % 4].x, 1.0f, shapeB[(i + 1) % 4].y);
+	//}
+	//glEnd();
 	return combinePlans(shapeA, shapeB);
 }
 
@@ -184,7 +184,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//current shape we are tracing
 	int curShape = 0;
 	cout<<"Lines :";
-	int index = 0;
+	int index = 0;//TODO find better starting index, (i.e. out of the other shape)
 	vec2 currentPoint = shapeA[index];
 	//while we don't contain the next point in the trace (currentPoint)
 	while (!containsVec(newPlan,currentPoint)) {
@@ -194,7 +194,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 		cout<< " " << index<<":"<<curShape<<endl;
 		//check this line against the other shape for intersections
 		bool hasIntersection = false;
-		for (int j = 0; j < n[curShape]; j++) {
+		for (int j = 0; j < n[!curShape]; j++) {//cycle through other shape
 			//if we are currently on the first shape
 			if (curShape == 0) {
 				//cout<<"On first shape, testing intersecting on other point "<< j << endl;
