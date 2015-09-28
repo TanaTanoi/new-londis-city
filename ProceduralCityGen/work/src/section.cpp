@@ -34,8 +34,8 @@ line SectionDivider::findLongestEdge(section s) {
 }
 
 /**
-* Divides the sections
-*/
+ * Divides the sections
+ */
 
 void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
@@ -92,9 +92,10 @@ vector<section> SectionDivider::splitSection(section s) {
 	vector<line> intersectors = vector<line>();
 	//cout << "Section size " <<s.lines.size() << endl;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
+		cout << "Checking intersects line ID " << s.lines[i].ID << endl;
 		if(s.lines[i].ID != l.ID){
 			//cout << "Checking intersects" << endl;
-			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) {
+			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) { // FIXME : Issue is here, further subdivisions are not finding any intersections
 				//cout << "Found intersector" << endl;
 				intersectors.push_back(s.lines[i]);
 			}
@@ -158,7 +159,7 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 	line startHalf = { start,end,newID++ };
 	a.lines.push_back(startHalf);
 
-//	//Adds all whole middle lines
+	//	//Adds all whole middle lines
 	while (lineID != longLine.ID) {
 
 		//cout << "Line ID " << lineID << endl;
@@ -220,16 +221,26 @@ void SectionDivider::testSection() {
 
 
 	vector<section> newSec = splitSection(s);
-	for(section sec : newSec){
-		cout << "Subdividing New Section " << endl;
-		cout << " ------------------------ " << endl;
-		cout <<  endl;
-		vector<section> miniSecs = splitSection(sec);
-		for(section mini : miniSecs){
-			sections.push_back(mini);
+		for(section sec : newSec){
+			cout << "Subdividing New Section " << endl;
+			cout << " ------------------------ " << endl;
+			cout <<  endl;
+			vector<section> miniSecs = splitSection(sec);
+			for(section mini : miniSecs){
+				sections.push_back(mini);
+			}
 		}
-	}
 	//sections.push_back(newSec[0]);
+
+	cout << endl;
+
+//	vector<section> miniSecs = splitSection(newSec[0]);
+//	for(section mini : miniSecs){
+//		sections.push_back(mini);
+//	}
+
+
+
 	//sections.push_back(newSec[1]);
 }
 

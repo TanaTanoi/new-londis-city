@@ -196,7 +196,7 @@ inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 
 
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
-			&& intersection.y <= max(lon.start.y, lon.start.y) && intersection.y >= min(lon.start.y, lon.start.y)) {
+			&& intersection.y <= max(lon.start.y, lon.end.y) && intersection.y >= min(lon.start.y, lon.end.y)) {
 		return true;
 	}
 
