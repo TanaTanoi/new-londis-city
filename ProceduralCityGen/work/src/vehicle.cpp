@@ -267,3 +267,26 @@ void Vehicle::setScale(const comp308::vec3& scale) {
 void Vehicle::handleCommand(int command) {
 }
 
+Direction Vehicle::getDirection() const {
+	return m_direction;
+}
+
+void Vehicle::setDirection(Direction direction = NORTH) {
+	m_direction = direction;
+}
+
+bool Vehicle::isIsMoving() const {
+	return m_isMoving;
+}
+
+void Vehicle::setIsMoving(bool isMoving = false) {
+	m_isMoving = isMoving;
+}
+
+float Vehicle::getVelocity() const {
+	return m_velocity;
+}
+
+void Vehicle::setVelocity(float velocity = 0) {
+	m_velocity = velocity;
+}
