@@ -129,12 +129,15 @@ vector<section> SectionDivider::splitSection(section s) {
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
 	section a;
 	a.lines.push_back(bi);
-	int lineID = toCut.ID;
+	int lineID = toCut.ID + 1;
+	if (lineID >= (int)s.lines.size()) {
+		lineID = 0;
+	}
 	int newID = 1;
 
 	// Add first half line
-	vec2 start = getIntersection(bi, toCut);
-	vec2 end = getSharedPoint(toCut, s.lines[lineID]);
+	vec2 end = getIntersection(bi, toCut);
+	vec2 start = getSharedPoint(toCut, s.lines[lineID]);
 
 	cout << "Section cutter " << start.x << "  " << start.y << "  " << end.x << "  " << end.y << "  " << endl;
 
@@ -142,33 +145,37 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 	a.lines.push_back(startHalf);
 
 //	//Adds all whole middle lines
-//	while (lineID != longLine.ID) {
-//		// Get correct lineID
-//		lineID++;
-//		if (lineID >= (int)s.lines.size()) {
-//			lineID = 0;
-//		}
-//		//Add line
-//		line toAdd = s.lines[lineID];
-//		toAdd.ID = newID; // Gives line appropriate ID
-//		a.lines.push_back(toAdd);
-//		// Increment new ID
-//		newID++;
-//	}
+	while (lineID != longLine.ID) {	
+		
+		cout << "Line ID " << lineID << endl;
+
+		//Add line
+		line toAdd = s.lines[lineID];
+		toAdd.ID = newID; // Gives line appropriate ID
+		a.lines.push_back(toAdd);
+		
+		// Get correct lineID
+		lineID++;
+		if (lineID >= (int)s.lines.size()) {
+			lineID = 0;
+		}
+		// Increment new ID
+		newID++;
+	}
 
 	// Add last half line
 
-//	vec2 start2 = getSharedPoint(bi, longLine);
-//	vec2 end2;
-//	if (lineID >= (int)s.lines.size()) {
-//		end2 = getSharedPoint(longLine, s.lines[0]);
-//	}
-//	else {
-//		end2 = getSharedPoint(longLine, s.lines[lineID]);
-//	}
-//
-//	line endHalf = { start2,end2,newID++ };
-//	a.lines.push_back(endHalf);
+	vec2 end2 = getIntersection(bi, longLine);
+	vec2 start2;
+	if (lineID >= (int)s.lines.size()) {
+		start2 = getSharedPoint(longLine, s.lines[0]);
+	}
+	else {
+		start2 = getSharedPoint(longLine, s.lines[lineID]);
+	}
+
+	line endHalf = { start2,end2,newID++ };
+	a.lines.push_back(endHalf);
 
 	// Needs to calculate area here
 
@@ -211,7 +218,7 @@ void SectionDivider::renderTest() {
 
 	cout<< "rendering " << endl;
 
-	for(int i = 1; i < 2; i++){ // (int)sections.size()
+	for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
 		glBegin(GL_LINES);
 		cout << "Section " << i << endl;
 		//	line longLine = findLongestEdge(sections[0]);
