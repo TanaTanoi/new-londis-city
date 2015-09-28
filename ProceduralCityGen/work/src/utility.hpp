@@ -14,7 +14,20 @@
 using namespace comp308;
 using namespace std;
 
+
+
+
 namespace util{
+
+/*Cross platform _isnan*/
+inline bool isNAN(float x){
+	return x != x;
+}
+/*Inverted cross platform _isfinite*/
+inline bool isInfinite(float x){
+	return !isNAN(x) && isNAN(x-x);
+}
+
 
 /**
 		A line represents a single line in a section outline
@@ -37,7 +50,7 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 	vec2 equation;
 	equation.x = (b.y - a.y) / (b.x - a.x);
 	equation.y = (a.y - (equation.x*a.x));
-	if (_isnan(equation.x)||!_finite(equation.x)){//if x is nan, then it is paralell to the y-axis, and thus can't be represented properly
+	if (isNAN(equation.x)||isInfinite(equation.x)){//if x is nan, then it is paralell to the y-axis, and thus can't be represented properly
 		//instead we leave x as nan and change y to the x point along the axis where the line is
 		//cout << "Equation from " << a.x << " " << a.y << " to " << b.x << " " << b.y << " is y-axis" << endl;
 		equation.y = a.x;
@@ -52,7 +65,7 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	//cout << "Original line "<< m_l << "  " << c_l << endl;
 	//cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
 
-	float m = cutDir.y/cutDir.x;	
+	float m = cutDir.y/cutDir.x;
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
 
 	if (m == m_l || m == -m_l) { // two parallel lines
@@ -63,7 +76,7 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 		float y = m*l.start.x + c; // finds appropriate y value on other line
 		return vec2(l.start.x, y);
 	}
-	
+
 	if (cutDir.x == 0) { // other line is vertical
 		//cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
 		float y = m_l*cutPoint.x + c_l; // finds appropriate y value on  line
@@ -98,7 +111,7 @@ inline vec2 getIntersection(line l, line o){
 						 //cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
 		float y = m_l*o.start.x + c_l; // finds appropriate y value on  line
 		return vec2(o.start.x, y);
-	}	
+	}
 
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
@@ -119,11 +132,11 @@ inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	//then also find the y value
 	float y = e1.x * x + e1.y;
 	vec2 toReturn = vec2(x, y);
-	if (!_finite(e1.x)||_isnan(e1.x)) {//if equation one is parallel to Y
+	if (isInfinite(e1.x)||isNAN(e1.x)) {//if equation one is parallel to Y
 		//Set the toReturn.x value to the value of e1.y (which is the x-intercept)
 		toReturn.x = e1.y;
 		toReturn.y = e2.x*toReturn.x + e2.y;
-	}else if (!_finite(e2.x) || _isnan(e2.x)) {//if equation two is parallel to Y
+	}else if (isInfinite(e2.x) || isNAN(e2.x)) {//if equation two is parallel to Y
 							 //Set the toReturn.x value to the value of e2.y (which is the x-intercept)
 		toReturn.x = e2.y;   //then set the y value to mx+c using the new x value
 		toReturn.y = e1.x*toReturn.x + e1.y;
@@ -141,7 +154,7 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 		return false;
 	}
 
-	if ((!_finite(e1.x)) && (!_finite(e2.x))) {
+	if ((isInfinite(e1.x)) && (isInfinite(e2.x))) {
 		cout << "both are y axis" << endl;
 		return false;
 	}
@@ -175,13 +188,13 @@ inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 		intersection = getIntersection(lon, cut, cutPoint);
 	}
 	catch (const noIntersectionException &e) { return false; } // This was a set of two parallel lines
-	
+
 	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
 
-	
+
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.start.y) && intersection.y >= min(lon.start.y, lon.start.y)) {
 		return true;

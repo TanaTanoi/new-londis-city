@@ -9,6 +9,8 @@
 using namespace std;
 using namespace comp308;
 
+
+
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
