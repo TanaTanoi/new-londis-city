@@ -65,6 +65,7 @@ void SectionDivider::recDivideSection(section s) {
 //
 vector<section> SectionDivider::splitSection(section s) {
 	line l = findLongestEdge(s);
+	cout << "Longest edge ID " << l.ID << endl;
 	vec2 lineVec =  l.end - l.start;
 	vec2 perpBi = vec2(-lineVec.y, lineVec.x); // gets perpendicular bisector to longest edge
 
@@ -79,11 +80,15 @@ vector<section> SectionDivider::splitSection(section s) {
 
 	float centreY = m*centreX + c;
 
+	cout << "Found all variables" << endl;
 	// Now finds the first intersection point with another line within the section
-	vector<line> intersectors;
+	vector<line> intersectors = vector<line>();
+	cout << "Section size " <<s.lines.size() << endl;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
-		if(s.lines[0].ID != l.ID){
+		if(s.lines[i].ID != l.ID){
+			cout << "Checking intersects" << endl;
 			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) {
+				cout << "Found intersector" << endl;
 				intersectors.push_back(s.lines[i]);
 			}
 		}
@@ -96,13 +101,14 @@ vector<section> SectionDivider::splitSection(section s) {
 	line toCut = intersectors[0];
 
 	section a, b; // the two new sections
+	a.lines = vector<line>(); b.lines = vector<line>(); // creates line vectors for them
 
 	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};
 
 	a = getInnerSection(s, bi, toCut, l);
 	b = getInnerSection(s, bi, l, toCut);
 
-	vector<section> x;
+	vector<section> x = vector<section>();
 	x.push_back(a);
 	x.push_back(b);
 
@@ -165,9 +171,9 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 
 void SectionDivider::testSection() {
 	line a = {vec2(100,100),vec2(400,100),0};
-	line b = { vec2(100,100), vec2(150,300),1 };
-	line c = {vec2(150,300), vec2(350,300),2};
-	line d = { vec2(350,300), vec2(400,100),3 };
+	line d = {vec2(150,300), vec2(100,100), 3 };
+	line c = {vec2(350,300),vec2(150,300), 2};
+	line b = { vec2(400,100),  vec2(350,300),1 };
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
@@ -178,7 +184,9 @@ void SectionDivider::testSection() {
 	section s = { lines };
 	sections.push_back(s);
 
-	splitSection(s);
+	vector<section> newSec = splitSection(s);
+	sections.push_back(newSec[0]);
+	sections.push_back(newSec[1]);
 }
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
@@ -193,26 +201,32 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 
 void SectionDivider::renderTest() {
 	//section s = sections.back();
-	glBegin(GL_LINES);
 
-	//	line longLine = findLongestEdge(sections[0]);
-	int longID  = findLongestEdge(sections[0]).ID;
-	//	cout << "LongLIne: " << longLine.ID << endl;
-	for (line l : sections[0].lines) {
-		//		cout <<"Checking ID "<< l.ID << endl;
-		if(longID == l.ID){ // draw green if longest line
-			glColor3f(0.0,1.0,0.0);
-			//			cout <<"Drawing longest line: "<< l.ID << endl;
-		}
-		else{
-			//			cout <<"Not     longest line: "<< l.ID << endl;
-			glColor3f(1.0,0.0,0.0); // otherwise draw red
-		}
 
-		glVertex2f(l.start.x, l.start.y);
-		glVertex2f(l.end.x, l.end.y);
+	cout<< "rendering " << endl;
+
+	for(int i = 0; i < (int)sections.size(); i++){
+		glBegin(GL_LINES);
+		cout << "Section " << i << endl;
+		//	line longLine = findLongestEdge(sections[0]);
+		int longID  = findLongestEdge(sections[i]).ID;
+		//	cout << "LongLIne: " << longLine.ID << endl;
+		for (line l : sections[i].lines) {
+			//		cout <<"Checking ID "<< l.ID << endl;
+			if(longID == l.ID){ // draw green if longest line
+				glColor3f(0.0,1.0,0.0);
+				//			cout <<"Drawing longest line: "<< l.ID << endl;
+			}
+			else{
+				//			cout <<"Not     longest line: "<< l.ID << endl;
+				glColor3f(1.0,0.0,0.0); // otherwise draw red
+			}
+
+			glVertex2f(l.start.x, l.start.y);
+			glVertex2f(l.end.x, l.end.y);
+		}
+		glEnd();
 	}
-	glEnd();
 }
 
 //void SectionDivider::cleanUp(){

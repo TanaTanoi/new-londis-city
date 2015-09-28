@@ -36,12 +36,20 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 }
 
 inline vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
-	float m_l = (l.end.y - l.start.y) / (l.start.x, l.end.x - l.start.x);
+	cout << "Line ID " << l.ID;
+	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 	float c_l = l.end.y - m_l*l.end.x;
-
+	cout << "Original line "<< m_l << "  " << c_l << endl;
+	cout << "Cut x " << cut.x <<  "Cut y " << cut.y << endl;
 
 	float m = cut.y/cut.x;
+	if(cut.x == 0){
+		return vec2(cutPoint.y,cut.y);
+	}
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
+
+
+	cout << "Bisector line "<< m << "  " << c << endl;
 
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
@@ -86,12 +94,13 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 
 	vec2 intersection = getIntersection(lon,cut,cutPoint);
+	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
 
-	if (intersection.x >= max(lon.start.x, lon.end.x) && intersection.x <= min(lon.start.x, lon.end.x)
-			&& intersection.y >= max(lon.start.y, lon.start.y) && intersection.y <= min(lon.start.y, lon.start.y)) {
+	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
+			&& intersection.y <= max(lon.start.y, lon.start.y) && intersection.y >= min(lon.start.y, lon.start.y)) {
 		return true;
 	}
 
