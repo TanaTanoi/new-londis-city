@@ -18,7 +18,7 @@ namespace util{
 
 /**
 		A line represents a single line in a section outline
-*/
+ */
 struct line {
 	comp308::vec2 start;
 	comp308::vec2 end;
@@ -35,16 +35,17 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 	return equation;
 }
 
-inline vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
+inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	cout << "Line ID " << l.ID;
 	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 	float c_l = l.end.y - m_l*l.end.x;
 	cout << "Original line "<< m_l << "  " << c_l << endl;
-	cout << "Cut x " << cut.x <<  "Cut y " << cut.y << endl;
+	cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
 
-	float m = cut.y/cut.x;
-	if(cut.x == 0){
-		return vec2(cutPoint.y,cut.y);
+	float m = cutDir.y/cutDir.x;
+	if(cutDir.x == 0){ // vertical line
+		cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
+		return vec2(cutPoint.x,l.start.y);
 	}
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
 
@@ -57,6 +58,21 @@ inline vec2 getIntersection(line l, vec2 cut, vec2 cutPoint){
 
 	return vec2(x,y);
 }
+
+//inline vec2 getIntersection(line l, line o){
+//	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+//	float c_l = l.end.y - m_l*l.end.x;
+//
+//	float m = (o.end.y - o.start.y) / (o.end.x - o.start.x);
+//
+//	float c = o.end.y - m*o.end.x;
+//
+//	// Calculates the intersection point
+//	float x = (c - c_l) / (m_l - m);
+//	float y = m_l * x + c_l;
+//
+//	return vec2(x,y);
+//}
 
 /*REQUIRES: The lines to actually intersect
 Intersection method given two lines, represented by 2 start and end vectors*/
@@ -92,6 +108,7 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 
 
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
+	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
 
 	vec2 intersection = getIntersection(lon,cut,cutPoint);
 	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
