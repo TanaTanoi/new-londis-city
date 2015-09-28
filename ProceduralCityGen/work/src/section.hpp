@@ -22,8 +22,9 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 100;
+	float goalArea = 40000;
 	std::vector<lot> lots;
+	int sectionID = 0;
 	//for testing
 	std::vector<section> sections;
 
