@@ -191,7 +191,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 //		cout<<"In loop. Index: "<<index<< " On shape " << (curShape+1)<<endl;
 		//add the point
 		newPlan.push_back(currentPoint);
-		cout<< " " << index<<":"<<curShape;
+		cout<< " " << index<<":"<<curShape<<endl;
 		//check this line against the other shape for intersections
 		bool hasIntersection = false;
 		for (int j = 0; j < n[curShape]; j++) {
@@ -202,7 +202,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 //					cout<<"found intersection at " << j << endl;
 					//if we find an intersection, add it
 					newPlan.push_back(util::getIntersection(currentPoint, shapeA[(index + 1) % n1], shapeB[j], shapeB[(j + 1) % n2]));
-					cout<< " I1";
+					cout << " I1" << endl;
 					//and then add point on second shape
 					index = (j + 1) % n2;
 					hasIntersection = true;
@@ -212,7 +212,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 				if (util::intersects(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1])) {
 					//if we find an intersection, add it
 					newPlan.push_back(util::getIntersection(currentPoint, shapeB[(index + 1) % n2], shapeA[j], shapeA[(j + 1) % n1]));
-					cout<< " I2";
+					cout<< " I2"<<endl;
 					//and then add point on second shape
 					index = (j + 1) % n1;
 					hasIntersection = true;
