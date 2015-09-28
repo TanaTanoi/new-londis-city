@@ -139,8 +139,27 @@ vector<vec2> Generator::cutEdges(vector<vec2> points) {
 /*Generates a modern floorPlan for testing combinePlans*/
 vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
 	cout<<"Generating modern floors"<<endl;
-	vector<vec2> shapeA = generateFloorPlan(center+vec2(0.5f,0), 2.0f, 4);
-	vector<vec2> shapeB = generateFloorPlan(center, 2.0f, 4);
+	//vector<vec2> shapeA = generateFloorPlan(center+vec2(2.0f,2.0f), 2.0f, 4);
+	//vector<vec2> shapeB = generateFloorPlan(center, 2.0f, 4);
+	vector<vec2> shapeA = vector<vec2>();
+	
+	shapeA.push_back(vec2(1,0 ));
+	shapeA.push_back(vec2(1,1));
+	shapeA.push_back(vec2(0,1));
+	shapeA.push_back(vec2(0, 0));
+	vector<vec2> shapeB = vector<vec2>();
+	shapeB.push_back(vec2(-0.5f, -0.5f));
+	shapeB.push_back(vec2(0.5f,-0.5f));
+	shapeB.push_back(vec2(0.5f,0.5f));
+	shapeB.push_back(vec2(-0.5f,0.5f));
+	glBegin(GL_LINES);
+	for (int i = 0; i < 4; i++) {
+		glVertex3f(shapeA[i].x, 1.0f, shapeA[i].y);
+		glVertex3f(shapeA[(i + 1) % 4].x, 1.0f, shapeA[(i+1)%4].y);
+		glVertex3f(shapeB[i].x, 1.0f, shapeB[i].y);
+		glVertex3f(shapeB[(i + 1) % 4].x, 1.0f, shapeB[(i + 1) % 4].y);
+	}
+	glEnd();
 	return combinePlans(shapeA, shapeB);
 }
 

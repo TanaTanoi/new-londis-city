@@ -32,6 +32,11 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 	vec2 equation;
 	equation.x = (b.y - a.y) / (b.x - a.x);
 	equation.y = (a.y - (equation.x*a.x));
+	if (_isnan(equation.x)||!_finite(equation.x)){//if x is nan, then it is paralell to the y-axis, and thus can't be represented properly
+		//instead we leave x as nan and change y to the x point along the axis where the line is
+		//cout << "Equation from " << a.x << " " << a.y << " to " << b.x << " " << b.y << " is y-axis" << endl;
+		equation.y = a.x;
+	}
 	return equation;
 }
 
@@ -79,21 +84,31 @@ Intersection method given two lines, represented by 2 start and end vectors*/
 inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
+	//cout << "Equations " << e1.x << " " << e1.y << " to " << e2.x << " " << e2.y << "|" << endl;
 	//If paralell lines
 	//get x value in which they meet
 	float x = (e2.y - e1.y) / (e1.x - e2.x);
 	//then also find the y value
 	float y = e1.x * x + e1.y;
-
-	return vec2(x, y);
+	vec2 toReturn = vec2(x, y);
+	if (!_finite(e1.x)||_isnan(e1.x)) {//if equation one is parallel to Y
+		//Set the toReturn.x value to the value of e1.y (which is the x-intercept)
+		toReturn.x = e1.y;
+		toReturn.y = e2.x*toReturn.x + e2.y;
+	}else if (!_finite(e2.x) || _isnan(e2.x)) {//if equation two is parallel to Y
+							 //Set the toReturn.x value to the value of e2.y (which is the x-intercept)
+		toReturn.x = e2.y;   //then set the y value to mx+c using the new x value
+		toReturn.y = e1.x*toReturn.x + e1.y;
+	}
+		return toReturn;
 }
 
 /*Tests if the two lines, represented as two vec2s each, intersect within the bounds of the points*/
 inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
-	//If paralell lines
-	if (e1.x == e2.x) {
+	//If paralell lines or if both are paralell to the y-axis
+	if (e1.x == e2.x||(  (!_finite(e1.x)||_isnan(e1.x)) && (!_finite(e1.x) || _isnan(e1.x)) )){
 		return false;
 	}
 	float x = (e2.y - e1.y) / (e1.x - e2.x);

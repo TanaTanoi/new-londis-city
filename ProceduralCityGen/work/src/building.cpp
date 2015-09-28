@@ -175,7 +175,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
  */
 void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
 	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
-
+	cout << "Making " << endl;
 	float height = extendBuilding(floor, 0.0f);
 	for (int i = 0; i < input.length(); i++) {
 		switch (input[i]) {
@@ -248,12 +248,6 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 	}else{
 		direction = normalize(direction);
 	}
-//	float curCol[4];
-//	glGetFloatv(GL_CURRENT_COLOR, curCol);
-//	glColor3f(curCol[0]*0.9f, curCol[1] * 0.9f, curCol[2] * 0.9f);
-//	glColor3f(static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
-//			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f),
-//			static_cast <float> (rand()) / static_cast <float> (RAND_MAX/1.0f));
 
 	glBindTexture(GL_TEXTURE_2D,tex_window[cur_tex_win][cur_tex_win_num]);
 	glBegin(GL_QUADS);
@@ -413,17 +407,32 @@ int Building::basicHashcode(string input) {
 
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
+	if (true) {
+		srand(time(NULL));
+		glNewList(toReturn, GL_COMPILE);
+		//generateFromString(Generator::generateModernFloorPlan(vec2(0, 0), 0.0f), Generator::generateRandomBuildingString(rand() % 4 + 3));
+		vector<vec2> plan = Generator::generateModernFloorPlan(vec2(0, 0), 0.0f);
+		glBegin(GL_LINE_LOOP);
+		for (vec2 v : plan) {
+			cout << v.x << " " << v.y << endl;
+			glVertex3f(v.x, 2.0f, v.y);
+		}
+		glEnd();
+		glEndList();
+		return toReturn;
+	}
+
 	/*Size of buildings and stuff for this thing*/
-	float size = 0.5f;
-	float disp = 1.0f;
+	float size = 4.0f;
+	float disp = 4.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
 
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
-	for (float i = -size; i <=size; i += disp) {
-		for (float j = -size; j <size; j += disp) {
+	for (float i = 0; i <=size; i += disp) {
+		for (float j = 0; j <=size; j += disp) {
 			//create a bounding box-like area
 			points.clear();
 			points.push_back(vec2(i, j));
