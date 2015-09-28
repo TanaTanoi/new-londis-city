@@ -209,7 +209,10 @@ void SectionDivider::testSection() {
 	
 	lot l = { s };
 	l.ID = 0;
+
 	lots.push_back(l);
+	divideLot(l);
+
 
 	//vector<section> newSec = splitSection(s);
 	//sections.push_back(newSec[0]);
