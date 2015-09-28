@@ -66,23 +66,39 @@ void VehicleController::initTexture(string filename, int index) {
 	**/
 }
 
+// Move a vehicle from one intersection to another.
+//	- It should accelerate towards the intersection then
+// decelerate to a stop when it arrives at the intersection
 void VehicleController::renderVehicles() {
+	for (Vehicle v : m_vehicles) {
 
-	for (Vehicle v : m_vehicles)
+		// Transforamtions
+		vec3 *trans = &v.getPos();
+		vec3 *rot = &v.getRot();
+
+		// TODO translate vehicle
+
+		// TODO rotate IFF turning
 		renderVehicle(&v, vec3(), vec3(), vec3(0.1, 0.1, 0.1), -1);
+	}
 }
 
 void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 		vec3 rotate, vec3 scale, int texture) {
 
+	vehicle->setPos(translate);
+	vehicle->setRot(rotate);
+
 	glPushMatrix();
 	glTranslatef(translate.x, translate.y, translate.z);
 	glRotatef(rotate.x, rotate.y, rotate.z, 1);
-	glScalef(scale.x, scale.y, scale.z);
 	vehicle->renderVehicle();
 	glPopMatrix();
 }
 
+/**
+ * Reads the file which contains all of the vehicle models
+ */
 void VehicleController::readConfig(string filename) {
 
 	ifstream file(filename);
@@ -103,6 +119,9 @@ void VehicleController::readConfig(string filename) {
 	cout << "Finished reading vehicle files" << endl;
 }
 
+/**
+ * Reads the file that contains all of the vehicle textures
+ */
 void VehicleController::readTextures(string filename) {
 
 	ifstream file(filename);

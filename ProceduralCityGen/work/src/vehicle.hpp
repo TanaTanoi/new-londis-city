@@ -38,6 +38,10 @@ private:
 	// IDs for the display list to render
 	GLuint m_displayListPoly = 0; // DisplayList for Polygon
 
+	// Current transformations
+	comp308::vec3 m_pos, m_rot, m_scale;
+
+	void init(std::string);
 	void readOBJ(std::string);
 
 	void createNormals();
@@ -46,9 +50,18 @@ private:
 public:
 
 	Vehicle(std::string);
+	Vehicle(std::string, comp308::vec3, comp308::vec3, comp308::vec3);
 
 	void renderVehicle();
 	void handleCommand(int);
+
+	// Getters and setters
+	const comp308::vec3& getPos() const;
+	void setPos(const comp308::vec3& pos);
+	const comp308::vec3& getRot() const;
+	void setRot(const comp308::vec3& rot);
+	const comp308::vec3& getScale() const;
+	void setScale(const comp308::vec3& scale);
 };
 
 // Controller for vehicles
