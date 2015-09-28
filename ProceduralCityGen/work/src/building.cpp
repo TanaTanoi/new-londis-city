@@ -414,7 +414,7 @@ int Building::basicHashcode(string input) {
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
 	/*Size of buildings and stuff for this thing*/
-	float size = 10.0f;
+	float size = 0.5f;
 	float disp = 1.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -422,7 +422,7 @@ int Building::generateBuildingFromString(string input) {
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
-	for (float i = -size; i <= size; i += disp) {
+	for (float i = -size; i <=size; i += disp) {
 		for (float j = -size; j <size; j += disp) {
 			//create a bounding box-like area
 			points.clear();
@@ -456,6 +456,7 @@ int Building::generateBuildingFromString(string input) {
 Result display lists are saved in the *result struct */
 void Building::generateBuilding(buildingParams* parameters, buildingLOD* result) {
 	vector<vec2> floorPlan = parameters->boundingArea;
+
 	//Get min distance
 	vec2 center = centerPoint(floorPlan);
 	float minDist = 100000.0f;
@@ -464,10 +465,12 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	minDist /= 1.5f;
 	srand(parameters->seed);
+	floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	int chance = rand()%5;
 	if (chance == 0) {//20% chance to generate differently shaped building
 		srand(rand());//increase randomness
-		floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
+		//floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
+		floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	}
 	else if (chance <= 2) {//%40% chance to have smaller area
 		floorPlan = shrinkPoints(floorPlan);
