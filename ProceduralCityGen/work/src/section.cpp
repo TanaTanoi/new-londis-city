@@ -33,14 +33,14 @@ line SectionDivider::findLongestEdge(section s) {
 	return longLine;
 }
 
-///**
-//* Divides the sections
-//*/
-//
-//void SectionDivider::divideLot(lot l) {
-//	recDivideSection(&l.boundingBox);
-//}
-//
+/**
+* Divides the sections
+*/
+
+void SectionDivider::divideLot(lot l) {
+	lots[l.ID] = recDivideSection(l,l.boundingBox);
+}
+
 
 /**
  * Recursively divides sections by extending a perpendicular bisector
@@ -48,18 +48,17 @@ line SectionDivider::findLongestEdge(section s) {
  * it is smaller than the largest acceptable size for a section.
  */
 
-void SectionDivider::recDivideSection(section s) {
-	vector<section> lots = splitSection(s);
-	for (section l : lots) {
-		splitSection(s);
-	}
-
-	//		if (l.area <= goalArea) {
-	//			sections.push_back(l);
-	//		}
-	//		else {
-	//			recDivideSection(&l);
-	//		}
+lot SectionDivider::recDivideSection(lot lot, section s) {
+	vector<section> secs = splitSection(s);
+	for (section l : secs) {
+		if (l.area <= goalArea) {
+			lot.sections.push_back(l);
+			return lot;
+		}
+		else {
+			return recDivideSection(lot, l);
+		}
+	}	
 }
 
 //
@@ -97,11 +96,21 @@ vector<section> SectionDivider::splitSection(section s) {
 		}
 	}
 
-	cout<< "Intersecting Lines found" << intersectors.size() << endl;
+	//cout<< "Intersecting Lines found" << intersectors.size() << endl;
+
+	line toCut;
+	float close = 0.0f;
+
+	for (int i = 0; i < (int)intersectors.size(); i++) {
+		float distance = abs((getIntersection(intersectors[i], perpBi, vec2(centreX, centreY)).y) - centreY);		
+		if (i == 0 || distance < close) {
+			close = distance;
+			toCut = intersectors[i];
+		}
+	}
+
 
 	// Now creates two new sections from the split
-
-	line toCut = intersectors[0];
 
 	section a, b; // the two new sections
 	a.lines = vector<line>(); b.lines = vector<line>(); // creates line vectors for them
@@ -178,7 +187,7 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 	a.lines.push_back(endHalf);
 
 	// Needs to calculate area here
-
+	a.area = getSectionSize(a);
 	return a;
 }
 
@@ -195,11 +204,16 @@ void SectionDivider::testSection() {
 	lines.push_back(d);
 
 	section s = { lines };
-	sections.push_back(s);
+	s.area = getSectionSize(s);
+	//sections.push_back(s);
+	
+	lot l = { s };
+	l.ID = 0;
+	lots.push_back(l);
 
-	vector<section> newSec = splitSection(s);
-	sections.push_back(newSec[0]);
-	sections.push_back(newSec[1]);
+	//vector<section> newSec = splitSection(s);
+	//sections.push_back(newSec[0]);
+	//sections.push_back(newSec[1]);
 }
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
@@ -212,13 +226,23 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 	return vec2(0,0);
 }
 
+float SectionDivider::getSectionSize(section s) {
+	float size = 0.0f;
+	for (int i = 0; i < (int)s.lines.size(); i++) {
+		line l = s.lines[i];
+		size = size + (l.start.x * l.end.y + l.end.x * l.start.y);
+	}
+	size /= 2.0f;
+	return size;
+}
+
 void SectionDivider::renderTest() {
 	//section s = sections.back();
 
 
 	cout<< "rendering " << endl;
 
-	for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
+	for(int i = 0; i < (int)lots[0].sections.size(); i++){ // (int)sections.size()
 		glBegin(GL_LINES);
 		cout << "Section " << i << endl;
 		//	line longLine = findLongestEdge(sections[0]);
