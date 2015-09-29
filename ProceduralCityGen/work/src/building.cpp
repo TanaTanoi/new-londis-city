@@ -102,7 +102,7 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 
 	int n = floor.size();
-	vec2 mid = centerPoint(floor);
+	vec2 mid = Generator::centerPoint(floor);
 	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
 	vector<vec3> bot;
 	vector<vec3> top;
@@ -160,13 +160,13 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 
 	}
 	glEnd();
-	glBegin(GL_POLYGON);
-	glNormal3f(0, -1, 0);
-	for (vec3 floorPoint: bot) {
-		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
-	}
-
-	glEnd();
+//	glBegin(GL_POLYGON);
+//	glNormal3f(0, -1, 0);
+//	for (vec3 floorPoint: bot) {
+//		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
+//	}
+//
+//	glEnd();
 	return height;
 }
 
@@ -204,7 +204,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 /*Generates a pointed roof from the input*/
 void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
 	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 0.3f)+0.3f;
-	vec2 mid = centerPoint(points);
+	vec2 mid = Generator::centerPoint(points);
 	vec3 peak = vec3(mid.x, elevation +height,mid.y);
 	int n = points.size();
 	glBegin(GL_TRIANGLES);
@@ -285,7 +285,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 		vector<vec2> topPlan = shrinkPoints(shrinkPoints(points));
 		vector<vec3> top;
 		/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
-		vec2 mid = centerPoint(points);
+		vec2 mid = Generator::centerPoint(points);
 		float height = abs(length(points[0]-mid))/2.0f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 		height+=elevation;
 		for (int i = 0;i<n;i++) {
@@ -322,8 +322,8 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 			for(int i = 0; i < n;i++){
 				vec3 p1 = top[i];
 				vec3 p2 = top[(i+1)%n];
-				glVertex3f(p1.x,p1.y,p1.z);
 				glVertex3f(p2.x,p2.y,p2.z);
+				glVertex3f(p1.x,p1.y,p1.z);
 				glVertex3f(mid3d.x,mid3d.y,mid3d.z);
 			}
 		glEnd();
@@ -339,7 +339,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 
 /*Shrinks the input points by a factor of 0.15 and returns the result*/
 vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
-	vec2 mid = centerPoint(points);
+	vec2 mid = Generator::centerPoint(points);
 	vector<vec2> smallPoints;
 	float dist = 0.15f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
 	for(vec2 v2:points){
@@ -347,24 +347,6 @@ vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
 		smallPoints.push_back(v2+diff);
 	}
 	return smallPoints;
-}
-
-
-/*Returns a vec2 that represents a point in the center of the
- * shape created by *points.
- */
-vec2 Building::centerPoint(vector<vec2> points){
-	float x = 0;
-	float y = 0;
-
-	for(int i = 0; i < points.size();i++){
-		x+=points[i].x;
-		y+=points[i].y;
-	}
-	y/=points.size();
-	x/=points.size();
-	return vec2(x,y);
-
 }
 
 
@@ -407,32 +389,32 @@ int Building::basicHashcode(string input) {
 
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
-	if (true) {
-		srand(time(NULL));
-		glNewList(toReturn, GL_COMPILE);
-		//generateFromString(Generator::generateModernFloorPlan(vec2(0, 0), 0.0f), Generator::generateRandomBuildingString(rand() % 4 + 3));
-		vector<vec2> plan = Generator::generateModernFloorPlan(vec2(0, 0), 0.0f);
-		glBegin(GL_LINE_LOOP);
-		for (vec2 v : plan) {
-			cout << v.x << " " << v.y << endl;
-			glVertex3f(v.x, 2.0f, v.y);
-		}
-		glEnd();
-		glEndList();
-		return toReturn;
-	}
+//	if (true) {
+//		srand(time(NULL));
+//		glNewList(toReturn, GL_COMPILE);
+//		//generateFromString(Generator::generateModernFloorPlan(vec2(0, 0), 0.0f), Generator::generateRandomBuildingString(rand() % 4 + 3));
+//		vector<vec2> plan = Generator::generateModernFloorPlan(vec2(0, 0), 0.0f);
+//		glBegin(GL_LINE_LOOP);
+//		for (vec2 v : plan) {
+//			cout << v.x << " " << v.y << endl;
+//			glVertex3f(v.x, 2.0f, v.y);
+//		}
+//		glEnd();
+//		glEndList();
+//		return toReturn;
+//	}
 
 	/*Size of buildings and stuff for this thing*/
-	float size = 4.0f;
-	float disp = 4.0f;
+	float size = 6.0f;
+	float disp = 3.0f;
 	float building_size = 1.0f;
 	vector<vec2> points;
 
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
-	for (float i = 0; i <=size; i += disp) {
-		for (float j = 0; j <=size; j += disp) {
+	for (float i = -size; i <=size; i += disp) {
+		for (float j = -size; j <=size; j += disp) {
 			//create a bounding box-like area
 			points.clear();
 			points.push_back(vec2(i, j));
@@ -464,15 +446,16 @@ int Building::generateBuildingFromString(string input) {
 /*Takes a parameters struct and creates a building based on that.
 Result display lists are saved in the *result struct */
 void Building::generateBuilding(buildingParams* parameters, buildingLOD* result) {
-	vector<vec2> floorPlan = parameters->boundingArea;
-
+//	vector<vec2> floorPlan = parameters->boundingArea;
+	vector<vec2> floorPlan =Generator::generateModernFloorPlan(Generator::centerPoint(parameters->boundingArea), 0.0f);
 	//Get min distance
-	vec2 center = centerPoint(floorPlan);
+	vec2 center = Generator::centerPoint(floorPlan);
 	float minDist = 100000.0f;
 	for (vec2 v : floorPlan) {
 		minDist = min(minDist, (float)hypot(v.x-center.x,v.y-center.y));
 	}
-	minDist /= 1.5f;
+	//minDist /= 1.5f;
+	minDist*=1.0f;
 	srand(parameters->seed);
 	floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	int chance = rand()%5;
@@ -484,7 +467,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	else if (chance <= 2) {//%40% chance to have smaller area
 		floorPlan = shrinkPoints(floorPlan);
 	}else if(chance==3){//10% chance to have a different orientated area
-		floorPlan = Generator::generateFloorPlan(center, minDist,4);
+		floorPlan = Generator::generateFloorPlan(center, minDist*2.0f,4);
 	}else{				//10% chance to generate building in same floor plan
 		srand(rand());
 		if (rand() % 2 == 0) {	//50% chance to be normal square

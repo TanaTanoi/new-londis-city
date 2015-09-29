@@ -161,12 +161,12 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e2 = getEquation(b1, b2);
 	//If paralell lines or if both are paralell to the y-axis
 	if (e1.x == e2.x){
-		cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
+//		cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
 		return false;
 	}
 
 	if ((isInfinite(e1.x)) && (isInfinite(e2.x))) {
-		cout << "both are y axis" << endl;
+//		cout << "both are y axis" << endl;
 		return false;
 	}
 	vec2 value = getIntersection(a1, a2, b1, b2);
@@ -174,14 +174,14 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	float x = value.x;
 	//if x is out of bounds X VALUE GOTTEN HERE IS WRONG , SHOULD BE 0.5
 	if (x < min(a1.x,a2.x) || x > max(a2.x,a1.x) || x < min(b2.x,b1.x)||x > max(b1.x,b2.x)) {
-		cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
+//		cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
 		return false;
 	}
 
 	//if y is out of bounds
 	if (value.y > max(a1.y,a2.y)||value.y < min(a2.y,a1.y)|| value.y > max(b1.y, b2.y) || value.y < min(b2.y, b1.y)) {
-		cout << a1.y << " to " << a2.y << endl;
-		cout << "Y value is out of bounds " << value.y <<  endl;
+//		cout << a1.y << " to " << a2.y << endl;
+//		cout << "Y value is out of bounds " << value.y <<  endl;
 		return false;
 	}
 
@@ -192,7 +192,7 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 
 
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
-	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
+//	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
 
 	vec2 intersection;
 	try {

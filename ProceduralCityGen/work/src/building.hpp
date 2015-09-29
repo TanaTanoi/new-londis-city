@@ -34,7 +34,7 @@ struct buildingLOD {
 
 const float BLOCK_SIZE = 0.3f;
 const float WINDOW_WIDTH = 0.1f;
-const float EXTRUDE_THRESHOLD = 0.2f;
+const float EXTRUDE_THRESHOLD = 0.3f;//TODO make extrude_threshold a function of floorplan size
 
 const int tex_wall_num = 2;
 const int tex_window_num = 2;
