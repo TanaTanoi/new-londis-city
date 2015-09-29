@@ -76,15 +76,30 @@ vector<section> SectionDivider::splitSection(section s) {
 	// Randomly decides a position around the centre of the longest edge
 	// to extend the bisector from. This will be within the middle sixth of the section
 
-	float random = ((float)rand() / (RAND_MAX)) + 1;
-	float leng = abs(length(lineVec));
-	float centreX = leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	float random = ((float)rand() / (RAND_MAX));
+
+	float leng = abs(l.end.x - l.start.x);
+	float centreX = 0.0f;
+	float centreY = 0.0f;
+	if(l.end.x == l.start.x){
+		centreX = l.start.x;
+		leng = abs(l.end.y - l.start.y);
+		centreY = min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	}
+	else{
+		centreX = min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+		float c = l.end.y - m*l.end.x;
+		centreY = m*centreX + c;
+	}
+
 	//cout<<"center x " << centreX<<endl;
-	float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
-	float c = l.end.y - m*l.end.x;
+
+	//cout << m << endl;
 
 
-	float centreY = m*centreX + c;
+
+
 	//cout<<"center y " << centreY<<endl;
 
 	//cout << "Found all variables" << endl;
@@ -216,24 +231,29 @@ void SectionDivider::testSection() {
 	lot l = { s };
 	l.ID = 0;
 
-	//lots.push_back(l);
-	//divideLot(l);
+	lots.push_back(l);
+	divideLot(l);
 
 
 	vector<section> newSec = splitSection(s);
-		for(section sec : newSec){
-			cout << "Subdividing New Section " << endl;
-			cout << " ------------------------ " << endl;
-			cout <<  endl;
-			vector<section> miniSecs = splitSection(sec);
-			for(section mini : miniSecs){
-				sections.push_back(mini);
-			}
-		}
-	//sections.push_back(newSec[0]);
+	//	for(section sec : newSec){
+	//		sections.push_back(sec);
+	//	}
+
+
+//		for(section sec : newSec){
+//			cout << "Subdividing New Section " << endl;
+//			cout << " ------------------------ " << endl;
+//			cout <<  endl;
+//			vector<section> miniSecs = splitSection(sec);
+//			for(section mini : miniSecs){
+//				sections.push_back(mini);
+//			}
+//		}
+
 
 	cout << endl;
-
+//	sections.push_back(newSec[0]);
 //	vector<section> miniSecs = splitSection(newSec[0]);
 //	for(section mini : miniSecs){
 //		sections.push_back(mini);
