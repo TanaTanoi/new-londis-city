@@ -33,14 +33,15 @@ line SectionDivider::findLongestEdge(section s) {
 	return longLine;
 }
 
-///**
-//* Divides the sections
-//*/
-//
-//void SectionDivider::divideLot(lot l) {
-//	recDivideSection(&l.boundingBox);
-//}
-//
+/**
+ * Divides the sections
+ */
+
+void SectionDivider::divideLot(lot l) {
+	cout << "Number of sections " << l.sections.size() << endl;
+	lots[l.ID] = recDivideSection(l,l.boundingBox);
+}
+
 
 /**
  * Recursively divides sections by extending a perpendicular bisector
@@ -48,47 +49,70 @@ line SectionDivider::findLongestEdge(section s) {
  * it is smaller than the largest acceptable size for a section.
  */
 
-void SectionDivider::recDivideSection(section s) {
-	vector<section> lots = splitSection(s);
-	for (section l : lots) {
-		splitSection(s);
-	}
-
+lot SectionDivider::recDivideSection(lot lot, section s) {
+	vector<section> secs = splitSection(s);
+	cout << "section size" << secs.size() << endl;
+	//	for (section l : secs) {
 	//		if (l.area <= goalArea) {
-	//			sections.push_back(l);
+	//			l.ID = sectionID++;
+	//			lot.sections.push_back(l);
 	//		}
 	//		else {
-	//			recDivideSection(&l);
+	//			cout << "Recursively dividing" << endl;
+	//			cout << "Size is " << l.area << endl;
+	//
+	//			lot = recDivideSection(lot, l);
 	//		}
+	//	}
+	return lot;
 }
 
 //
 vector<section> SectionDivider::splitSection(section s) {
 	line l = findLongestEdge(s);
-	cout << "Longest edge ID " << l.ID << endl;
+	//cout << "Longest edge ID " << l.ID << endl;
 	vec2 lineVec =  l.end - l.start;
 	vec2 perpBi = vec2(-lineVec.y, lineVec.x); // gets perpendicular bisector to longest edge
 
 	// Randomly decides a position around the centre of the longest edge
 	// to extend the bisector from. This will be within the middle sixth of the section
 
-	float random = ((float)rand() / (RAND_MAX)) + 1;
-	float centreX = l.length*(5.0f / 12.0f) + random * (l.length*(1.0f / 6.0f));
+	float random = ((float)rand() / (RAND_MAX));
 
-	float m = (l.end.y - l.start.y) / (l.start.x, l.end.x - l.start.x);
-	float c = l.end.y - m*l.end.x;
+	float leng = abs(l.end.x - l.start.x);
+	float centreX = 0.0f;
+	float centreY = 0.0f;
+	if(l.end.x == l.start.x){
+		centreX = l.start.x;
+		leng = abs(l.end.y - l.start.y);
+		centreY = min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	}
+	else{
+		centreX = min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+		float c = l.end.y - m*l.end.x;
+		centreY = m*centreX + c;
+	}
 
-	float centreY = m*centreX + c;
+	//cout<<"center x " << centreX<<endl;
 
-	cout << "Found all variables" << endl;
+	//cout << m << endl;
+
+
+
+
+	//cout<<"center y " << centreY<<endl;
+
+	//cout << "Found all variables" << endl;
 	// Now finds the first intersection point with another line within the section
 	vector<line> intersectors = vector<line>();
-	cout << "Section size " <<s.lines.size() << endl;
+	//cout << "Section size " <<s.lines.size() << endl;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
+		cout << "Checking intersects line ID " << s.lines[i].ID << endl;
 		if(s.lines[i].ID != l.ID){
-			cout << "Checking intersects" << endl;
-			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) {
-				cout << "Found intersector" << endl;
+			//cout << "Checking intersects" << endl;
+			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) { // FIXME : Issue is here, further subdivisions are not finding any intersections
+				//cout << "Found intersector" << endl;
 				intersectors.push_back(s.lines[i]);
 			}
 		}
@@ -96,76 +120,105 @@ vector<section> SectionDivider::splitSection(section s) {
 
 	cout<< "Intersecting Lines found" << intersectors.size() << endl;
 
-	// Now creates two new sections from the split
+	line toCut;
+	float close = 0.0f;
 
-	line toCut = intersectors[0];
+	for (int i = 0; i < (int)intersectors.size(); i++) {
+		float distance = abs((getIntersection(intersectors[i], perpBi, vec2(centreX, centreY)).y) - centreY);
+		if (i == 0 || distance < close) {
+			close = distance;
+			toCut = intersectors[i];
+		}
+	}
+
+
+	// Now creates two new sections from the split
 
 	section a, b; // the two new sections
 	a.lines = vector<line>(); b.lines = vector<line>(); // creates line vectors for them
 
 	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};
+	line antiBi = {getIntersection(l,perpBi,vec2(centreX,centreY)), getIntersection(toCut,perpBi,vec2(centreX,centreY)), 0};
 
 	a = getInnerSection(s, bi, toCut, l);
-	b = getInnerSection(s, bi, l, toCut);
+	b = getInnerSection(s, antiBi, l, toCut);
 
 	vector<section> x = vector<section>();
 	x.push_back(a);
 	x.push_back(b);
+
+	for(section l : x){
+		cout << "Section " << l.ID << endl;
+		for(line lin : l.lines){
+			cout<< lin.start.x << " " << lin.start.y << " " << lin.end.x << " " << lin.end.y << "  ID  " <<  lin.ID << endl;
+		}
+	}
 
 	return x;
 
 }
 
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
+
+	cout<< endl;
+		cout << "Getting New Section " << endl;
+		cout << " ------------------------ " << endl;
+		cout <<  endl;
+
+
 	section a;
 	a.lines.push_back(bi);
-	int lineID = toCut.ID;
+	int lineID = (toCut.ID + 1)%s.lines.size();
+//	if (lineID >= (int)s.lines.size()) {
+//		lineID = 0;
+//	}
 	int newID = 1;
 
 	// Add first half line
-	vec2 start = getSharedPoint(bi, toCut);
-	vec2 end;
-	if (lineID >= (int)s.lines.size()) {
-		end = getSharedPoint(toCut, s.lines[0]);
-	}
-	else {
-		end = getSharedPoint(toCut, s.lines[lineID]);
-	}
+	vec2 end = getIntersection(bi, toCut);
+	cout << "Pre shared point line ID " << lineID << "  " << s.lines[lineID].ID << endl;
+	vec2 start = getSharedPoint(toCut, s.lines[lineID]);
+
+	//cout << "Section cutter " << start.x << "  " << start.y << "  " << end.x << "  " << end.y << "  " << endl;
 
 	line startHalf = { start,end,newID++ };
 	a.lines.push_back(startHalf);
 
-	//Adds all whole middle lines
+	//	//Adds all whole middle lines
 	while (lineID != longLine.ID) {
+
+		//cout << "Line ID " << lineID << endl;
+
+		//Add line
+		line toAdd = s.lines[lineID];
+		toAdd.ID = newID; // Gives line appropriate ID
+		a.lines.push_back(toAdd);
+
 		// Get correct lineID
 		lineID++;
 		if (lineID >= (int)s.lines.size()) {
 			lineID = 0;
 		}
-		//Add line
-		line toAdd = s.lines[lineID];
-		toAdd.ID = newID; // Gives line appropriate ID
-		a.lines.push_back(toAdd);
 		// Increment new ID
 		newID++;
 	}
 
 	// Add last half line
 
-	vec2 start2 = getSharedPoint(bi, longLine);
-	vec2 end2;
-	if (lineID >= (int)s.lines.size()) {
-		end2 = getSharedPoint(longLine, s.lines[0]);
+	vec2 end2 = getIntersection(bi, longLine);
+	lineID --;
+	if(lineID < 0){
+		lineID = (int)s.lines.size() - 1;
 	}
-	else {
-		end2 = getSharedPoint(longLine, s.lines[lineID]);
-	}
+
+	cout << "Pre shared point at the end line ID " << lineID << "  " << s.lines[lineID].ID << endl;
+	vec2 start2 = getSharedPoint(longLine, s.lines[lineID]);
 
 	line endHalf = { start2,end2,newID++ };
 	a.lines.push_back(endHalf);
 
 	// Needs to calculate area here
-
+	a.area = getSectionSize(a);
 	return a;
 }
 
@@ -182,32 +235,120 @@ void SectionDivider::testSection() {
 	lines.push_back(d);
 
 	section s = { lines };
-	sections.push_back(s);
+	s.area = getSectionSize(s);
+	//sections.push_back(s);
+
+	lot l;
+	l.boundingBox = s;
+	l.ID = 0;
+	l.sections = vector<section>();
+
+	lots.push_back(l);
+	divideLot(l);
+
 
 	vector<section> newSec = splitSection(s);
-	sections.push_back(newSec[0]);
-	sections.push_back(newSec[1]);
+	//	for(section sec : newSec){
+	//		sections.push_back(sec);
+	//	}
+
+		for(section sec: newSec){
+			vector<section> miniSec = splitSection(sec);
+			for(section sl : miniSec){
+				vector<section> s2sec= splitSection(sl);
+				for(section s2 : s2sec){
+					vector<section> s3sec= splitSection(s2);
+					for(section s3: s3sec){
+						vector<section> s4sec= splitSection(s3);
+						for(section s4: s4sec){
+							for(section s5:splitSection(s4)){
+//								for(section s6:splitSection(s5)){
+//									sections.push_back(s6);
+//								}
+								sections.push_back(s5);
+
+
+							}
+						}
+						//sections.push_back(s3);
+					}
+				}
+			}
+		}
+
+//	sections.push_back(
+//			splitSection(newSec[0])[1]
+//	);
+//	sections.push_back(splitSection(splitSection(splitSection(newSec[0])[1])[0])[0]);
+	//for(section sec : newSec){
+	//	cout<< endl;
+	//	cout << "Subdividing New Section " << endl;
+	//	cout << " ------------------------ " << endl;
+	//	cout <<  endl;
+	//	vector<section> miniSecs = splitSection(newSec[0]);
+	//	for(section mini : miniSecs){
+	//		cout<< endl;
+	//		cout << "Subdividing New Section " << endl;
+	//		cout << " ------------------------ " << endl;
+	//		cout <<  endl;
+	//		vector<section> mm = splitSection(mini);
+	//		for(section m : mm){
+	//			sections.push_back(m);
+	//		}
+	//	}
+	//	//}
+	//
+	//
+	//	cout << endl;
+//		sections.push_back(newSec[0]);
+//		vector<section> miniSecs = splitSection(newSec[0]);
+//		for(section mini : miniSecs){
+//			sections.push_back(mini);
+//		}
+
+
+
+	//sections.push_back(newSec[1]);
 }
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
+	cout << "ID's being compared " << a.ID << "  " << b.ID << endl;
+	vec2 inter;
+	try{
+		inter = getIntersection(a,b);
+	}catch(const noIntersectionException &e){cout << "Parallel in shared point" << endl;}
+
+
 	if ((a.start.x == b.start.x && a.start.y == b.start.y )||( a.start.x == b.end.x && a.start.y == b.end.y)){
 		return a.start;
 	}
 	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
 		return a.end;
 	}
-	return vec2(0,0);
+	//nor a or b have a shared point
+	cout << "Returning 0 0"  << endl;
+	return inter;
+}
+
+float SectionDivider::getSectionSize(section s) {
+	float size = 0.0f;
+	for (int i = 0; i < (int)s.lines.size(); i++) {
+		line l = s.lines[i];
+		size = size + (l.start.x * l.end.y + l.end.x * l.start.y);
+	}
+	size /= 2.0f;
+	return size;
 }
 
 void SectionDivider::renderTest() {
 	//section s = sections.back();
 
 
-	cout<< "rendering " << endl;
+	//cout<< "rendering " << endl;
 
-	for(int i = 0; i < (int)sections.size(); i++){
+	for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
 		glBegin(GL_LINES);
-		cout << "Section " << i << endl;
+		//cout << "Section " << i << endl;
 		//	line longLine = findLongestEdge(sections[0]);
 		int longID  = findLongestEdge(sections[i]).ID;
 		//	cout << "LongLIne: " << longLine.ID << endl;
