@@ -74,13 +74,13 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	}
 
 	if (l.end.x == l.start.x) { // line is vertical
-		cout << "Existing line is vertical " << endl;
+		//cout << "Existing line is vertical " << endl;
 		float y = m*l.start.x + c; // finds appropriate y value on other line
 		return vec2(l.start.x, y);
 	}
 
 	if (cutDir.x == 0) { // other line is vertical
-		cout << "New line is vertical " << endl;
+		//cout << "New line is vertical " << endl;
 		//cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
 		float y = m_l*cutPoint.x + c_l; // finds appropriate y value on  line
 		return vec2(cutPoint.x, y);
@@ -93,7 +93,7 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	float y = m_l * x + c_l;
 
 	if(x == 0.0 && y == 0.0){
-			cout << "Returning blank vec2" << endl;
+			//cout << "Returning blank vec2" << endl;
 		}
 
 	return vec2(x,y);

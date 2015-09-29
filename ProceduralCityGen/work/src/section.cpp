@@ -159,6 +159,13 @@ vector<section> SectionDivider::splitSection(section s) {
 }
 
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
+
+	cout<< endl;
+		cout << "Getting New Section " << endl;
+		cout << " ------------------------ " << endl;
+		cout <<  endl;
+
+
 	section a;
 	a.lines.push_back(bi);
 	int lineID = (toCut.ID + 1)%s.lines.size();
@@ -239,10 +246,6 @@ void SectionDivider::testSection() {
 	lots.push_back(l);
 	divideLot(l);
 
-	cout<< endl;
-	cout << "Subdividing New Section " << endl;
-	cout << " ------------------------ " << endl;
-	cout <<  endl;
 
 	vector<section> newSec = splitSection(s);
 	//	for(section sec : newSec){
@@ -254,7 +257,21 @@ void SectionDivider::testSection() {
 			for(section sl : miniSec){
 				vector<section> s2sec= splitSection(sl);
 				for(section s2 : s2sec){
-				sections.push_back(s2);
+					vector<section> s3sec= splitSection(s2);
+					for(section s3: s3sec){
+						vector<section> s4sec= splitSection(s3);
+						for(section s4: s4sec){
+							for(section s5:splitSection(s4)){
+//								for(section s6:splitSection(s5)){
+//									sections.push_back(s6);
+//								}
+								sections.push_back(s5);
+
+
+							}
+						}
+						//sections.push_back(s3);
+					}
 				}
 			}
 		}
@@ -262,7 +279,7 @@ void SectionDivider::testSection() {
 //	sections.push_back(
 //			splitSection(newSec[0])[1]
 //	);
-
+//	sections.push_back(splitSection(splitSection(splitSection(newSec[0])[1])[0])[0]);
 	//for(section sec : newSec){
 	//	cout<< endl;
 	//	cout << "Subdividing New Section " << endl;
@@ -296,9 +313,9 @@ void SectionDivider::testSection() {
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
 	cout << "ID's being compared " << a.ID << "  " << b.ID << endl;
-
+	vec2 inter;
 	try{
-		getIntersection(a,b);
+		inter = getIntersection(a,b);
 	}catch(const noIntersectionException &e){cout << "Parallel in shared point" << endl;}
 
 
@@ -308,8 +325,9 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
 		return a.end;
 	}
+	//nor a or b have a shared point
 	cout << "Returning 0 0"  << endl;
-	return vec2(0,0);
+	return inter;
 }
 
 float SectionDivider::getSectionSize(section s) {
