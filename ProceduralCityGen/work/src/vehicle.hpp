@@ -66,18 +66,58 @@ public:
 	void handleCommand(int);
 
 	// Getters and setters
-	const comp308::vec3& getPos() const;
-	void setPos(const comp308::vec3& pos);
-	const comp308::vec3& getRot() const;
-	void setRot(const comp308::vec3& rot);
-	const comp308::vec3& getScale() const;
-	void setScale(const comp308::vec3& scale);
-	Direction getDirection() const;
-	void setDirection(Direction);
-	bool isIsMoving() const;
-	void setIsMoving(bool);
-	float getVelocity() const;
-	void setVelocity(float);
+
+	inline Direction getDirection() const {
+		return m_direction;
+	}
+
+	inline void setDirection(Direction direction = NORTH) {
+		m_direction = direction;
+	}
+
+	inline bool isIsMoving() const {
+		return m_isMoving;
+	}
+
+	inline void setIsMoving(bool isMoving = false) {
+		m_isMoving = isMoving;
+	}
+
+	inline const comp308::vec3& getPos() const {
+		return m_pos;
+	}
+
+	inline void setPos(const comp308::vec3& pos) {
+		m_pos = pos;
+	}
+
+	inline void translatePos(const comp308::vec3& pos) {
+		m_pos += pos;
+	}
+
+	inline const comp308::vec3& getRot() const {
+		return m_rot;
+	}
+
+	inline void setRot(const comp308::vec3& rot) {
+		m_rot = rot;
+	}
+
+	inline const comp308::vec3& getScale() const {
+		return m_scale;
+	}
+
+	inline void setScale(const comp308::vec3& scale) {
+		m_scale = scale;
+	}
+
+	inline float getVelocity() const {
+		return m_velocity;
+	}
+
+	inline void setVelocity(float velocity = 0) {
+		m_velocity = velocity;
+	}
 };
 
 // Controller for vehicles
@@ -106,7 +146,7 @@ private:
 	void initTexture(std::string, int);
 
 	float disToNextVehicle(Vehicle*);
-	void interpolate(comp308::vec3*, comp308::vec3*);
+	void interpolate(Vehicle*, comp308::vec3*, comp308::vec3*);
 
 public:
 
