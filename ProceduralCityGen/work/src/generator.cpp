@@ -183,6 +183,19 @@ vec2 Generator::centerPoint(vector<vec2> points){
 
 }
 
+/*Shrinks the input points by a factor of 0.15 and returns the result*/
+vector<vec2> Generator::shrinkPoints(std::vector<vec2> points) {
+	vec2 mid = Generator::centerPoint(points);
+	vector<vec2> smallPoints;
+	float dist = 0.15f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
+	for (vec2 v2 : points) {
+		vec2 diff = (mid - v2)*dist;
+		smallPoints.push_back(v2 + diff);
+	}
+	return smallPoints;
+}
+
+
 /*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return

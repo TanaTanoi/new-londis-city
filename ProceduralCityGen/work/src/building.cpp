@@ -180,7 +180,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 	for (int i = 0; i < input.length(); i++) {
 		switch (input[i]) {
 		case 'S':
-			floor = shrinkPoints(floor);
+			floor = Generator::shrinkPoints(floor);
 			break;
 		case 'E':
 			height = extendBuilding(floor, height);
@@ -282,7 +282,7 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float elevation){
 	int n = points.size();
 		vector<vec3> bot;
-		vector<vec2> topPlan = shrinkPoints(shrinkPoints(points));
+		vector<vec2> topPlan = Generator::shrinkPoints(Generator::shrinkPoints(points));
 		vector<vec3> top;
 		/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
 		vec2 mid = Generator::centerPoint(points);
@@ -337,17 +337,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 
 }
 
-/*Shrinks the input points by a factor of 0.15 and returns the result*/
-vector<vec2> Building::shrinkPoints(std::vector<vec2> points){
-	vec2 mid = Generator::centerPoint(points);
-	vector<vec2> smallPoints;
-	float dist = 0.15f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
-	for(vec2 v2:points){
-		vec2 diff = (mid - v2)*dist;
-		smallPoints.push_back(v2+diff);
-	}
-	return smallPoints;
-}
+
 
 
 /*Returns a display list containing fully random buildings */
@@ -405,8 +395,8 @@ int Building::generateBuildingFromString(string input) {
 //	}
 
 	/*Size of buildings and stuff for this thing*/
-	float size = 6.0f;
-	float disp = 3.0f;
+	float size = 10.0f;
+	float disp = 1.5f;
 	float building_size = 1.0f;
 	vector<vec2> points;
 
@@ -458,18 +448,35 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	srand(parameters->seed);
 	//floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	int chance = rand()%5;srand(rand());
-	if(chance <=2){
-		// 60% chance keep 4 sided square
+	if(chance <=3){
+		// 80% chance keep 4 sided square
 		chance = rand()%5;srand(rand());
 		if(chance <=3){
 			//80% to stay square
 			chance = rand()%5;srand(rand());
 			if(chance <=2){
 				//60% chance to be normal square
-				//floor plan unchanged
+				chance = rand() % 5; srand(rand());
+				if (chance <= 2) {
+					//60% chance to stay same
+					//floor plan unchanged
+					glNewList(result->low, GL_COMPILE);
+					generateModernBuilding(parameters->boundingArea, center, minDist);
+					glEndList();
+					return;
+				}else {
+					//40% chance for residential building
+					result->low = glGenLists(1);
+					glNewList(result->low, GL_COMPILE);
+					generateResdientialBuilding(floorPlan);
+					glEndList();
+					return;
+				}
+
+
 			}else{
 				//40% chance to shrink
-				floorPlan = shrinkPoints(floorPlan);
+				floorPlan = Generator::shrinkPoints(floorPlan);
 			}
 
 		}else{
@@ -478,20 +485,44 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		}
 	}else{
 		//40% chance to change to more exciting shape
+		chance = rand() % 5; srand(rand());
+		if (chance <= 2) {
+			//60% chance for single shape of >=4 sides
+			chance = rand() % 5; srand(rand());
+			if (chance <= 1) {
+				//40% chance of rotated square
+				floorPlan = Generator::generateFloorPlan(center, minDist*1.5f, 4);
+			}else if(chance<=4){
+				//40% chance of new shape
+				floorPlan = Generator::generateFloorPlan(center, minDist, (rand()%4)+4);
+			}else {
+				//20% chance of really odd building
+				vector<vec2> shapeA = Generator::generateFloorPlan(center+vec2(minDist/2,minDist/2), minDist*2.0f, (rand() % 4) + 4);
+				floorPlan = Generator::combinePlans(shapeA, Generator::generateFloorPlan(center, minDist*2.0f, (rand() % 4) + 4));
+			}
+
+		}else {
+			//40% chance of modern building
+			result->low = glGenLists(1);
+			glNewList(result->low, GL_COMPILE);
+			generateModernBuilding(parameters->boundingArea, center, minDist);
+			glEndList();
+			return;
+		}
 	}
 
 
 
 
 
-
-	if (chance == 0) {//20% chance to generate differently shaped building
+	//old order code
+	/*if (chance == 0) {//20% chance to generate differently shaped building
 		srand(rand());//increase randomness
 		//floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
 		floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	}
 	else if (chance <= 2) {//%40% chance to have smaller area
-		floorPlan = shrinkPoints(floorPlan);
+		floorPlan = Generator::shrinkPoints(floorPlan);
 	}else if(chance==3){//10% chance to have a different orientated area
 		floorPlan = Generator::generateFloorPlan(center, minDist*2.0f,4);
 	}else{				//10% chance to generate building in same floor plan
@@ -505,7 +536,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		}else {					//50% chance to be different square
 			floorPlan = Generator::cutEdges(floorPlan);
 		}
-	}
+	}*/
 
 	cur_tex_wall = parameters->b_type;
 	cur_tex_wall_num = rand()%2;
@@ -542,6 +573,33 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
 		cur_elev = extendBuilding(tiers[1], cur_elev);
+	}
+
+
+}
+
+void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDist) {
+
+	vector<vector<vec2>> levels = vector<vector<vec2>>();
+	levels.push_back(Generator::generateFloorPlan(mid, minDist, rand() % 4 + 4));//add base
+	//generate 1 to 4 plan changes
+	for (int i = 0; i < rand() % 3 + 1; i++) {
+		float xmul = rand() % 2 - 1;//-1 to 1;
+		srand(rand());
+		float ymul = rand() % 2 - 1;//-1 to 1;
+		vec2 offset = vec2(xmul*(minDist/2.0f),(minDist/2.0f)*ymul);
+		levels.push_back(Generator::combinePlans(levels[i], Generator::generateFloorPlan(mid+offset, minDist, rand() % 4 + 4)));
+	}
+	//the end of levels now contains the ground floor
+
+	
+	float elevation = 0.0f;
+	for (int i = levels.size() - 1; i >= 0;) {
+		srand(rand());
+		elevation = extendBuilding(levels[i], elevation);
+		if (rand() % 3 <= 1) {//66% chance to change floor plan
+			i--;
+		}
 	}
 
 

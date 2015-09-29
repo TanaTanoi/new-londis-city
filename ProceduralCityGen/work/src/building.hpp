@@ -57,10 +57,10 @@ public:
 	void initTexture(void);//not currently working
 
 	float extendBuilding(std::vector<comp308::vec2>, float);
-	std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
+	
 	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
 
-	comp308::vec2 centerPoint(std::vector<comp308::vec2>);
+	
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
 	int generateBuildingFromString(std::string);
@@ -73,6 +73,7 @@ public:
 	void generateBuilding(buildingParams*, buildingLOD*);
 
 	void generateResdientialBuilding(std::vector<comp308::vec2> points);
+	void generateModernBuilding(std::vector<comp308::vec2> points,comp308::vec2,float);
 
 
 
