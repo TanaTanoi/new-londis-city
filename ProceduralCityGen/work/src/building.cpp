@@ -446,8 +446,7 @@ int Building::generateBuildingFromString(string input) {
 /*Takes a parameters struct and creates a building based on that.
 Result display lists are saved in the *result struct */
 void Building::generateBuilding(buildingParams* parameters, buildingLOD* result) {
-//	vector<vec2> floorPlan = parameters->boundingArea;
-	vector<vec2> floorPlan =Generator::generateModernFloorPlan(Generator::centerPoint(parameters->boundingArea), 0.0f);
+	vector<vec2> floorPlan = parameters->boundingArea;
 	//Get min distance
 	vec2 center = Generator::centerPoint(floorPlan);
 	float minDist = 100000.0f;
@@ -457,8 +456,35 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	//minDist /= 1.5f;
 	minDist*=1.0f;
 	srand(parameters->seed);
-	floorPlan = Generator::generateModernFloorPlan(center,minDist);
-	int chance = rand()%5;
+	//floorPlan = Generator::generateModernFloorPlan(center,minDist);
+	int chance = rand()%5;srand(rand());
+	if(chance <=2){
+		// 60% chance keep 4 sided square
+		chance = rand()%5;srand(rand());
+		if(chance <=3){
+			//80% to stay square
+			chance = rand()%5;srand(rand());
+			if(chance <=2){
+				//60% chance to be normal square
+				//floor plan unchanged
+			}else{
+				//40% chance to shrink
+				floorPlan = shrinkPoints(floorPlan);
+			}
+
+		}else{
+			//20% chance to be a cut square
+			floorPlan = Generator::cutEdges(floorPlan);
+		}
+	}else{
+		//40% chance to change to more exciting shape
+	}
+
+
+
+
+
+
 	if (chance == 0) {//20% chance to generate differently shaped building
 		srand(rand());//increase randomness
 		//floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
