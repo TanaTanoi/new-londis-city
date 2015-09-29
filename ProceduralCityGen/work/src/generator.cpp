@@ -141,27 +141,17 @@ vector<vec2> Generator::cutEdges(vector<vec2> points) {
 /*Generates a modern floorPlan for testing combinePlans*/
 vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
 	cout<<"Generating modern floors"<<endl;
-	vector<vec2> shapeA = generateFloorPlan(center+vec2(2.0f,2.0f), 2.0f, 5);
-	vector<vec2> shapeB = generateFloorPlan(center, 2.0f, 4);
-	//vector<vec2> shapeA = vector<vec2>();
-	//
-	//shapeA.push_back(vec2(1,0 ));
-	//shapeA.push_back(vec2(1,1));
-	//shapeA.push_back(vec2(0,1));
-	//shapeA.push_back(vec2(0, 0));
-	//vector<vec2> shapeB = vector<vec2>();
-	//shapeB.push_back(vec2(-0.5f, -0.5f));
-	//shapeB.push_back(vec2(0.5f,-0.5f));
-	//shapeB.push_back(vec2(0.5f,0.5f));
-	//shapeB.push_back(vec2(-0.5f,0.5f));
-	//glBegin(GL_LINES);
-	//for (int i = 0; i < 4; i++) {
-	//	glVertex3f(shapeA[i].x, 1.0f, shapeA[i].y);
-	//	glVertex3f(shapeA[(i + 1) % 4].x, 1.0f, shapeA[(i+1)%4].y);
-	//	glVertex3f(shapeB[i].x, 1.0f, shapeB[i].y);
-	//	glVertex3f(shapeB[(i + 1) % 4].x, 1.0f, shapeB[(i + 1) % 4].y);
-	//}
-	//glEnd();
+	radius = max(0.3f,radius);
+	vector<vec2> shapeA = generateFloorPlan(center+vec2(radius/2,radius/2), radius*2, rand()%4+3);
+	srand(rand());
+	vector<vec2> shapeB = generateFloorPlan(center, radius*2, rand()%4+3);
+	srand(rand());
+	shapeA = combinePlans(shapeA, shapeB);
+	shapeB = generateFloorPlan(center-vec2(radius,radius), radius*2, rand()%4+3);
+	srand(rand());
+	shapeA = combinePlans(shapeA, shapeB);
+	shapeB = generateFloorPlan(center+vec2(radius,-radius/2), radius*2, rand()%4+3);
+	srand(rand());
 	return combinePlans(shapeA, shapeB);
 }
 
@@ -176,6 +166,23 @@ bool containsVec(vector<vec2> array, vec2  toFind){
 
 }
 
+/*Returns a vec2 that represents a point in the center of the
+ * shape created by *points.
+ */
+vec2 Generator::centerPoint(vector<vec2> points){
+	float x = 0;
+	float y = 0;
+
+	for(int i = 0; i < points.size();i++){
+		x+=points[i].x;
+		y+=points[i].y;
+	}
+	y/=points.size();
+	x/=points.size();
+	return vec2(x,y);
+
+}
+
 /*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
@@ -187,6 +194,14 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	int curShape = 0;
 	cout<<"Lines :";
 	int index = 0;//TODO find better starting index, (i.e. out of the other shape)
+	//find point furthest away from the center of B
+	vec2 midB = centerPoint(shapeB);
+	for(int i =0; i < n1;i++){
+		if(abs(length(shapeA[index]-midB)) < abs(length(shapeA[i]-midB))){
+			index = i;
+		}
+	}
+
 	vec2 currentPoint = shapeA[index];
 	//while we don't contain the next point in the trace (currentPoint)
 	while (!containsVec(newPlan,currentPoint)) {
@@ -243,7 +258,6 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 		}
 
 	}
-	cout<<"Returning floor plan"<<endl;
 	return newPlan;
 
 }
