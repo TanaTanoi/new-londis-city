@@ -69,15 +69,18 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
 
 	if (m == m_l || m == -m_l) { // two parallel lines
+		cout << "Parallel lines " << endl;
 		throw noIntersectionException();
 	}
 
 	if (l.end.x == l.start.x) { // line is vertical
+		cout << "Existing line is vertical " << endl;
 		float y = m*l.start.x + c; // finds appropriate y value on other line
 		return vec2(l.start.x, y);
 	}
 
 	if (cutDir.x == 0) { // other line is vertical
+		cout << "New line is vertical " << endl;
 		//cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
 		float y = m_l*cutPoint.x + c_l; // finds appropriate y value on  line
 		return vec2(cutPoint.x, y);
@@ -89,6 +92,10 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	float x = (c - c_l) / (m_l - m);
 	float y = m_l * x + c_l;
 
+	if(x == 0.0 && y == 0.0){
+			cout << "Returning blank vec2" << endl;
+		}
+
 	return vec2(x,y);
 }
 
@@ -99,7 +106,7 @@ inline vec2 getIntersection(line l, line o){
 	float m = (o.end.y - o.start.y) / (o.end.x - o.start.x);
 	float c = o.end.y - m*o.end.x;
 
-	if (m == m_l) {
+	if (m == m_l || m == -m_l) {
 		throw noIntersectionException();
 	}
 	if (l.end.x == l.start.x) { // line is vertical
@@ -116,6 +123,10 @@ inline vec2 getIntersection(line l, line o){
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
 	float y = m_l * x + c_l;
+
+	if(x == 0.0 && y == 0.0){
+		cout << "Returning blank vec2" << endl;
+	}
 
 	return vec2(x,y);
 }
@@ -187,16 +198,19 @@ inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 	try {
 		intersection = getIntersection(lon, cut, cutPoint);
 	}
-	catch (const noIntersectionException &e) { return false; } // This was a set of two parallel lines
+	catch (const noIntersectionException &e) { cout << "Caught parallel line" << endl; return false; } // This was a set of two parallel lines
 
 	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
-
+	if(intersection.x == 0.0 && intersection.y ==0.0){
+		cout << "Blank vec2 here " << endl;
+	}
 
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.end.y) && intersection.y >= min(lon.start.y, lon.end.y)) {
+		cout << "INTERSECTS" << endl;
 		return true;
 	}
 
