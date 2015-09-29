@@ -150,7 +150,7 @@ vector<section> SectionDivider::splitSection(section s) {
 	for(section l : x){
 		cout << "Section " << l.ID << endl;
 		for(line lin : l.lines){
-			//cout<< lin.start.x << " " << lin.start.y << " " << lin.end.x << " " << lin.end.y << endl;
+			cout<< lin.start.x << " " << lin.start.y << " " << lin.end.x << " " << lin.end.y << "  ID  " <<  lin.ID << endl;
 		}
 	}
 
@@ -161,14 +161,15 @@ vector<section> SectionDivider::splitSection(section s) {
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
 	section a;
 	a.lines.push_back(bi);
-	int lineID = toCut.ID + 1;
-	if (lineID >= (int)s.lines.size()) {
-		lineID = 0;
-	}
+	int lineID = (toCut.ID + 1)%s.lines.size();
+//	if (lineID >= (int)s.lines.size()) {
+//		lineID = 0;
+//	}
 	int newID = 1;
 
 	// Add first half line
 	vec2 end = getIntersection(bi, toCut);
+	cout << "Pre shared point line ID " << lineID << "  " << s.lines[lineID].ID << endl;
 	vec2 start = getSharedPoint(toCut, s.lines[lineID]);
 
 	//cout << "Section cutter " << start.x << "  " << start.y << "  " << end.x << "  " << end.y << "  " << endl;
@@ -198,13 +199,13 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 	// Add last half line
 
 	vec2 end2 = getIntersection(bi, longLine);
-	vec2 start2;
-	if (lineID >= (int)s.lines.size()) {
-		start2 = getSharedPoint(longLine, s.lines[0]);
+	lineID --;
+	if(lineID < 0){
+		lineID = (int)s.lines.size() - 1;
 	}
-	else {
-		start2 = getSharedPoint(longLine, s.lines[lineID]);
-	}
+
+	cout << "Pre shared point at the end line ID " << lineID << "  " << s.lines[lineID].ID << endl;
+	vec2 start2 = getSharedPoint(longLine, s.lines[lineID]);
 
 	line endHalf = { start2,end2,newID++ };
 	a.lines.push_back(endHalf);
@@ -248,42 +249,45 @@ void SectionDivider::testSection() {
 	//		sections.push_back(sec);
 	//	}
 
-//	for(section sec: newSec){
-//		vector<section> miniSec = splitSection(sec);
-//		for(section sl : miniSec){
-//			sections.push_back(sl);
-//		}
-//	}
+		for(section sec: newSec){
+			vector<section> miniSec = splitSection(sec);
+			for(section sl : miniSec){
+				vector<section> s2sec= splitSection(sl);
+				for(section s2 : s2sec){
+				sections.push_back(s2);
+				}
+			}
+		}
 
-	sections.push_back(
-			splitSection(newSec[0])[1]
-								);
+//	sections.push_back(
+//			splitSection(newSec[0])[1]
+//	);
 
 	//for(section sec : newSec){
-//	cout<< endl;
-//	cout << "Subdividing New Section " << endl;
-//	cout << " ------------------------ " << endl;
-//	cout <<  endl;
-//	vector<section> miniSecs = splitSection(newSec[0]);
-//	for(section mini : miniSecs){
-//		cout<< endl;
-//		cout << "Subdividing New Section " << endl;
-//		cout << " ------------------------ " << endl;
-//		cout <<  endl;
-//		vector<section> mm = splitSection(mini);
-//		for(section m : mm){
-//			sections.push_back(m);
-//		}
-//	}
-//	//}
-//
-//
-//	cout << endl;
-	//	sections.push_back(newSec[0]);
+	//	cout<< endl;
+	//	cout << "Subdividing New Section " << endl;
+	//	cout << " ------------------------ " << endl;
+	//	cout <<  endl;
 	//	vector<section> miniSecs = splitSection(newSec[0]);
 	//	for(section mini : miniSecs){
-	//		sections.push_back(mini);
+	//		cout<< endl;
+	//		cout << "Subdividing New Section " << endl;
+	//		cout << " ------------------------ " << endl;
+	//		cout <<  endl;
+	//		vector<section> mm = splitSection(mini);
+	//		for(section m : mm){
+	//			sections.push_back(m);
+	//		}
 	//	}
+	//	//}
+	//
+	//
+	//	cout << endl;
+//		sections.push_back(newSec[0]);
+//		vector<section> miniSecs = splitSection(newSec[0]);
+//		for(section mini : miniSecs){
+//			sections.push_back(mini);
+//		}
 
 
 
@@ -291,6 +295,8 @@ void SectionDivider::testSection() {
 }
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
+	cout << "ID's being compared " << a.ID << "  " << b.ID << endl;
+
 	try{
 		getIntersection(a,b);
 	}catch(const noIntersectionException &e){cout << "Parallel in shared point" << endl;}
@@ -302,7 +308,7 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
 		return a.end;
 	}
-	cout << "Returning 0 0" << endl;
+	cout << "Returning 0 0"  << endl;
 	return vec2(0,0);
 }
 
