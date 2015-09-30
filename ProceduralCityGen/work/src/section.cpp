@@ -137,8 +137,8 @@ vector<section> SectionDivider::splitSection(section s) {
 	section a, b; // the two new sections
 	a.lines = vector<line>(); b.lines = vector<line>(); // creates line vectors for them
 
-	line bi = {getIntersection(toCut,perpBi,vec2(centreX,centreY)), getIntersection(l,perpBi,vec2(centreX,centreY)),0};
-	line antiBi = {getIntersection(l,perpBi,vec2(centreX,centreY)), getIntersection(toCut,perpBi,vec2(centreX,centreY)), 0};
+	line bi = { getIntersection(l,perpBi,vec2(centreX,centreY)), getIntersection(toCut,perpBi,vec2(centreX,centreY)), 0};
+	line antiBi = {bi.end, bi.start, bi.ID};
 
 	a = getInnerSection(s, bi, toCut, l);
 	b = getInnerSection(s, antiBi, l, toCut);
@@ -150,7 +150,12 @@ vector<section> SectionDivider::splitSection(section s) {
 	for(section l : x){
 		cout << "Section " << l.ID << endl;
 		for(line lin : l.lines){
-			cout<< lin.start.x << " " << lin.start.y << " " << lin.end.x << " " << lin.end.y << "  ID  " <<  lin.ID << endl;
+			if(lin.end.y > 300|| lin.start.y > 300){
+				cout << "____________ Line is higher than 300 _____________" << endl;
+				if(lin.ID == 0){
+					cout << "Issue is bisector" << endl;
+				}
+			}
 		}
 	}
 
@@ -161,32 +166,34 @@ vector<section> SectionDivider::splitSection(section s) {
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
 
 	cout<< endl;
-		cout << "Getting New Section " << endl;
-		cout << " ------------------------ " << endl;
-		cout <<  endl;
+	cout << "Getting New Section " << endl;
+	cout << " ------------------------ " << endl;
+	cout <<  endl;
 
+	bool isTriangle = true;
 
 	section a;
 	a.lines.push_back(bi);
 	int lineID = (toCut.ID + 1)%s.lines.size();
-//	if (lineID >= (int)s.lines.size()) {
-//		lineID = 0;
-//	}
+	//	if (lineID >= (int)s.lines.size()) {
+	//		lineID = 0;
+	//	}
 	int newID = 1;
 
 	// Add first half line
-	vec2 end = getIntersection(bi, toCut);
+	vec2 start = getIntersection(bi.start,bi.end,toCut.start, toCut.end);//getIntersection(bi, toCut);
 	cout << "Pre shared point line ID " << lineID << "  " << s.lines[lineID].ID << endl;
-	vec2 start = getSharedPoint(toCut, s.lines[lineID]);
+	vec2 end = getIntersection(toCut.start,toCut.end, s.lines[lineID].start, s.lines[lineID].end);//getSharedPoint(toCut, s.lines[lineID]);
 
 	//cout << "Section cutter " << start.x << "  " << start.y << "  " << end.x << "  " << end.y << "  " << endl;
+
 
 	line startHalf = { start,end,newID++ };
 	a.lines.push_back(startHalf);
 
 	//	//Adds all whole middle lines
 	while (lineID != longLine.ID) {
-
+		isTriangle = false;
 		//cout << "Line ID " << lineID << endl;
 
 		//Add line
@@ -205,14 +212,25 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 
 	// Add last half line
 
-	vec2 end2 = getIntersection(bi, longLine);
+	vec2 end2 = getIntersection(bi.start,bi.end,longLine.start, longLine.end);//getIntersection(bi, longLine);
+	//	if(isTriangle){
+	//		cout<< endl;
+	//		cout<< "I am a triangle " << endl;
+	//		bool bibi =  bi.ID == lineID;
+	//		bool longli = longLine.ID == lineID ;
+	//		cout << "Bi: "  << bibi <<  "  LongLine: " << longli << endl;
+	//	}
+	//else{
 	lineID --;
+	//	}
+
+
 	if(lineID < 0){
 		lineID = (int)s.lines.size() - 1;
 	}
 
 	cout << "Pre shared point at the end line ID " << lineID << "  " << s.lines[lineID].ID << endl;
-	vec2 start2 = getSharedPoint(longLine, s.lines[lineID]);
+	vec2 start2 = getIntersection(longLine.start, longLine.end, s.lines[lineID].start, s.lines[lineID].end);//getSharedPoint(longLine, s.lines[lineID]);
 
 	line endHalf = { start2,end2,newID++ };
 	a.lines.push_back(endHalf);
@@ -227,6 +245,10 @@ void SectionDivider::testSection() {
 	line d = {vec2(150,300), vec2(100,100), 3 };
 	line c = {vec2(350,300),vec2(150,300), 2};
 	line b = { vec2(400,100),  vec2(350,300),1 };
+
+//	line a = {vec2(100,100),vec2(400,100),0};
+//	line b = {vec2(400,100),vec2(250,300),1};
+//	line c = {vec2(250,300),vec2(100,100),2};
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
@@ -247,39 +269,59 @@ void SectionDivider::testSection() {
 	divideLot(l);
 
 
+
+
+
 	vector<section> newSec = splitSection(s);
+
+	//	vector<section> sec1 = splitSection(newSec[1]);
+	//	vector<section> sec2 = splitSection(sec1[1]);
+	//	vector<section> sec3 = splitSection(sec2[0]);
+	//	vector<section> sec4 = splitSection(sec3[0]);
+	//	vector<section> sec45 = splitSection(sec3[1]);
+	//
+	//	sections.push_back(newSec[1]);
+	//	sections.push_back(sec1[1]);
+	//	sections.push_back(sec2[1]);
+	//	sections.push_back(sec3[1]);
+	//
+	//	sections.push_back(sec45[0]);
+	//	sections.push_back(sec45[1]);
+	//	sections.push_back(sec4[0]);
+	//	sections.push_back(sec4[1]);
+
 	//	for(section sec : newSec){
 	//		sections.push_back(sec);
 	//	}
 
-		for(section sec: newSec){
-			vector<section> miniSec = splitSection(sec);
-			for(section sl : miniSec){
-				vector<section> s2sec= splitSection(sl);
-				for(section s2 : s2sec){
-					vector<section> s3sec= splitSection(s2);
-					for(section s3: s3sec){
-						vector<section> s4sec= splitSection(s3);
-						for(section s4: s4sec){
-							for(section s5:splitSection(s4)){
-//								for(section s6:splitSection(s5)){
-//									sections.push_back(s6);
-//								}
-								sections.push_back(s5);
-
-
-							}
-						}
-						//sections.push_back(s3);
+	for(section sec: newSec){
+		vector<section> miniSec = splitSection(sec);
+		for(section sl : miniSec){
+			vector<section> s2sec= splitSection(sl);
+			for(section s2 : s2sec){
+				vector<section> s3sec= splitSection(s2);
+				for(section s3: s3sec){
+					vector<section> s4sec= splitSection(s3);
+					for(section s4: s4sec){
+						//							for(section s5:splitSection(s4)){
+						////								for(section s6:splitSection(s5)){
+						////									sections.push_back(s6);
+						////								}
+						sections.push_back(s4);
+						//
+						//
+						//							}
 					}
+					//sections.push_back(s3);
 				}
 			}
 		}
+	}
 
-//	sections.push_back(
-//			splitSection(newSec[0])[1]
-//	);
-//	sections.push_back(splitSection(splitSection(splitSection(newSec[0])[1])[0])[0]);
+	//	sections.push_back(
+	//			splitSection(newSec[0])[1]
+	//	);
+	//	sections.push_back(splitSection(splitSection(splitSection(newSec[0])[1])[0])[0]);
 	//for(section sec : newSec){
 	//	cout<< endl;
 	//	cout << "Subdividing New Section " << endl;
@@ -300,11 +342,11 @@ void SectionDivider::testSection() {
 	//
 	//
 	//	cout << endl;
-//		sections.push_back(newSec[0]);
-//		vector<section> miniSecs = splitSection(newSec[0]);
-//		for(section mini : miniSecs){
-//			sections.push_back(mini);
-//		}
+	//		sections.push_back(newSec[0]);
+	//		vector<section> miniSecs = splitSection(newSec[0]);
+	//		for(section mini : miniSecs){
+	//			sections.push_back(mini);
+	//		}
 
 
 
@@ -325,8 +367,11 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
 		return a.end;
 	}
-	//nor a or b have a shared point
-	cout << "Returning 0 0"  << endl;
+
+	if(inter.y > 300){
+		cout << "Shared Point too high" << endl;
+	}
+
 	return inter;
 }
 

@@ -128,6 +128,10 @@ inline vec2 getIntersection(line l, line o){
 		cout << "Returning blank vec2" << endl;
 	}
 
+	if(y > 300){
+			cout << "Intersection Point too high" << endl;
+		}
+
 	return vec2(x,y);
 }
 
