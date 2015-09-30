@@ -26,6 +26,10 @@ double g_winHeight 	= 480;
 bool m_LeftButton = false;
 /*Mouse position*/
 comp308::vec2 m_pos = comp308::vec2(0, 0);
+
+comp308::vec3 p_pos = comp308::vec3(0,1,0);
+comp308::vec3 p_dir = comp308::vec3(1,0,0);
+
 /*Controler Left Stick/Right Stick Axes position
 Values between -1 and 1*/
 comp308::vec2 c_LSpos = comp308::vec2(0, 0);
@@ -61,5 +65,5 @@ void mouseButtonCallback(GLFWwindow* , int , int , int );
 void mouseMotionCallbackFPS(GLFWwindow*, double, double);
 void mouseScrollCallback(GLFWwindow*, double, double);
 void windowSizeCallback(GLFWwindow*, int , int);
-
+void keyCallback(GLFWwindow* , int , int , int , int );
 void joystickEventsPoll(void);

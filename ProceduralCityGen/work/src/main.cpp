@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
 	glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
+	glfwSetKeyCallback(window, keyCallback);
 	/*Setting up other stuff*/
 	/*Set up depths and perspective*/
 	glClearDepth(1.0f);
@@ -212,9 +213,14 @@ void setupCamera() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTranslatef(0, 0, -50*zoom);
-	glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
-	glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
+//	glTranslatef(0, 0, -50*zoom);
+//	glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
+//	glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
+	//glTranslatef(0,0,-50*zoom);
+	glRotatef(-p_dir.y,1.0f,0.0f,0.0f);
+	glRotatef(-p_dir.x,0.0f,1.0f,0.0f);
+	glTranslatef(-p_pos.x,-p_pos.y,-p_pos.z);
+
 
 }
 
@@ -257,10 +263,23 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+	cout<<"Key: " << key<<endl;
+	if(key == 87 && action){
+		//p_pos-= normalize(p_dir);
+		//p_pos.z +=1;
+		//p_pos.y+=1;
+	}
+
+}
+
 void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	if (m_LeftButton) {
-		rotation.x += (m_pos.x - xpos);
-		rotation.y += (m_pos.y - ypos);
+		/*rotation.x += (m_pos.x - xpos);
+		rotation.y += (m_pos.y - ypos);*/
+		p_dir.x +=(m_pos.x - xpos);
+		p_dir.y +=(m_pos.y - ypos);
 	}
 	m_pos = vec2(xpos, ypos);
 }
