@@ -296,11 +296,6 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 		glBegin(GL_QUADS);
 		/*n amount of walls*/
 		for (int i = 0; i < n; i++) {
-			if(i %2==0){
-				glColor3f(1.0f, 0.5f, 0.1f);
-			}else{
-				glColor3f(0.1f,0.2f,0.9f);
-			}
 			vec3 topl = top[i];
 			vec3 topr = top[(i + 1) % n];
 			vec3 botr = bot[(i + 1) % n];
@@ -308,17 +303,24 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 			vec3 normal = cross((botl - topr), (topl - topr));
 			normal = normalize(normal);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
-			glVertex3f(topl.x, topl.y, topl.z);
-			glVertex3f(botl.x, botl.y, botl.z);
-			glVertex3f(botr.x, botr.y, botr.z);
+			glTexCoord2f(1.0f,0.0f);
 			glVertex3f(topr.x, topr.y, topr.z);
+			glTexCoord2f(1.0f,1.0f);
+			glVertex3f(botr.x, botr.y, botr.z);
+			glTexCoord2f(0.0f,1.0f);
+			glVertex3f(botl.x, botl.y, botl.z);
+			glTexCoord2f(0.0f,0.0f);
+			glVertex3f(topl.x, topl.y, topl.z);
+
+
+
 		}
 		glEnd();
 		glBegin(GL_TRIANGLES);
 		/*roof*/
 		glColor3f(0,0,0);
 		glNormal3f(0, 1, 0);
-		vec3 mid3d = vec3(mid.x,elevation,mid.y);
+		vec3 mid3d = vec3(mid.x,height,mid.y);
 			for(int i = 0; i < n;i++){
 				vec3 p1 = top[i];
 				vec3 p2 = top[(i+1)%n];
@@ -592,7 +594,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	}
 	//the end of levels now contains the ground floor
 
-	
+
 	float elevation = 0.0f;
 	for (int i = levels.size() - 1; i >= 0;) {
 		srand(rand());
