@@ -74,6 +74,10 @@ int main(int argc, char **argv) {
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
 	/*Setting up other stuff*/
+	if (joystick) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
 	/*Set up depths and perspective*/
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -206,20 +210,35 @@ void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar
 
 	glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 }
+
+void lookAt(vec3 pos, vec3 center, vec3 up) {
+	gluLookAt(pos.x, pos.y, pos.z, center.x, center.y, center.z, up.x, up.y, up.z);
+
+}
+
 void setupCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	perspectiveGL(20.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
-//	glTranslatef(0, 0, -50*zoom);
-//	glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
-//	glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
+	perspectiveGL(45.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
+	if (joystick) {
+		lookAt(p_pos, p_pos + p_front, p_up);
+	}
+	else {
+		glTranslatef(0, 0, -50 * zoom);
+		glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
+		glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
+	}
 	//glTranslatef(0,0,-50*zoom);
-	glRotatef(-p_dir.y,1.0f,0.0f,0.0f);
-	glRotatef(-p_dir.x,0.0f,1.0f,0.0f);
-	glTranslatef(-p_pos.x,-p_pos.y,-p_pos.z);
+	//vec3 up = vec3(0, 1, 0);
+	//vec3 camRight = normalize(cross(up, p_front));
+	//vec3 camUp = cross(p_front, camRight);
+	
+	//glRotatef(-p_dir.y,1.0f,0.0f,0.0f);
+	//glRotatef(-p_dir.x,0.0f,1.0f,0.0f);
+	//glTranslatef(-p_pos.x,-p_pos.y,-p_pos.z);
 
 
 }
@@ -270,16 +289,31 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		//p_pos-= normalize(p_dir);
 		//p_pos.z +=1;
 		//p_pos.y+=1;
+		p_pos += 0.05f*p_front;
 	}
 
 }
-
+bool firstM = true;
 void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
+	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+
 	if (m_LeftButton) {
-		/*rotation.x += (m_pos.x - xpos);
-		rotation.y += (m_pos.y - ypos);*/
-		p_dir.x +=(m_pos.x - xpos);
-		p_dir.y +=(m_pos.y - ypos);
+		rotation.x += (m_pos.x - xpos);
+		rotation.y += (m_pos.y - ypos);
+		/*yaw += (xpos - m_pos.x)*0.05f;
+		pitch = (m_pos.x - ypos)*0.05f;
+		
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		float pitchR = radians(pitch);
+		float yawR = radians(yaw);
+		p_dir.x =cos(yawR)*cos(pitchR);
+		p_dir.y =sin(pitchR);
+		p_dir.z =sin(yawR)*cos(pitchR);
+		p_front = normalize(p_dir);*/
 	}
 	m_pos = vec2(xpos, ypos);
 }
@@ -303,11 +337,31 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
 void joystickEventsPoll() {
 	int count;
 	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+	//0,1-Left Stick 2 is trigger (postive left, negative, right) 3,4 is Right Stick y,x
 	if (count > 0) {
+		
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
-		rotation.x += (0.0f - c_LSpos.x);
-		rotation.y += (0.0f - c_LSpos.y);
+		yaw += (c_LSpos.x-0.0f )*0.5f;
+		pitch+= (0.0f - c_LSpos.y)*0.5f;
+
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		float pitchR = radians(pitch);
+		float yawR = radians(yaw);
+		p_dir.x = cos(yawR)*cos(pitchR);
+		p_dir.y = sin(pitchR);
+		p_dir.z = sin(yawR)*cos(pitchR);
+		p_front = normalize(p_dir);
+
+		vec2 c_RSpos = vec2((float)((int)(axes[3] * 100)) / 100.0f,
+			(float)((int)(axes[4] * 100)) / 100.0f);
+		if (abs(c_RSpos.x)>0.01f) {
+			p_pos -= 0.05f*p_front*c_RSpos.x;
+		}
 
 	}
 }

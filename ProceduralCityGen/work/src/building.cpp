@@ -513,33 +513,6 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		}
 	}
 
-
-
-
-
-	//old order code
-	/*if (chance == 0) {//20% chance to generate differently shaped building
-		srand(rand());//increase randomness
-		//floorPlan = Generator::generateFloorPlan(center, minDist, rand() % 4 + 4);
-		floorPlan = Generator::generateModernFloorPlan(center,minDist);
-	}
-	else if (chance <= 2) {//%40% chance to have smaller area
-		floorPlan = Generator::shrinkPoints(floorPlan);
-	}else if(chance==3){//10% chance to have a different orientated area
-		floorPlan = Generator::generateFloorPlan(center, minDist*2.0f,4);
-	}else{				//10% chance to generate building in same floor plan
-		srand(rand());
-		if (rand() % 2 == 0) {	//50% chance to be normal square
-			result->low = glGenLists(1);
-			glNewList(result->low, GL_COMPILE);
-			generateResdientialBuilding(floorPlan);
-			glEndList();
-			return;
-		}else {					//50% chance to be different square
-			floorPlan = Generator::cutEdges(floorPlan);
-		}
-	}*/
-
 	cur_tex_wall = parameters->b_type;
 	cur_tex_wall_num = rand()%2;
 

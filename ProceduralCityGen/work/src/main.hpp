@@ -26,9 +26,13 @@ double g_winHeight 	= 480;
 bool m_LeftButton = false;
 /*Mouse position*/
 comp308::vec2 m_pos = comp308::vec2(0, 0);
-
-comp308::vec3 p_pos = comp308::vec3(0,1,0);
-comp308::vec3 p_dir = comp308::vec3(1,0,0);
+float pitch = 0;
+float yaw = -90.0f;
+comp308::vec3 p_pos = comp308::vec3(0,1,2);
+comp308::vec3 p_front = comp308::vec3(0, 0, -1);
+comp308::vec3 p_up= comp308::vec3(0, 1, 0);
+comp308::vec3 p_tar = comp308::vec3(0, 1, 0);
+comp308::vec3 p_dir = comp308::normalize(p_pos - p_tar);
 
 /*Controler Left Stick/Right Stick Axes position
 Values between -1 and 1*/
