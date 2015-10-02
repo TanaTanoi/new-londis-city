@@ -58,7 +58,7 @@ void Building::initTexture() {
 
 	initShader();
 	glUseProgram(g_shader);
-
+	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	for(int i = 0; i < 2;i++){

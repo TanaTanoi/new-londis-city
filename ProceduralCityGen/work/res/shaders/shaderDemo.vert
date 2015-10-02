@@ -20,10 +20,23 @@ varying vec3 vPosition;
 varying vec2 vTextureCoord0;
 varying vec3 vLightDir;
 
+
 void main() {
+
 	vNormal = normalize(gl_NormalMatrix * gl_Normal);
 	vPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
+
+	float distn, dx,dy, dz;
+	distn = length(vPosition - vec3(0,0,0));
+	dx = vPosition.x;
+	dy = vPosition.y;
+	dz = vPosition.z;
+	//vPosition.y = vPosition.y - distn/5;
+	//vPosition.xz = vec2(distn/abs(dx),distn/abs(dz));
+
 	vLightDir = normalize(vec3(gl_LightSource[0].position));
 	vTextureCoord0 = gl_MultiTexCoord0.xy;
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	//gl_Position.y = gl_Position.y + vPosition.y;
+//	gl_Position.xz =gl_Position.xz -  vPosition.xz;
 }

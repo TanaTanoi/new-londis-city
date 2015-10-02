@@ -235,7 +235,7 @@ void setupCamera() {
 	//vec3 up = vec3(0, 1, 0);
 	//vec3 camRight = normalize(cross(up, p_front));
 	//vec3 camUp = cross(p_front, camRight);
-	
+
 	//glRotatef(-p_dir.y,1.0f,0.0f,0.0f);
 	//glRotatef(-p_dir.x,0.0f,1.0f,0.0f);
 	//glTranslatef(-p_pos.x,-p_pos.y,-p_pos.z);
@@ -302,7 +302,7 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 		rotation.y += (m_pos.y - ypos);
 		/*yaw += (xpos - m_pos.x)*0.05f;
 		pitch = (m_pos.x - ypos)*0.05f;
-		
+
 		if (pitch > 89.0f)
 			pitch = 89.0f;
 		if (pitch < -89.0f)
@@ -339,7 +339,7 @@ void joystickEventsPoll() {
 	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
 	//0,1-Left Stick 2 is trigger (postive left, negative, right) 3,4 is Right Stick y,x
 	if (count > 0) {
-		
+
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
 		yaw += (c_LSpos.x-0.0f )*0.5f;
