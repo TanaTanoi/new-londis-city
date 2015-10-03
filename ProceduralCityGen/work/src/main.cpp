@@ -342,9 +342,17 @@ void joystickEventsPoll() {
 
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
-		yaw += (c_LSpos.x-0.0f )*0.5f;
-		pitch+= (0.0f - c_LSpos.y)*0.5f;
+		vec2 c_RSpos = vec2((float)((int)(axes[3] * 100)) / 100.0f,
+			(float)((int)(axes[4] * 100)) / 100.0f);
 
+
+		float threshold = 0.2f;//stops drifting when the user isn't touching the controler 
+		if (abs(c_RSpos.y) >= threshold) {
+			yaw += (c_RSpos.y - 0.0f)*0.9f;
+		}
+		if (abs(c_RSpos.x) >= threshold) {
+			pitch += (0.0f - c_RSpos.x)*0.9f;
+		}
 		if (pitch > 89.0f)
 			pitch = 89.0f;
 		if (pitch < -89.0f)
@@ -357,11 +365,17 @@ void joystickEventsPoll() {
 		p_dir.z = sin(yawR)*cos(pitchR);
 		p_front = normalize(p_dir);
 
-		vec2 c_RSpos = vec2((float)((int)(axes[3] * 100)) / 100.0f,
-			(float)((int)(axes[4] * 100)) / 100.0f);
-		if (abs(c_RSpos.x)>0.01f) {
-			p_pos -= 0.05f*p_front*c_RSpos.x;
+		if (abs(c_LSpos.y) < threshold) {
+			c_LSpos.y = 0;
 		}
+		if (abs(c_LSpos.x) < threshold) {
+			c_LSpos.x = 0;
+		}
+
+		p_pos -= 0.05f*p_front*c_LSpos.y;
+
+		vec3 p_right = cross(p_up, p_front);
+		p_pos -= 0.05f*p_right*c_LSpos.x;
 
 	}
 }
