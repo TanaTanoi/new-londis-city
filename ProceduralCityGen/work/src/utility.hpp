@@ -93,8 +93,8 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	float y = m_l * x + c_l;
 
 	if(x == 0.0 && y == 0.0){
-			//cout << "Returning blank vec2" << endl;
-		}
+		//cout << "Returning blank vec2" << endl;
+	}
 
 	return vec2(x,y);
 }
@@ -103,6 +103,7 @@ inline vec2 getIntersection(line l, line o){
 	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 	float c_l = l.end.y - m_l*l.end.x;
 
+
 	float m = (o.end.y - o.start.y) / (o.end.x - o.start.x);
 	float c = o.end.y - m*o.end.x;
 
@@ -110,12 +111,18 @@ inline vec2 getIntersection(line l, line o){
 		throw noIntersectionException();
 	}
 	if (l.end.x == l.start.x) { // line is vertical
+		cout << "Vertical line" << endl;
+		cout << "Line " << l.start.x << ", " << l.start.y << "  "  << l.end.x << ", " << l.end.y << endl;
+		cout << "Other " << o.start.x << ", " << o.start.y << "  "  << o.end.x << ", " << o.end.y << endl;
+
 		float y = m*l.start.x + c; // finds appropriate y value on other line
-		return vec2(l.start.x, y);
+
+		cout << "New " << l.start.x << " , " << y << endl;
+			return vec2(l.start.x, y);
 	}
 
 	if (o.end.x == o.start.x) { // other line is vertical
-						 //cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
+		cout << "Vertical line" << endl;
 		float y = m_l*o.start.x + c_l; // finds appropriate y value on  line
 		return vec2(o.start.x, y);
 	}
@@ -129,8 +136,9 @@ inline vec2 getIntersection(line l, line o){
 	}
 
 	if(y > 300){
-			cout << "Intersection Point too high" << endl;
-		}
+		cout << "Intersection Point too high" << endl;
+		cout << x << "  " << y << endl;
+	}
 
 	return vec2(x,y);
 }
@@ -152,11 +160,11 @@ inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 		toReturn.x = e1.y;
 		toReturn.y = e2.x*toReturn.x + e2.y;
 	}else if (isInfinite(e2.x) || isNAN(e2.x)) {//if equation two is parallel to Y
-							 //Set the toReturn.x value to the value of e2.y (which is the x-intercept)
+		//Set the toReturn.x value to the value of e2.y (which is the x-intercept)
 		toReturn.x = e2.y;   //then set the y value to mx+c using the new x value
 		toReturn.y = e1.x*toReturn.x + e1.y;
 	}
-		return toReturn;
+	return toReturn;
 }
 
 /*Tests if the two lines, represented as two vec2s each, intersect within the bounds of the points*/
@@ -165,12 +173,12 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e2 = getEquation(b1, b2);
 	//If paralell lines or if both are paralell to the y-axis
 	if (e1.x == e2.x){
-//		cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
+		//		cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
 		return false;
 	}
 
 	if ((isInfinite(e1.x)) && (isInfinite(e2.x))) {
-//		cout << "both are y axis" << endl;
+		//		cout << "both are y axis" << endl;
 		return false;
 	}
 	vec2 value = getIntersection(a1, a2, b1, b2);
@@ -178,14 +186,14 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	float x = value.x;
 	//if x is out of bounds X VALUE GOTTEN HERE IS WRONG , SHOULD BE 0.5
 	if (x < min(a1.x,a2.x) || x > max(a2.x,a1.x) || x < min(b2.x,b1.x)||x > max(b1.x,b2.x)) {
-//		cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
+		//		cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
 		return false;
 	}
 
 	//if y is out of bounds
 	if (value.y > max(a1.y,a2.y)||value.y < min(a2.y,a1.y)|| value.y > max(b1.y, b2.y) || value.y < min(b2.y, b1.y)) {
-//		cout << a1.y << " to " << a2.y << endl;
-//		cout << "Y value is out of bounds " << value.y <<  endl;
+		//		cout << a1.y << " to " << a2.y << endl;
+		//		cout << "Y value is out of bounds " << value.y <<  endl;
 		return false;
 	}
 
@@ -196,7 +204,7 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 
 
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
-//	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
+	//	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
 
 	vec2 intersection;
 	try {

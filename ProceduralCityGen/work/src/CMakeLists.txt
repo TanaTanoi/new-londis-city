@@ -14,6 +14,7 @@ SET(headers
 	"generator.h"
 	"vehicle.hpp"
 	"utility.hpp"
+	"roadNetwork.hpp"
 )
 
 
@@ -25,6 +26,7 @@ SET(sources
 	"generator.cpp"
 	"vehicleController.cpp"
 	"vehicle.cpp"
+	"roadNetwork.cpp"
 )
 
 # Add executable target and link libraries

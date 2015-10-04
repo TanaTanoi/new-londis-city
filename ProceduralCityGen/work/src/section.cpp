@@ -154,9 +154,9 @@ vector<section> SectionDivider::splitSection(section s) {
 		cout << "Section " << l.ID << endl;
 		for(line lin : l.lines){
 			if(lin.end.y > 300|| lin.start.y > 300){
-				cout << "____________ Line is higher than 300 _____________" << endl;
+				//cout << "____________ Line is higher than 300 _____________" << endl;
 				if(lin.ID == 0){
-					cout << "Issue is bisector" << endl;
+					//cout << "Issue is bisector" << endl;
 				}
 			}
 		}
@@ -252,20 +252,20 @@ void SectionDivider::testSection() {
 	//	line c = {vec2(350,300),vec2(150,300), 2};
 	//	line b = { vec2(400,100),  vec2(350,300),1 };
 
-	line a = {vec2(150,100),vec2(400,100),0};
-	line d = {vec2(100,400), vec2(150,100), 3 };
-	line c = {vec2(400,400),vec2(100,400), 2};
-	line b = { vec2(400,100),  vec2(400,400),1 };
+//	line a = {vec2(150,100),vec2(400,100),0};
+//	line d = {vec2(100,400), vec2(150,100), 3 };
+//	line c = {vec2(400,400),vec2(100,400), 2};
+//	line b = { vec2(400,150),  vec2(400,400),1 };
 
-	//	line a = {vec2(100,100),vec2(400,100),0};
-	//	line b = {vec2(400,100),vec2(250,300),1};
-	//	line c = {vec2(250,300),vec2(100,100),2};
+		line a = {vec2(100,100),vec2(400,100),0};
+		line b = {vec2(400,100),vec2(250,300),1};
+		line c = {vec2(250,300),vec2(100,100),2};
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
 	lines.push_back(b);
 	lines.push_back(c);
-	lines.push_back(d);
+	//lines.push_back(d);
 
 	section s = { lines };
 	s.area = getSectionSize(s);
@@ -305,7 +305,7 @@ void SectionDivider::testSection() {
 	//		sections.push_back(sec);
 	//	}
 	int i = 0;
-	int count = 3;
+	int count = 4;
 	vector<section> newSec = splitSection(s);
 
 	while(i < count){
@@ -326,29 +326,29 @@ void SectionDivider::testSection() {
 		sections.push_back(t);
 	}
 
-//	for(section sec: newSec){
-//		vector<section> miniSec = splitSection(sec);
-//		for(section sl : miniSec){
-//			vector<section> s2sec= splitSection(sl);
-//			for(section s2 : s2sec){
-//				vector<section> s3sec= splitSection(s2);
-//				for(section s3: s3sec){
-//					vector<section> s4sec= splitSection(s3);
-//					for(section s4: s4sec){
-//													for(section s5:splitSection(s4)){
-//														for(section s6:splitSection(s5)){
-//															sections.push_back(s6);
-//														}
-//						//sections.push_back(s4);
-//						//
-//						//
-//													}
-//					}
-//					//sections.push_back(s3);
-//				}
-//			}
-//		}
-//	}
+	//	for(section sec: newSec){
+	//		vector<section> miniSec = splitSection(sec);
+	//		for(section sl : miniSec){
+	//			vector<section> s2sec= splitSection(sl);
+	//			for(section s2 : s2sec){
+	//				vector<section> s3sec= splitSection(s2);
+	//				for(section s3: s3sec){
+	//					vector<section> s4sec= splitSection(s3);
+	//					for(section s4: s4sec){
+	//													for(section s5:splitSection(s4)){
+	//														for(section s6:splitSection(s5)){
+	//															sections.push_back(s6);
+	//														}
+	//						//sections.push_back(s4);
+	//						//
+	//						//
+	//													}
+	//					}
+	//					//sections.push_back(s3);
+	//				}
+	//			}
+	//		}
+	//	}
 
 	//	sections.push_back(
 	//			splitSection(newSec[0])[1]
@@ -392,17 +392,20 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 		inter = getIntersection(a,b);
 	}catch(const noIntersectionException &e){cout << "Parallel in shared point" << endl;}
 
+	int asX = (int) round((a.start* 10.0).x); int aeX = (int) round((a.end* 10.0).x); int bsX = (int) round((b.start* 10.0).x); int beX = (int) round((b.end* 10.0).x);
+	int asY = (int) round((a.start* 10.0).y); int aeY = (int) round((a.end* 10.0).y); int bsY = (int) round((b.start* 10.0).y); int beY = (int) round((b.end* 10.0).y);
 
-	if ((a.start.x == b.start.x && a.start.y == b.start.y )||( a.start.x == b.end.x && a.start.y == b.end.y)){
+	if ((asX == bsX && asY == bsY) || (asX == beX && asY == beY)){
 		return a.start;
 	}
-	else if ((a.end.x == b.start.x && a.end.y == b.start.y) || (a.end.x == b.end.x && a.end.y == b.end.y)) {
+	else if ((aeX == bsX && aeY == bsY) || (aeX == beX && aeY == beY)) {
 		return a.end;
 	}
 
-	if(inter.y > 300){
-		cout << "Shared Point too high" << endl;
-	}
+	cout << "A: " << a.start* 10 << endl;
+	cout << "B: " << b.start*10 << endl;
+	cout << "A: " << asX << " " << asY << " , "  << aeX << " " << aeY << endl;
+	cout << "B: " << bsX << " " << bsY << " , "  << beX << " " << beY << endl;
 
 	return inter;
 }
@@ -423,28 +426,29 @@ void SectionDivider::renderTest() {
 
 	//cout<< "rendering " << endl;
 
-	for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
-		glBegin(GL_LINES);
-		//cout << "Section " << i << endl;
-		//	line longLine = findLongestEdge(sections[0]);
-		int longID  = findLongestEdge(sections[i]).ID;
-		//	cout << "LongLIne: " << longLine.ID << endl;
-		for (line l : sections[i].lines) {
-			//		cout <<"Checking ID "<< l.ID << endl;
-			if(longID == l.ID){ // draw green if longest line
-				glColor3f(0.0,1.0,0.0);
-				//			cout <<"Drawing longest line: "<< l.ID << endl;
-			}
-			else{
-				//			cout <<"Not     longest line: "<< l.ID << endl;
-				glColor3f(1.0,0.0,0.0); // otherwise draw red
-			}
-
-			glVertex2f(l.start.x, l.start.y);
-			glVertex2f(l.end.x, l.end.y);
+		for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
+			glBegin(GL_LINES);
+	//cout << "Section " << i << endl;
+	//	line longLine = findLongestEdge(sections[0]);
+	int longID  = findLongestEdge(sections[15]).ID;
+	//	cout << "LongLIne: " << longLine.ID << endl;
+	for (line l : sections[i].lines) {
+		//		cout <<"Checking ID "<< l.ID << endl;
+		if(longID == l.ID){ // draw green if longest line
+			glColor3f(0.0,1.0,0.0);
+			//			cout <<"Drawing longest line: "<< l.ID << endl;
 		}
-		glEnd();
+		else{
+			//			cout <<"Not     longest line: "<< l.ID << endl;
+			glColor3f(1.0,0.0,0.0); // otherwise draw red
+		}
+
+		glVertex2f(l.start.x, l.start.y);
+		glVertex2f(l.end.x, l.end.y);
 	}
+	glEnd();
+		}
+
 }
 
 //void SectionDivider::cleanUp(){
