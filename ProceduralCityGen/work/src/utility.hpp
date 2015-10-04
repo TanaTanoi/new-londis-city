@@ -69,7 +69,7 @@ inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint){
 	float c = cutPoint.y - m*cutPoint.x; // y = mx + c so c =  y - mx
 
 	if (m == m_l || m == -m_l) { // two parallel lines
-		cout << "Parallel lines " << endl;
+		//cout << "Parallel lines " << endl;
 		throw noIntersectionException();
 	}
 
@@ -111,18 +111,18 @@ inline vec2 getIntersection(line l, line o){
 		throw noIntersectionException();
 	}
 	if (l.end.x == l.start.x) { // line is vertical
-		cout << "Vertical line" << endl;
-		cout << "Line " << l.start.x << ", " << l.start.y << "  "  << l.end.x << ", " << l.end.y << endl;
-		cout << "Other " << o.start.x << ", " << o.start.y << "  "  << o.end.x << ", " << o.end.y << endl;
+		//cout << "Vertical line" << endl;
+		//cout << "Line " << l.start.x << ", " << l.start.y << "  "  << l.end.x << ", " << l.end.y << endl;
+		//cout << "Other " << o.start.x << ", " << o.start.y << "  "  << o.end.x << ", " << o.end.y << endl;
 
 		float y = m*l.start.x + c; // finds appropriate y value on other line
 
-		cout << "New " << l.start.x << " , " << y << endl;
+		//cout << "New " << l.start.x << " , " << y << endl;
 			return vec2(l.start.x, y);
 	}
 
 	if (o.end.x == o.start.x) { // other line is vertical
-		cout << "Vertical line" << endl;
+		//cout << "Vertical line" << endl;
 		float y = m_l*o.start.x + c_l; // finds appropriate y value on  line
 		return vec2(o.start.x, y);
 	}
@@ -132,12 +132,12 @@ inline vec2 getIntersection(line l, line o){
 	float y = m_l * x + c_l;
 
 	if(x == 0.0 && y == 0.0){
-		cout << "Returning blank vec2" << endl;
+		//cout << "Returning blank vec2" << endl;
 	}
 
 	if(y > 300){
-		cout << "Intersection Point too high" << endl;
-		cout << x << "  " << y << endl;
+		//cout << "Intersection Point too high" << endl;
+		//cout << x << "  " << y << endl;
 	}
 
 	return vec2(x,y);
@@ -212,20 +212,59 @@ inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 	}
 	catch (const noIntersectionException &e) { cout << "Caught parallel line" << endl; return false; } // This was a set of two parallel lines
 
-	cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
+	//cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
 	if(intersection.x == 0.0 && intersection.y ==0.0){
-		cout << "Blank vec2 here " << endl;
+		//cout << "Blank vec2 here " << endl;
 	}
 
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.end.y) && intersection.y >= min(lon.start.y, lon.end.y)) {
-		cout << "INTERSECTS" << endl;
+	//	cout << "INTERSECTS" << endl;
 		return true;
 	}
 
+	return false;
+}
+
+inline bool shareSlope(line edge, line secEdge) {
+	// Checks if the lines are vertical
+	if (edge.start.x - edge.end.x == 0 && secEdge.start.x - secEdge.end.x == 0) {
+		return true;
+	}
+
+	// Gets line gradients
+	float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
+	float ms = (secEdge.end.y - secEdge.start.y) / (secEdge.end.x - secEdge.start.x);
+	// Casts to ints for comparison
+	int m1 = int(round(ms));  int m2 = int(round(m));
+
+	if (m1 == m2) {
+		return true; // have same slope
+	}	
+	return false; // have different slopes
+}
+
+
+inline bool shareSide(line edge, line secEdge){
+	if (shareSlope(edge, secEdge)) {
+		float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
+		float c = m*edge.end.x - edge.end.y;
+
+		//NOTE: SPECIAL CASE FOR VERTICAL NEEDED
+
+		// finish this
+		// should now check if the start or end point lies on the equation line
+		// i.e. calculate for edge.start.x what y is and see if they compare
+
+		float y = secEdge.start.x*m + c;
+		if (int(round(y)) == int(round(secEdge.start.y) )){
+			return true;
+		}
+
+	}
 	return false;
 }
 

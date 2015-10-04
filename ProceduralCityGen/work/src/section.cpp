@@ -51,19 +51,21 @@ void SectionDivider::divideLot(lot l) {
 
 lot SectionDivider::recDivideSection(lot lot, section s) {
 	vector<section> secs = splitSection(s);
-	cout << "section size" << secs.size() << endl;
-	//	for (section l : secs) {
-	//		if (l.area <= goalArea) {
-	//			l.ID = sectionID++;
-	//			lot.sections.push_back(l);
-	//		}
-	//		else {
-	//			cout << "Recursively dividing" << endl;
-	//			cout << "Size is " << l.area << endl;
-	//
-	//			lot = recDivideSection(lot, l);
-	//		}
-	//	}
+	//cout << "section size" << secs.size() << endl;
+	cout << "Goal size" << goalArea <<endl;
+		for (section l : secs) {
+			if (l.area <= goalArea) {
+				l.ID = sectionID++;
+				lot.sections.push_back(l);
+				cout << " Found a section " << endl;
+			}
+			else {
+			//	cout << "Recursively dividing" << endl;
+			//	cout << "Size is " << l.area << endl;
+	
+				lot = recDivideSection(lot, l);
+			}
+		}
 	return lot;
 }
 
@@ -108,7 +110,7 @@ vector<section> SectionDivider::splitSection(section s) {
 	vector<line> intersectors = vector<line>();
 	//cout << "Section size " <<s.lines.size() << endl;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
-		cout << "Checking intersects line ID " << s.lines[i].ID << endl;
+		//cout << "Checking intersects line ID " << s.lines[i].ID << endl;
 		if(s.lines[i].ID != l.ID){
 			//cout << "Checking intersects" << endl;
 			if (intersects(s.lines[i],perpBi,vec2(centreX,centreY))) { // FIXME : Issue is here, further subdivisions are not finding any intersections
@@ -118,7 +120,7 @@ vector<section> SectionDivider::splitSection(section s) {
 		}
 	}
 
-	cout<< "Intersecting Lines found" << intersectors.size() << endl;
+	//cout<< "Intersecting Lines found" << intersectors.size() << endl;
 
 	line toCut;
 	float close = 0.0f;
@@ -151,7 +153,7 @@ vector<section> SectionDivider::splitSection(section s) {
 	x.push_back(b);
 
 	for(section l : x){
-		cout << "Section " << l.ID << endl;
+		//cout << "Section " << l.ID << endl;
 		for(line lin : l.lines){
 			if(lin.end.y > 300|| lin.start.y > 300){
 				//cout << "____________ Line is higher than 300 _____________" << endl;
@@ -168,10 +170,10 @@ vector<section> SectionDivider::splitSection(section s) {
 
 section SectionDivider::getInnerSection(section s, line bi, line toCut, line longLine) {
 
-	cout<< endl;
-	cout << "Getting New Section " << endl;
-	cout << " ------------------------ " << endl;
-	cout <<  endl;
+	//cout<< endl;
+	//cout << "Getting New Section " << endl;
+	//cout << " ------------------------ " << endl;
+	//cout <<  endl;
 
 	bool isTriangle = true;
 
@@ -185,10 +187,10 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 
 	// Add first half line
 	vec2 start = getIntersection(bi, toCut);
-	cout << "Pre shared point line ID " << lineID << "  " << s.lines[lineID].ID << endl;
+	//cout << "Pre shared point line ID " << lineID << "  " << s.lines[lineID].ID << endl;
 	vec2 end = getSharedPoint(toCut, s.lines[lineID]);
 	if(end.y > 300){
-		cout << "Issue here" << endl;
+		//cout << "Issue here" << endl;
 	}
 
 	//cout << "Section cutter " << start.x << "  " << start.y << "  " << end.x << "  " << end.y << "  " << endl;
@@ -235,7 +237,7 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 		lineID = (int)s.lines.size() - 1;
 	}
 
-	cout << "Pre shared point at the end line ID " << lineID << "  " << s.lines[lineID].ID << endl;
+	//cout << "Pre shared point at the end line ID " << lineID << "  " << s.lines[lineID].ID << endl;
 	vec2 start2 = getSharedPoint(longLine, s.lines[lineID]);
 
 	line endHalf = { start2,end2,newID++ };
@@ -252,23 +254,24 @@ void SectionDivider::testSection() {
 	//	line c = {vec2(350,300),vec2(150,300), 2};
 	//	line b = { vec2(400,100),  vec2(350,300),1 };
 
-//	line a = {vec2(150,100),vec2(400,100),0};
-//	line d = {vec2(100,400), vec2(150,100), 3 };
-//	line c = {vec2(400,400),vec2(100,400), 2};
-//	line b = { vec2(400,150),  vec2(400,400),1 };
+	line a = {vec2(150,100),vec2(400,100),0};
+	line d = {vec2(100,400), vec2(150,100), 3 };
+	line c = {vec2(400,400),vec2(100,400), 2};
+	line b = { vec2(400,150),  vec2(400,400),1 };
 
-		line a = {vec2(100,100),vec2(400,100),0};
+		/*line a = {vec2(100,100),vec2(400,100),0};
 		line b = {vec2(400,100),vec2(250,300),1};
-		line c = {vec2(250,300),vec2(100,100),2};
+		line c = {vec2(250,300),vec2(100,100),2};*/
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
 	lines.push_back(b);
 	lines.push_back(c);
-	//lines.push_back(d);
+	lines.push_back(d);
 
 	section s = { lines };
 	s.area = getSectionSize(s);
+	cout << s.area << endl;
 	//sections.push_back(s);
 
 	lot l;
@@ -278,12 +281,6 @@ void SectionDivider::testSection() {
 
 	lots.push_back(l);
 	divideLot(l);
-
-
-
-
-
-
 
 	//	vector<section> sec1 = splitSection(newSec[1]);
 	//	vector<section> sec2 = splitSection(sec1[1]);
@@ -301,7 +298,7 @@ void SectionDivider::testSection() {
 	//	sections.push_back(sec4[0]);
 	//	sections.push_back(sec4[1]);
 
-	//	for(section sec : newSec){
+	//	for(section sec : newSec){d
 	//		sections.push_back(sec);
 	//	}
 	int i = 0;
@@ -386,7 +383,7 @@ void SectionDivider::testSection() {
 }
 
 vec2 SectionDivider::getSharedPoint(line a, line b) {
-	cout << "ID's being compared " << a.ID << "  " << b.ID << endl;
+	//cout << "ID's being compared " << a.ID << "  " << b.ID << endl;
 	vec2 inter;
 	try{
 		inter = getIntersection(a,b);
@@ -402,10 +399,10 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 		return a.end;
 	}
 
-	cout << "A: " << a.start* 10 << endl;
-	cout << "B: " << b.start*10 << endl;
-	cout << "A: " << asX << " " << asY << " , "  << aeX << " " << aeY << endl;
-	cout << "B: " << bsX << " " << bsY << " , "  << beX << " " << beY << endl;
+	//cout << "A: " << a.start* 10 << endl;
+	//cout << "B: " << b.start*10 << endl;
+	//cout << "A: " << asX << " " << asY << " , "  << aeX << " " << aeY << endl;
+	//cout << "B: " << bsX << " " << bsY << " , "  << beX << " " << beY << endl;
 
 	return inter;
 }
@@ -414,10 +411,39 @@ float SectionDivider::getSectionSize(section s) {
 	float size = 0.0f;
 	for (int i = 0; i < (int)s.lines.size(); i++) {
 		line l = s.lines[i];
-		size = size + (l.start.x * l.end.y + l.end.x * l.start.y);
+		size = size + (l.start.x + l.end.x) * (l.start.y + l.end.y);
 	}
 	size /= 2.0f;
+	//cout << "Size is " << size << endl;
 	return size;
+}
+
+/**
+* Removes all sections from a lot that do not have street access
+or are too small to have a building
+*/
+void SectionDivider::removeUnusableSections(lot l) {
+	vector<section> toKeep = vector<section>();
+
+	for (section s : l.sections) { // checks each section
+		if (s.area > minArea) { // checks if section size is big enough 
+			if (hasStreetAccess(s,l)) {
+				toKeep.push_back(s); // adds to collection to keep
+			}
+		}
+	}
+	l.sections = toKeep;
+}
+
+bool SectionDivider::hasStreetAccess(section s, lot l) {
+	for (line edge : l.boundingBox.lines) { // checks against each edge of section
+		for (line sectionEdge : s.lines) { 
+			if (shareSlope(edge, sectionEdge)) { // checks if they have the same slope
+				// now needs to check if they share an edge
+			}
+		}
+	}
+	return false;
 }
 
 void SectionDivider::renderTest() {
@@ -426,11 +452,11 @@ void SectionDivider::renderTest() {
 
 	//cout<< "rendering " << endl;
 
-		for(int i = 0; i < (int)sections.size(); i++){ // (int)sections.size()
+		for(int i = 0; i < (int)lots[0].sections.size(); i++){ // (int)sections.size()
 			glBegin(GL_LINES);
 	//cout << "Section " << i << endl;
 	//	line longLine = findLongestEdge(sections[0]);
-	int longID  = findLongestEdge(sections[15]).ID;
+	int longID  = findLongestEdge(sections[i]).ID;
 	//	cout << "LongLIne: " << longLine.ID << endl;
 	for (line l : sections[i].lines) {
 		//		cout <<"Checking ID "<< l.ID << endl;
