@@ -169,6 +169,7 @@ void Building::renderWindows(vector<vec2> floor, float elevation) {
 	vec2 mid = Generator::centerPoint(floor);
 	if (abs(length(floor[0] - mid))<EXTRUDE_THRESHOLD) { return; }
 	int n = floor.size();
+	glBindTexture(GL_TEXTURE_2D, tex_window[cur_tex_win][cur_tex_win_num]);
 	for (int i = 0; i < n; i++) {
 		//create a normal from the direction vector of the floors and the up vector, which is contant
 		vec2 dir = (floor[(i + 1) % n] - floor[i]);
@@ -238,7 +239,6 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 /*Generates a set of windows along the line a - b at the elevation provided. */
 void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 
-
 	float bottom = elevation+(BLOCK_SIZE*0.2f);						//the bottom and top of the windows
 	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));		//
 
@@ -264,7 +264,6 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 		direction = normalize(direction);
 	}
 
-	glBindTexture(GL_TEXTURE_2D,tex_window[cur_tex_win][cur_tex_win_num]);
 	glBegin(GL_QUADS);
 	for (int j = 0; j < i; j+=2) {
 		if((j/2)%2 == 0){
