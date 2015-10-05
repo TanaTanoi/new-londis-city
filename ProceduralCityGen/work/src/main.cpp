@@ -348,10 +348,10 @@ void joystickEventsPoll() {
 
 		float threshold = 0.2f;//stops drifting when the user isn't touching the controler 
 		if (abs(c_RSpos.y) >= threshold) {
-			yaw += (c_RSpos.y - 0.0f)*0.9f;
+			yaw += (c_RSpos.y - 0.0f)*1.2f;
 		}
 		if (abs(c_RSpos.x) >= threshold) {
-			pitch += (0.0f - c_RSpos.x)*0.9f;
+			pitch += (0.0f - c_RSpos.x)*1.2f;
 		}
 		if (pitch > 89.0f)
 			pitch = 89.0f;
