@@ -45,6 +45,8 @@ class noIntersectionException : public exception
 };
 
 
+
+
 /*Returns a vec2 where r.x = gradient and r.y = y-offset*/
 inline vec2 getEquation(vec2 a, vec2 b) {
 	vec2 equation;
@@ -292,4 +294,12 @@ inline bool shareSide(line edge, line secEdge){
 	return false;
 }
 
+
+inline vector<vec2> linesToPoints(vector<line> lines) {
+	vector<vec2> toReturn = vector<vec2>();
+	for (line l : lines) {
+		toReturn.push_back(l.start);
+	}
+	return toReturn;
+}
 }

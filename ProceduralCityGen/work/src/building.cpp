@@ -114,6 +114,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
+	
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
 		vec3 topl = top[i];
@@ -141,15 +142,16 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		glEnd();
 
 		//Generate windows
-		if(cur_tex_wall!=SKYSCRAPER)
-		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
+		//if(cur_tex_wall!=SKYSCRAPER)
+			//generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
+	
 	glBegin(GL_TRIANGLES);
-	/*roof*/
+	/*Render a roof here, or at least a top*/
 	glColor3f(0,0,0);
 	glNormal3f(0, 1, 0);
-	vec3 mid3d = vec3(mid.x,elevation,mid.y);
+	vec3 mid3d = vec3(mid.x,height,mid.y);
 	for(int i = 0; i < n;i++){
 		vec3 p1 = top[i];
 		vec3 p2 = top[(i+1)%n];
@@ -160,15 +162,23 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 
 	}
 	glEnd();
-//	glBegin(GL_POLYGON);
-//	glNormal3f(0, -1, 0);
-//	for (vec3 floorPoint: bot) {
-//		glVertex3f(floorPoint.x, floorPoint.y, floorPoint.z);
-//	}
-//
-//	glEnd();
 	return height;
 }
+
+void Building::renderWindows(vector<vec2> floor, float elevation) {
+	vec2 mid = Generator::centerPoint(floor);
+	if (abs(length(floor[0] - mid))<EXTRUDE_THRESHOLD) { return; }
+	int n = floor.size();
+	glBindTexture(GL_TEXTURE_2D, tex_window[cur_tex_win][cur_tex_win_num]);
+	for (int i = 0; i < n; i++) {
+		//create a normal from the direction vector of the floors and the up vector, which is contant
+		vec2 dir = (floor[(i + 1) % n] - floor[i]);
+		vec3 normal = vec3(dir.x, 0, dir.y);
+		normal = cross(vec3(0, 1, 0),normal);
+		generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
+	}
+}
+
 
 /*Generates a building based on the instructions from the input string,
  * and the floor points.
@@ -183,7 +193,11 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			floor = Generator::shrinkPoints(floor);
 			break;
 		case 'E':
+			//Add windows and then extrude the building.
+			if (cur_tex_wall != SKYSCRAPER)
+				renderWindows(floor, height);
 			height = extendBuilding(floor, height);
+			
 			break;
 		case 'R':
 			if(rand()%2==0){
@@ -196,6 +210,8 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 		case 'D':
 			if (floor.size() == 4) { floor = subdivide(floor)[rand()%2]; }
 			break;
+		case '$':
+			height = extendBuilding(floor, height);
 		}
 
 	}
@@ -220,9 +236,8 @@ void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevat
 		glVertex3f(peak.x, peak.y+0.3f, peak.z);
 	glEnd();
 }
-
+/*Generates a set of windows along the line a - b at the elevation provided. */
 void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
-
 
 	float bottom = elevation+(BLOCK_SIZE*0.2f);						//the bottom and top of the windows
 	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));		//
@@ -249,7 +264,6 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 		direction = normalize(direction);
 	}
 
-	glBindTexture(GL_TEXTURE_2D,tex_window[cur_tex_win][cur_tex_win_num]);
 	glBegin(GL_QUADS);
 	for (int j = 0; j < i; j+=2) {
 		if((j/2)%2 == 0){
@@ -341,7 +355,6 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 
 
 
-
 /*Returns a display list containing fully random buildings */
 int Building::generateRandomBuildings() {
 	/*Generate a random bunch of floor plans*/
@@ -381,23 +394,9 @@ int Building::basicHashcode(string input) {
 
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
-//	if (true) {
-//		srand(time(NULL));
-//		glNewList(toReturn, GL_COMPILE);
-//		//generateFromString(Generator::generateModernFloorPlan(vec2(0, 0), 0.0f), Generator::generateRandomBuildingString(rand() % 4 + 3));
-//		vector<vec2> plan = Generator::generateModernFloorPlan(vec2(0, 0), 0.0f);
-//		glBegin(GL_LINE_LOOP);
-//		for (vec2 v : plan) {
-//			cout << v.x << " " << v.y << endl;
-//			glVertex3f(v.x, 2.0f, v.y);
-//		}
-//		glEnd();
-//		glEndList();
-//		return toReturn;
-//	}
 
 	/*Size of buildings and stuff for this thing*/
-	float size = 10.0f;
+	float size = 20.0f;
 	float disp = 1.5f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -537,16 +536,22 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
 	float cur_elev = 0.0f;
 	//extend main tier random amount of times
 	for(int i = 0; i < n ;i++){
+		if (cur_tex_wall != SKYSCRAPER&&i>0)
+			renderWindows(tiers[2],cur_elev);
 		cur_elev = extendBuilding(tiers[2], cur_elev);
 	}
 	n = rand() % (n-((int)(n *0.75) -1)) + (int)(n *0.75);//between 3/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
+		if (cur_tex_wall != SKYSCRAPER)
+			renderWindows(tiers[0], cur_elev);
 		cur_elev = extendBuilding(tiers[0], cur_elev);
 	}
 	n = rand() % (n - ((int)(n *0.75) - 1)) + (int)(n *0.75);//between 3n/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
+		if (cur_tex_wall != SKYSCRAPER&&i>0)
+			renderWindows(tiers[1], cur_elev);
 		cur_elev = extendBuilding(tiers[1], cur_elev);
 	}
 
@@ -557,20 +562,25 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 
 	vector<vector<vec2>> levels = vector<vector<vec2>>();
 	levels.push_back(Generator::generateFloorPlan(mid, minDist, rand() % 4 + 4));//add base
+	srand(rand());
 	//generate 1 to 4 plan changes
-	for (int i = 0; i < rand() % 3 + 1; i++) {
+	for (int i = 0; i < rand() % 3 + 2; i++) {
+		srand(rand());
 		float xmul = rand() % 2 - 1;//-1 to 1;
 		srand(rand());
 		float ymul = rand() % 2 - 1;//-1 to 1;
+		srand(rand());
 		vec2 offset = vec2(xmul*(minDist/2.0f),(minDist/2.0f)*ymul);
+		//in this case, i is the most recently added level (i.e. the largest floorplan)
 		levels.push_back(Generator::combinePlans(levels[i], Generator::generateFloorPlan(mid+offset, minDist, rand() % 4 + 4)));
 	}
 	//the end of levels now contains the ground floor
 
-
 	float elevation = 0.0f;
 	for (int i = levels.size() - 1; i >= 0;) {
 		srand(rand());
+		if (cur_tex_wall != SKYSCRAPER)
+			renderWindows(levels[i], elevation);
 		elevation = extendBuilding(levels[i], elevation);
 		if (rand() % 3 <= 1) {//66% chance to change floor plan
 			i--;

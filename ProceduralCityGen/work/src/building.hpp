@@ -57,6 +57,8 @@ public:
 	void initTexture(void);//not currently working
 
 	float extendBuilding(std::vector<comp308::vec2>, float);
+
+	void renderWindows(std::vector<comp308::vec2> floor, float elevation);
 	
 	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
 
