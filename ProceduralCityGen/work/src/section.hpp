@@ -22,8 +22,8 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 400000;
-	float minArea;
+	float goalArea = 2000; // Does not work at 11000 FIXME
+	float minArea = 500;
 	std::vector<lot> lots;
 	int sectionID = 0;
 	//for testing
@@ -37,7 +37,7 @@ private:
 	comp308::vec2 getSharedPoint(util::line a, util::line b);
 	section getInnerSection(section, util::line, util::line, util::line);
 	float getSectionSize(section);
-	void removeUnusableSections(lot);
+	lot removeUnusableSections(lot);
 	bool hasStreetAccess(section, lot);
 	//bool intersects(line *, float, float, line *);
 

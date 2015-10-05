@@ -118,7 +118,7 @@ inline vec2 getIntersection(line l, line o){
 		float y = m*l.start.x + c; // finds appropriate y value on other line
 
 		//cout << "New " << l.start.x << " , " << y << endl;
-			return vec2(l.start.x, y);
+		return vec2(l.start.x, y);
 	}
 
 	if (o.end.x == o.start.x) { // other line is vertical
@@ -222,7 +222,7 @@ inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
 
 	if (intersection.x <= max(lon.start.x, lon.end.x) && intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.end.y) && intersection.y >= min(lon.start.y, lon.end.y)) {
-	//	cout << "INTERSECTS" << endl;
+		//	cout << "INTERSECTS" << endl;
 		return true;
 	}
 
@@ -242,29 +242,53 @@ inline bool shareSlope(line edge, line secEdge) {
 	int m1 = int(round(ms));  int m2 = int(round(m));
 
 	if (m1 == m2) {
+		cout << "Shared slope" << endl;
 		return true; // have same slope
-	}	
+	}
 	return false; // have different slopes
 }
 
 
 inline bool shareSide(line edge, line secEdge){
 	if (shareSlope(edge, secEdge)) {
-		float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
-		float c = m*edge.end.x - edge.end.y;
 
-		//NOTE: SPECIAL CASE FOR VERTICAL NEEDED
+		// Special vertical case
+		if(edge.end.x - edge.start.x == 0){ // i.e. both are vertical as they share a slope
+			float minHeight = min(edge.start.y, edge.end.y);
+			float maxHeight = max(edge.start.y, edge.end.y);
+
+			if((secEdge.start.y > minHeight && secEdge.start.y < maxHeight) || (secEdge.end.y > minHeight && secEdge.end.y < maxHeight)){
+				return (secEdge.end.x - edge.end.x == 0); // have same x intercept
+			}
+			return false;
+		}
+
+		float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
+
+		float c = edge.end.y - m*edge.end.x;
+
+		cout << "slope " << m << " y intercept " << c << endl;
 
 		// finish this
 		// should now check if the start or end point lies on the equation line
 		// i.e. calculate for edge.start.x what y is and see if they compare
 
 		float y = secEdge.start.x*m + c;
+
+		cout << y << " " << int(round(secEdge.start.y) ) << endl;
+
 		if (int(round(y)) == int(round(secEdge.start.y) )){
 			return true;
 		}
 
+		y = secEdge.end.x*m + c;
+		cout << y << " " << int(round(secEdge.end.y) ) << endl;
+		if(int(round(y)) == int(round(secEdge.end.y) )){
+			return true;
+		}
+
 	}
+	cout << "Returned false" << endl;
 	return false;
 }
 
