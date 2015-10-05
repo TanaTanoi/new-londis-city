@@ -396,7 +396,7 @@ int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
 
 	/*Size of buildings and stuff for this thing*/
-	float size = 10.0f;
+	float size = 20.0f;
 	float disp = 1.5f;
 	float building_size = 1.0f;
 	vector<vec2> points;
@@ -536,19 +536,22 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
 	float cur_elev = 0.0f;
 	//extend main tier random amount of times
 	for(int i = 0; i < n ;i++){
-		renderWindows(tiers[2],cur_elev);
+		if (cur_tex_wall != SKYSCRAPER&&i>0)
+			renderWindows(tiers[2],cur_elev);
 		cur_elev = extendBuilding(tiers[2], cur_elev);
 	}
 	n = rand() % (n-((int)(n *0.75) -1)) + (int)(n *0.75);//between 3/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
-		renderWindows(tiers[0], cur_elev);
+		if (cur_tex_wall != SKYSCRAPER)
+			renderWindows(tiers[0], cur_elev);
 		cur_elev = extendBuilding(tiers[0], cur_elev);
 	}
 	n = rand() % (n - ((int)(n *0.75) - 1)) + (int)(n *0.75);//between 3n/4 and n (inclusive)
 	cur_elev = 0.0f;
 	for (int i = 0; i < n; i++) {
-		renderWindows(tiers[1], cur_elev);
+		if (cur_tex_wall != SKYSCRAPER&&i>0)
+			renderWindows(tiers[1], cur_elev);
 		cur_elev = extendBuilding(tiers[1], cur_elev);
 	}
 
@@ -576,7 +579,8 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	float elevation = 0.0f;
 	for (int i = levels.size() - 1; i >= 0;) {
 		srand(rand());
-		renderWindows(levels[i], elevation);
+		if (cur_tex_wall != SKYSCRAPER)
+			renderWindows(levels[i], elevation);
 		elevation = extendBuilding(levels[i], elevation);
 		if (rand() % 3 <= 1) {//66% chance to change floor plan
 			i--;
