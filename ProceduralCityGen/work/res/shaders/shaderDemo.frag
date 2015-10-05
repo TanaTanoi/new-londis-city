@@ -2,36 +2,43 @@
 varying vec3 position;
 varying vec3 normal;
 
+uniform float shininess;
+
 uniform sampler2D texture0;
 varying vec2 vTextureCoord0;
 
+uniform vec3 global_ambient;
 void main()
 {
-		float shininess = 1;
 		int MAX_LIGHTS = 3;
-		vec3 ambientCombo = vec3(0,0,0);
+		vec3 ambientCombo = global_ambient;
 		vec3 diffuseCombo = vec3(0,0,0);
 		vec3 specularCombo = vec3(0,0,0);
+		float lambert = 1.0f;
 		for(int i =0; i < MAX_LIGHTS;i++){
 			vec3 lightPos =gl_LightSource[i].position.xyz;
-			vec3 lambient =gl_LightSource[i].ambient.xyz;  //gl_LightSource[0]
+			vec3 lambient =gl_LightSource[i].ambient.xyz;
 	 		vec3 ldiffuse =gl_LightSource[i].diffuse.xyz;
 	 		vec3 lspecular=gl_LightSource[i].specular.xyz;
 
 	 		vec3 surf2light=normalize(lightPos-position);
 
 			float dist=length(position-lightPos);   //distance from light-source to surface
-			float att=1.0/(1.0+0.1*dist+0.01*dist*dist);    //attenuation (constant,linear,quadric)
+			float att=1.0/(1.0+0.1*dist+0.001*dist*dist);    //attenuation (constant,linear,quadric)
 
 	 		if(gl_LightSource[i].position.w > 0){///in the case of spotlight lights and point lights
 
-	 			float diff = dot(normalize(gl_LightSource[i].spotDirection.xyz),surf2light);
-	 			diff = acos(diff/length(gl_LightSource[i].spotDirection.xyz)/length(surf2light));
-	 			if(!(diff>3.1-gl_LightSource[i].spotCutoff)){
-	 				continue;//skip this light if this fragment is out the scope of the light
+	 			float theta = dot(normalize(gl_LightSource[i].spotDirection.xyz),-surf2light);
+	 			theta = acos(theta/length(gl_LightSource[i].spotDirection.xyz)/length(surf2light));
+	 			if((theta>gl_LightSource[i].spotCutoff)){
+	 				lambert = pow(gl_LightSource[i].spotCutoff/theta,gl_LightSource[i].spotExponent);
+		 			if(lambert<0.0){
+		 				continue;//skip this light if this fragment is out the scope of the light
+		 			}
+
 	 			}
 	 		}else{								//in the case of directional lights
-	 			att = min(1,max(dot(lightPos,-normal),0.0)*gl_LightSource[i].position.w);
+	 			att = min(1,max(dot(lightPos,-normal),0.0));//min(1,max(dot(lightPos,-normal),0.0)*gl_LightSource[i].position.w);
 	 			surf2light = -lightPos;
 	 		}
 
@@ -42,8 +49,8 @@ void main()
 	        vec3 reflection=reflect(-surf2light,norm);
 			float scont=pow(max(0.0,dot(surf2view,reflection)),shininess);
 
-			ambientCombo+= lambient*att;
-			diffuseCombo+=dcont*ldiffuse*att;
+			ambientCombo+= lambient*att*lambert;
+			diffuseCombo+=dcont*ldiffuse*att*lambert;
 			specularCombo+=scont*lspecular*att;
 
 		}
@@ -54,7 +61,7 @@ void main()
 
         vec3 diffuse=color*diffuseCombo;
 
-        vec3 specular=specularCombo*color;
+        vec3 specular=color*specularCombo;
 
-        gl_FragColor=vec4((ambient+diffuse+specular),1.0);  //<- don't forget the paranthesis (ambient+diffuse+specular)
+        gl_FragColor=vec4((ambient+diffuse),1.0);
 }
