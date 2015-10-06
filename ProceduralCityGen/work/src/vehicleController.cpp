@@ -89,7 +89,7 @@ void VehicleController::renderVehicles() {
 		vec3 start = vec3();
 		vec3 goal = vec3();
 		interpolate(&v, &start, &goal);
-		renderVehicle(&v, vec3(), vec3(), vec3(0.1, 0.1, 0.1), -1);
+		renderVehicle(&v, trans, rot, vec3(0.1, 0.1, 0.1), -1);
 	}
 }
 
@@ -181,6 +181,7 @@ float VehicleController::disToNextVehicle(Vehicle* from) {
 				break;
 			}
 
+
 			// If the distance calculated is less than the original min, replace it
 			min = (distance < min) ? distance : min;
 		}
@@ -189,6 +190,10 @@ float VehicleController::disToNextVehicle(Vehicle* from) {
 	return min;
 }
 
+intersection VehicleController::checkIntersections(vec3* position) {
+	intersection sect;
+	return sect;
+}
 /**
  * Interpolate a vehicle between a start point and an end point.
  * TODO allow the car to turn gorners.
@@ -225,6 +230,8 @@ void VehicleController::interpolate(Vehicle *vehicle, vec3 *from, vec3 *goal) {
 
 	vehicle->translatePos(new_pos);
 }
+
+
 
 // Probably don't need this
 void VehicleController::cleanUp() {

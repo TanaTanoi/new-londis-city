@@ -13,6 +13,7 @@ SET(headers
 	"section.hpp"
 	"generator.h"
 	"vehicle.hpp"
+	"vehicleController.hpp"
 	"utility.hpp"
 	"roadNetwork.hpp"
 )
