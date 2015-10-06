@@ -6,6 +6,7 @@
 #include "generator.h"
 #include "utility.hpp"
 #include "section.hpp"
+#include "building.hpp"
 using namespace std;
 using namespace comp308;
 
@@ -203,7 +204,6 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	int n[] = { shapeA.size(),shapeB.size() };
 	//current shape we are tracing
 	int curShape = 0;
-	cout<<"Lines :";
 	int index = 0;
 	//find point furthest away from the center of B
 	vec2 midB = centerPoint(shapeB);
@@ -216,10 +216,9 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	vec2 currentPoint = shapeA[index];
 	//while we don't contain the next point in the trace (currentPoint)
 	while (!containsVec(newPlan,currentPoint)) {
-//		cout<<"In loop. Index: "<<index<< " On shape " << (curShape+1)<<endl;
 		//add the point
 		newPlan.push_back(currentPoint);
-		cout<< " " << index<<":"<<curShape<<endl;
+		//cout<< " " << index<<":"<<curShape<<endl;
 		//check this line against the other shape for intersections
 		bool hasIntersection = false;
 		for (int j = 0; j < n[!curShape]; j++) {//cycle through other shape
@@ -230,7 +229,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 //					cout<<"found intersection at " << j << endl;
 					//if we find an intersection, add it
 					newPlan.push_back(util::getIntersection(currentPoint, shapeA[(index + 1) % n[0]], shapeB[j], shapeB[(j + 1) % n[1]]));
-					cout << " I1" << endl;
+					//cout << " I1" << endl;
 					//and then add point on second shape
 					index = (j + 1) % n[1];
 					hasIntersection = true;
@@ -240,7 +239,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 				if (util::intersects(currentPoint, shapeB[(index + 1) % n[1]], shapeA[j], shapeA[(j + 1) % n[0]])) {
 					//if we find an intersection, add it
 					newPlan.push_back(util::getIntersection(currentPoint, shapeB[(index + 1) % n[1]], shapeA[j], shapeA[(j + 1) % n[0]]));
-					cout<< " I2"<<endl;
+					//cout<< " I2"<<endl;
 					//and then add point on second shape
 					index = (j + 1) % n[0];
 					hasIntersection = true;
@@ -291,3 +290,6 @@ section Generator::createRandomSection(){
 	return {lines,0,0};
 }
 
+vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
+	//TODO convert a lot into a list of building parameters I can send to the main then building class
+}

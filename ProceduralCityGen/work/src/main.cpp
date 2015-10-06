@@ -186,7 +186,7 @@ void init() {
 	/*Create a new building object*/
 	building = Building();
 	building.initTexture();
-	initSkybox("../work/res/textures/cubeMap.jpg");
+	initSkybox("../work/res/textures/officeSkybox.png");
 	skybox_shader =  makeShaderProgram("../work/res/shaders/skybox_shader.vert", "../work/res/shaders/skybox_shader.frag");
 }
 

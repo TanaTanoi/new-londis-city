@@ -100,7 +100,6 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	return result;
 }
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
-
 	int n = floor.size();
 	vec2 mid = Generator::centerPoint(floor);
 	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
@@ -114,20 +113,28 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
-
+	
 	/*n amount of walls*/
+	
 	for (int i = 0; i < n; i++) {
+		//->
+		
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
 		vec3 botr = bot[(i + 1) % n];
 		vec3 botl = bot[i];
+	
+		
 		vec3 normal = cross((botl - topr), (topl - topr));
-		normal = normalize(normal);
-
+		if (length(normal) > 0) {
+			normal = normalize(normal);
+		}
 		float len = abs(length(botl-botr));	//length of the wall
+	
 		len /=tex_wall_width;	//the proportion of the wall
-
+								//->		
 		//Use texture
+		
 		glBindTexture(GL_TEXTURE_2D,tex_wall[cur_tex_wall][cur_tex_wall_num]);
 		glBegin(GL_QUADS);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
@@ -140,12 +147,13 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 			glTexCoord2f(0,0);
 			glVertex3f(topl.x, topl.y, topl.z);
 		glEnd();
-
+		
 		//Generate windows
 		//if(cur_tex_wall!=SKYSCRAPER)
 			//generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
+	
 
 	glBegin(GL_TRIANGLES);
 	/*Render a roof here, or at least a top*/
@@ -162,6 +170,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 
 	}
 	glEnd();
+	
 	return height;
 }
 
@@ -564,7 +573,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	vector<vector<vec2>> levels = vector<vector<vec2>>();
 	levels.push_back(Generator::generateFloorPlan(mid, minDist, rand() % 4 + 4));//add base
 	srand(rand());
-	//generate 1 to 4 plan changes
+	//generate 2 to 5 plan changes
 	for (int i = 0; i < rand() % 3 + 2; i++) {
 		srand(rand());
 		float xmul = rand() % 2 - 1;//-1 to 1;
