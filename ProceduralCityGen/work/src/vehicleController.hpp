@@ -8,7 +8,15 @@
 #ifndef SRC_VEHICLECONTROLLER_HPP_
 #define SRC_VEHICLECONTROLLER_HPP_
 
-#include "roadNetwork.hpp"
+
+/**
+ * Used to show if there are cars at the surrounding roads at an intersection.
+ */
+struct intersection {
+	bool foward, port, starboard;
+};
+
+class RoadNetwork;
 
 // Controller for vehicles
 class VehicleController {
@@ -40,6 +48,7 @@ private:
 	void initTexture(std::string, int);
 
 	float disToNextVehicle(Vehicle*);
+	intersection checkIntersections(comp308::vec3*);
 	void interpolate(Vehicle*, comp308::vec3*, comp308::vec3*);
 
 public:
