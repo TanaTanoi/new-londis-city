@@ -51,6 +51,7 @@ void SectionDivider::divideLot(lot l) {
  */
 
 lot SectionDivider::recDivideSection(lot lot, section s) {
+	cout << "Rec divide" << endl;
 	vector<section> secs = splitSection(s);
 	//cout << "section size" << secs.size() << endl;
 	//cout << "Goal size" << goalArea <<endl;
@@ -76,6 +77,10 @@ vector<section> SectionDivider::splitSection(section s) {
 	line l = findLongestEdge(s);
 	//cout << "Longest edge ID " << l.ID << endl;
 	vec2 lineVec =  l.end - l.start;
+	vec2 lineVec2 =  l.start - l.end;
+
+	cout << "Line vectors" << lineVec.x << "," << lineVec.y << " "<< lineVec2.x << "," << lineVec2.y << endl;
+
 	vec2 perpBi = vec2(-lineVec.y, lineVec.x); // gets perpendicular bisector to longest edge
 
 	// Randomly decides a position around the centre of the longest edge
@@ -89,10 +94,10 @@ vector<section> SectionDivider::splitSection(section s) {
 	if(l.end.x == l.start.x){
 		centreX = l.start.x;
 		leng = abs(l.end.y - l.start.y);
-		centreY = min(l.end.y, l.start.y) + 0.5*leng;//min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+		centreY = min(l.end.y, l.start.y) + 0.51*leng;//min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
 	}
 	else{
-		centreX = min(l.end.x, l.start.x) + 0.5*leng;        //min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+		centreX = min(l.end.x, l.start.x) + 0.51*leng;        //min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
 		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 		float c = l.end.y - m*l.end.x;
 		centreY = m*centreX + c;
@@ -251,19 +256,19 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 }
 
 void SectionDivider::testSection() {
-	//			line a = {vec2(100,100),vec2(400,100),0};
-	//			line d = {vec2(150,300), vec2(100,100), 3 };
-	//			line c = {vec2(350,300),vec2(150,300), 2};
-	//			line b = { vec2(400,100),  vec2(350,300),1 };
+				line a = {vec2(100,100),vec2(400,100),0};
+				line d = {vec2(150,300), vec2(100,100), 3 };
+				line c = {vec2(350,300),vec2(150,300), 2};
+				line b = { vec2(400,100),  vec2(350,300),1 };
 	//
-	line a = {vec2(150,100),vec2(400,100),0};
-	line d = {vec2(100,400), vec2(150,100), 3 };
-	line c = {vec2(400,400),vec2(100,400), 2};
-	line b = { vec2(400,150),  vec2(400,400),1 };
+//	line a = {vec2(150,100),vec2(400,100),0};
+//	line d = {vec2(100,400), vec2(150,100), 3 };
+//	line c = {vec2(400,400),vec2(100,400), 2};
+//	line b = { vec2(400,150),  vec2(400,400),1 };
 
-	//	line a = {vec2(100,100),vec2(400,100),0};
-	//	line b = {vec2(400,100),vec2(250,300),1};
-	//	line c = {vec2(250,300),vec2(100,100),2};
+//		line a = {vec2(100,100),vec2(400,100),0};
+//		line b = {vec2(400,100),vec2(250,300),1};
+//		line c = {vec2(250,300),vec2(100,100),2};
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
@@ -461,12 +466,12 @@ bool SectionDivider::hasStreetAccess(section s, lot l) {
 }
 
 void SectionDivider::renderTest() {
-	//renderWireFrame();
-	renderPoly();
+	renderWireFrame();
+	//renderPoly();
 }
 
 void SectionDivider::renderWireFrame(){
-	for(int i =8; i < (int)lots[0].sections.size() - 4; i++){ // (int)sections.size()
+	for(int i =0; i < (int)lots[0].sections.size(); i++){ // (int)sections.size()
 
 //		if(i == 8){
 //			cout << lots[0].sections[8].lines[0].start.x << "," <<  lots[0].sections[8].lines[0].start.y
@@ -493,7 +498,10 @@ void SectionDivider::renderWireFrame(){
 }
 
 void SectionDivider::renderPoly(){
-	for(int i = 0; i < (int)lots[0].sections.size(); i++){
+	for(int i = 0; i<	(int)lots[0].sections.size(); i++){ // 55 -14
+		//cout << "area " << lots[0].sections[i].area << endl;
+
+
 		glBegin(GL_POLYGON);
 		int longID  = findLongestEdge(lots[0].sections[i]).ID;
 		srand(lots[0].sections[i].ID);

@@ -71,6 +71,7 @@ road RoadNetwork::truncate(road r){
 	// Then pull inside a little
 	// Get length of line
 	// return if at least 2/3 of original length
+	return r; // just for compilation
 }
 
 /**
