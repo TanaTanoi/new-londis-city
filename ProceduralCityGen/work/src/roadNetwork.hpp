@@ -44,11 +44,20 @@ private:
 	void addRoad(roadNode,roadNode);
 	void calulateBoundary();
 
+
+
 public:
+	RoadNetwork();
 	void renderRoads();
 	void createRoads(section);
+	void recDivide(road);
+
+	// Testing
+		void testNetwork();
 
 	// Cam's methods
+
+	road findClosestRoads(vec3);
 
 	inline const std::map<int, std::vector<int> >& getAdjacencyList() const {
 		return adjacencyList;

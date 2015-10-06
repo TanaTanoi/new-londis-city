@@ -13,6 +13,8 @@ using namespace util;
 using namespace comp308;
 using namespace std;
 
+RoadNetwork::RoadNetwork(){}
+
 /**
  * Checks whether a road will be fully inside a the world
  * which is represented by a section
@@ -133,6 +135,10 @@ void RoadNetwork::createRoads(section world){
 	// Now take in population density
 	// Now generate highways
 	// Now generate minor roads
+}
+
+void RoadNetwork::testNetwork(){
+	//createRoads();
 }
 
 

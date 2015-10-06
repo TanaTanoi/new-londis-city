@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 
+#include "roadNetwork.hpp"
 #include "comp308.hpp"
 #include "main.hpp"
 #include "building.hpp"
@@ -28,8 +29,9 @@ using namespace comp308;
 
 int testList;
 SectionDivider *g_sections = nullptr;
+RoadNetwork *g_network = nullptr;
 
-//0, bmode, 1, rmode, 2 cmode
+//0, bmode, 1, smode, 2 cmode, 3 rmode
 int mode = 0;
 //Main program
 //
@@ -87,6 +89,7 @@ int main(int argc, char **argv) {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	string BMODE = "B";
+	string SMODE = "S";
 	string RMODE = "R";
 	string CMODE = "C";
 
@@ -95,10 +98,14 @@ int main(int argc, char **argv) {
 		testList = building.generateBuildingFromString("testd");
 		mode = 0;
 		initLighting();
-	}else if(argv[1] == RMODE){
+	}else if(argv[1] == SMODE){
 		g_sections = new SectionDivider();
 		g_sections->testSection();
 		mode = 1;
+	}else if(argv[1] == RMODE){
+		g_network = new RoadNetwork();
+		g_network->testNetwork();
+		mode = 3;
 	}else if(argv[1] == CMODE){
 		mode = 2;
 	}
@@ -130,7 +137,7 @@ int main(int argc, char **argv) {
 			drawGrid(40, 1);
 			glCallList(testList);
 			drawSkycube(20.0f);
-		}else if(mode == 1){
+		}else if(mode == 1 || mode == 3){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
 			glViewport(0, 0, g_winWidth, g_winHeight);   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
@@ -142,7 +149,12 @@ int main(int argc, char **argv) {
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 
+			if(mode == 1){
 			g_sections->renderTest();
+			}
+			else{
+				g_network->renderRoads();
+			}
 		}else if(mode == 2){
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
@@ -157,6 +169,7 @@ int main(int argc, char **argv) {
 	// Delete pointers
 	//delete g_vehicleCtrl;
 	delete g_sections;
+	delete g_network;
 	glfwTerminate();
 
 }
