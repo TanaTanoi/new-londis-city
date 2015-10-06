@@ -25,6 +25,12 @@ double g_winWidth 	= 640;
 double g_winHeight 	= 480;
 
 bool m_LeftButton = false;
+
+/*Skybox texture*/
+GLuint skyboxID = 0;
+/*Skybox shader*/
+GLuint skybox_shader = 0;
+
 /*Mouse position*/
 comp308::vec2 m_pos = comp308::vec2(0, 0);
 float pitch = 0;
@@ -62,7 +68,8 @@ void init(void);
 /*Rendering delcarations*/
 void drawGrid(double,double);
 int generateBuildingFromString(std::string);
-
+void initSkybox(std::string);
+void drawSkycube(float);
 //int generateHexagonBuilding(float,float);
 
 /*Callback delcarations*/

@@ -21,7 +21,8 @@
 #include "building.hpp"
 #include "generator.h"
 #include "section.hpp"
-
+#include "shaderLoader.hpp"
+#include "imageLoader.hpp"
 using namespace std;
 using namespace comp308;
 
@@ -91,7 +92,7 @@ int main(int argc, char **argv) {
 
 	if(argc > 1 && argv[1] == BMODE ){
 		init();
-		testList = building.generateBuildingFromString("test");
+		testList = building.generateBuildingFromString("testd");
 		mode = 0;
 		initLighting();
 	}else if(argv[1] == RMODE){
@@ -128,6 +129,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
+			drawSkycube(20.0f);
 		}else if(mode == 1){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
@@ -171,6 +173,8 @@ void init() {
 	/*Create a new building object*/
 	building = Building();
 	building.initTexture();
+	initSkybox("../work/res/textures/cubeMap.jpg");
+	skybox_shader =  makeShaderProgram("../work/res/shaders/skybox_shader.vert", "../work/res/shaders/skybox_shader.frag");
 }
 
 void initLighting() {
@@ -346,7 +350,7 @@ void joystickEventsPoll() {
 			(float)((int)(axes[4] * 100)) / 100.0f);
 
 
-		float threshold = 0.2f;//stops drifting when the user isn't touching the controler 
+		float threshold = 0.2f;//stops drifting when the user isn't touching the controler
 		if (abs(c_RSpos.y) >= threshold) {
 			yaw += (c_RSpos.y - 0.0f)*1.2f;
 		}
@@ -378,4 +382,89 @@ void joystickEventsPoll() {
 		p_pos -= 0.05f*p_right*c_LSpos.x;
 
 	}
+
+
+}
+
+void initSkybox(string filepath){
+
+	cout<<"Loading cubemap " << filepath<<endl;
+
+	glGenTextures(1, &skyboxID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxID);
+
+	image tex(filepath);
+	int cubeWidth = tex.w/4;
+
+	//images for each part of the cubemap
+	image p_x =tex.subImage(cubeWidth*2,cubeWidth*1,cubeWidth,cubeWidth);//right
+	image n_x =tex.subImage(cubeWidth*0,cubeWidth*1,cubeWidth,cubeWidth);//left
+	image p_y =tex.subImage(cubeWidth*1,cubeWidth*0,cubeWidth,cubeWidth);//top
+	image n_y =tex.subImage(cubeWidth*1,cubeWidth*2,cubeWidth,cubeWidth);//bot
+	image n_z =tex.subImage(cubeWidth*3,cubeWidth*1,cubeWidth,cubeWidth);//back
+	image p_z =tex.subImage(cubeWidth*1,cubeWidth*1,cubeWidth,cubeWidth);//front
+	vector<image> faces = vector<image>();
+	faces.push_back(p_x);
+	faces.push_back(n_x);
+	faces.push_back(p_y);
+	faces.push_back(n_y);
+	faces.push_back(p_z);
+	faces.push_back(n_z);
+	for(int i =0;i<6;i++){
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB8,cubeWidth,cubeWidth,0,GL_RGB,GL_UNSIGNED_BYTE,faces[i].dataPointer());
+		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL_RGB8, cubeWidth, cubeWidth,faces[i].glFormat(), GL_UNSIGNED_BYTE, faces[i].dataPointer());
+	}
+
+	//Specify cubemap paramters
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"), GL_TEXTURE_CUBE_MAP);
+
+}
+
+void drawSkycube(float size){
+	glUseProgram(skybox_shader);
+	vector<vec2> box = vector<vec2>();
+	box.push_back(vec2(-size,-size));
+	box.push_back(vec2(-size,size));
+	box.push_back(vec2(size,size));
+	box.push_back(vec2(-size,size));
+
+	glBegin(GL_QUADS);
+	//Floor
+	glNormal3f(0,1,0);
+	for(int i = 0; i < 4;i++){
+		glVertex3f(box[i].x,-size,box[i].y);
+	}
+	glNormal3f(0,-1,0);
+	for(int i = 0; i < 4;i++){
+		glVertex3f(box[i].x,size,box[i].y);
+	}
+	for(int i = 0; i < 4;i++){
+		vec3 normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
+		glNormal3f(normal.x,normal.y,normal.z);
+		glTexCoord2f(0,0);
+		glVertex3f(box[i].x,-size,box[i].y);
+		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
+		glNormal3f(normal.x,normal.y,normal.z);
+		glTexCoord2f(0,1);
+		glVertex3f(box[i].x,size,box[i].y);
+		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
+		glNormal3f(normal.x,normal.y,normal.z);
+		glTexCoord2f(1,1);
+		glVertex3f(box[(i+1)%4].x,size,box[(i+1)%4].y);
+		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
+		glNormal3f(normal.x,normal.y,normal.z);
+		glTexCoord2f(1,0);
+		glVertex3f(box[(i+1)%4].x,-size,box[(i+1)%4].y);
+	}
+
+	glEnd();
+
 }

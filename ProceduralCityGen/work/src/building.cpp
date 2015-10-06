@@ -114,7 +114,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
-	
+
 	/*n amount of walls*/
 	for (int i = 0; i < n; i++) {
 		vec3 topl = top[i];
@@ -146,7 +146,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 			//generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
-	
+
 	glBegin(GL_TRIANGLES);
 	/*Render a roof here, or at least a top*/
 	glColor3f(0,0,0);
@@ -197,7 +197,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			if (cur_tex_wall != SKYSCRAPER)
 				renderWindows(floor, height);
 			height = extendBuilding(floor, height);
-			
+
 			break;
 		case 'R':
 			if(rand()%2==0){
@@ -363,7 +363,7 @@ int Building::generateRandomBuildings() {
 	float disp = 1.2f;
 	float building_size = 1.2f;
 	glNewList(toReturn, GL_COMPILE);
-
+	glUseProgram(g_shader);
 	vector<vec2> points;
 	for (float i = -size; i <= size; i += disp) {
 		for (float j = -size; j <= i; j += disp) {
@@ -423,6 +423,7 @@ int Building::generateBuildingFromString(string input) {
 		}
 	}
 	glNewList(toReturn, GL_COMPILE);
+	glUseProgram(g_shader);
 	cout << "Total buildings: " << buildings.size() << endl;
 	//Compile all buildings into one display list and return
 	for (buildingLOD b : buildings) {
