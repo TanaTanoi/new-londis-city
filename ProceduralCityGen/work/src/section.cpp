@@ -9,7 +9,7 @@
 #include "section.hpp"
 #include "comp308.hpp"
 #include "utility.hpp"
-
+#include "generator.h"
 using namespace std;
 using namespace comp308;
 using namespace util;
@@ -40,7 +40,7 @@ line SectionDivider::findLongestEdge(section s) {
 void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
 	lots[l.ID] = recDivideSection(l,l.boundingBox);
-	//lots[l.ID] = removeUnusableSections(lots[l.ID]);
+	lots[l.ID] = removeUnusableSections(lots[l.ID]);
 }
 
 
@@ -276,13 +276,14 @@ void SectionDivider::testSection() {
 	lines.push_back(c);
 	lines.push_back(d);
 
-	section s = { lines };
+	//section s = { lines };
+	section s = Generator::createRandomSection();
 	s.area = getSectionSize(s);
 	cout << s.area << endl;
 	//sections.push_back(s);
 
 	lot l;
-	l.boundingBox = s;
+	l.boundingBox = Generator::createRandomSection();
 	l.ID = 0;
 	l.sections = vector<section>();
 
@@ -465,8 +466,8 @@ bool SectionDivider::hasStreetAccess(section s, lot l) {
 }
 
 void SectionDivider::renderTest() {
-	renderWireFrame();
-	//renderPoly();
+	//renderWireFrame();
+	renderPoly();
 }
 
 void SectionDivider::renderWireFrame(){
