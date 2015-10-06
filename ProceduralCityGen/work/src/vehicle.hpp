@@ -1,4 +1,6 @@
 #pragma once
+#ifndef SRC_VEHICLE_HPP_
+#define SRC_VEHICLE_HPP_
 /*
  * vehicle.hpp
  *
@@ -120,47 +122,5 @@ public:
 	}
 };
 
-// Controller for vehicles
-class VehicleController {
 
-private:
-
-	// Points that vehicles cannot occupy
-	std::vector<comp308::vec3> m_outOfBounds;
-
-	// Size of the map
-	comp308::vec3 m_mapSize;
-
-	// textures and cars
-	std::vector<std::string> m_filenames_car;
-	std::vector<std::string> m_filenames_tex;
-
-	std::vector<Vehicle> m_vehicles;
-
-	// Textures for vehicles
-	GLuint *m_textures;
-
-	void readConfig(std::string);
-	void readTextures(std::string);
-	void initVehicles();
-	void initTexture(std::string, int);
-
-	float disToNextVehicle(Vehicle*);
-	void interpolate(Vehicle*, comp308::vec3*, comp308::vec3*);
-
-public:
-
-	VehicleController(std::string, std::string, std::vector<comp308::vec3>, comp308::vec3);
-
-	// Render all of the vehicles
-	void renderVehicles();
-
-	// Render a specific vehicle given a transformation and a texture
-	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int);
-
-	// Delete all pointers
-	void cleanUp();
-
-};
-
-// #endif /* SRC_VEHICLE_HPP_ */
+#endif /* SRC_VEHICLE_HPP_ */
