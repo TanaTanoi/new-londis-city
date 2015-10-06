@@ -110,6 +110,7 @@ inline vec2 getIntersection(line l, line o){
 	float c = o.end.y - m*o.end.x;
 
 	if (m == m_l || m == -m_l) {
+		cout <<"Threw exception" << endl;
 		throw noIntersectionException();
 	}
 	if (l.end.x == l.start.x) { // line is vertical
@@ -131,15 +132,10 @@ inline vec2 getIntersection(line l, line o){
 
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
-	float y = m_l * x + c_l;
+	float y = m * x + c; // was m_l and c_l
 
-	if(x == 0.0 && y == 0.0){
-		//cout << "Returning blank vec2" << endl;
-	}
-
-	if(y > 300){
-		//cout << "Intersection Point too high" << endl;
-		//cout << x << "  " << y << endl;
+	if(x == 337.5){
+		cout << "Found bisector cut" << endl;
 	}
 
 	return vec2(x,y);
