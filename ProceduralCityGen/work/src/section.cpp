@@ -9,7 +9,7 @@
 #include "section.hpp"
 #include "comp308.hpp"
 #include "utility.hpp"
-#include "generator.hpp"
+#include "generator.h"
 using namespace std;
 using namespace comp308;
 using namespace util;
