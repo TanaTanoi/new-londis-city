@@ -40,7 +40,7 @@ line SectionDivider::findLongestEdge(section s) {
 void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
 	lots[l.ID] = recDivideSection(l,l.boundingBox);
-	//lots[l.ID] = removeUnusableSections(lots[l.ID]);
+	lots[l.ID] = removeUnusableSections(lots[l.ID]);
 }
 
 
@@ -466,8 +466,8 @@ bool SectionDivider::hasStreetAccess(section s, lot l) {
 }
 
 void SectionDivider::renderTest() {
-	renderWireFrame();
-	//renderPoly();
+	//renderWireFrame();
+	renderPoly();
 }
 
 void SectionDivider::renderWireFrame(){
