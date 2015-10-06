@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "comp308.hpp"
-
+#include "section.hpp"
 class Generator {
 
 private:
@@ -29,5 +29,5 @@ public:
 	static comp308::vec2 centerPoint(std::vector<comp308::vec2> points);
 	static std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
 	static std::vector<comp308::vec2> combinePlans(std::vector<comp308::vec2>, std::vector<comp308::vec2>);
-
+	static section createRandomSection(void);
 };

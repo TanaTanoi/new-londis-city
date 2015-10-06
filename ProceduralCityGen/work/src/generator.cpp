@@ -5,7 +5,7 @@
 #include "comp308.hpp"
 #include "generator.h"
 #include "utility.hpp"
-
+#include "section.hpp"
 using namespace std;
 using namespace comp308;
 
@@ -271,4 +271,17 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	}
 	return newPlan;
 
+
 }
+
+section Generator::createRandomSection(){
+	section s;
+	vector<vec2> points = generateFloorPlan(vec2(400,400),100,rand()%5+3);
+	vector<util::line> lines = vector<util::line>();
+	int n = points.size();
+	for(int i =0; i < n;i++){
+		lines.push_back({points[i],points[(i+1)%n],i});
+	}
+	return {lines,0,0};
+}
+

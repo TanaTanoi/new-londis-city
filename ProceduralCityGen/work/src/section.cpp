@@ -9,7 +9,7 @@
 #include "section.hpp"
 #include "comp308.hpp"
 #include "utility.hpp"
-
+#include "generator.hpp"
 using namespace std;
 using namespace comp308;
 using namespace util;
@@ -271,13 +271,14 @@ void SectionDivider::testSection() {
 	lines.push_back(c);
 	lines.push_back(d);
 
-	section s = { lines };
+	//section s = { lines };
+	section s = Generator::createRandomSection();
 	s.area = getSectionSize(s);
 	cout << s.area << endl;
 	//sections.push_back(s);
 
 	lot l;
-	l.boundingBox = s;
+	l.boundingBox = Generator::createRandomSection();
 	l.ID = 0;
 	l.sections = vector<section>();
 
