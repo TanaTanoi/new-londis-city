@@ -18,6 +18,7 @@
 #include "building.hpp"
 #include "generator.h"
 #include "vehicle.hpp"
+#include "vehicleController.hpp"
 
 /*Fields */
 double g_winWidth 	= 640;
