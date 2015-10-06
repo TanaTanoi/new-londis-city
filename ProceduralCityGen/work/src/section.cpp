@@ -40,7 +40,7 @@ line SectionDivider::findLongestEdge(section s) {
 void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
 	lots[l.ID] = recDivideSection(l,l.boundingBox);
-	lots[l.ID] = removeUnusableSections(lots[l.ID]);
+	//lots[l.ID] = removeUnusableSections(lots[l.ID]);
 }
 
 
@@ -251,25 +251,25 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 }
 
 void SectionDivider::testSection() {
-	//		line a = {vec2(100,100),vec2(400,100),0};
-	//		line d = {vec2(150,300), vec2(100,100), 3 };
-	//		line c = {vec2(350,300),vec2(150,300), 2};
-	//		line b = { vec2(400,100),  vec2(350,300),1 };
+	//			line a = {vec2(100,100),vec2(400,100),0};
+	//			line d = {vec2(150,300), vec2(100,100), 3 };
+	//			line c = {vec2(350,300),vec2(150,300), 2};
+	//			line b = { vec2(400,100),  vec2(350,300),1 };
 	//
-	//	line a = {vec2(150,100),vec2(400,100),0};
-	//	line d = {vec2(100,400), vec2(150,100), 3 };
-	//	line c = {vec2(400,400),vec2(100,400), 2};
-	//	line b = { vec2(400,150),  vec2(400,400),1 };
+	line a = {vec2(150,100),vec2(400,100),0};
+	line d = {vec2(100,400), vec2(150,100), 3 };
+	line c = {vec2(400,400),vec2(100,400), 2};
+	line b = { vec2(400,150),  vec2(400,400),1 };
 
-	line a = {vec2(100,100),vec2(400,100),0};
-	line b = {vec2(400,100),vec2(250,300),1};
-	line c = {vec2(250,300),vec2(100,100),2};
+	//	line a = {vec2(100,100),vec2(400,100),0};
+	//	line b = {vec2(400,100),vec2(250,300),1};
+	//	line c = {vec2(250,300),vec2(100,100),2};
 
 	vector<line > lines = vector<line >();
 	lines.push_back(a);
 	lines.push_back(b);
 	lines.push_back(c);
-	//lines.push_back(d);
+	lines.push_back(d);
 
 	section s = { lines };
 	s.area = getSectionSize(s);
@@ -460,13 +460,20 @@ bool SectionDivider::hasStreetAccess(section s, lot l) {
 }
 
 void SectionDivider::renderTest() {
-	//section s = sections.back();
+	//renderWireFrame();
+	renderPoly();
+}
+
+void SectionDivider::renderWireFrame(){
+	for(int i =8; i < (int)lots[0].sections.size() - 4; i++){ // (int)sections.size()
+
+//		if(i == 8){
+//			cout << lots[0].sections[8].lines[0].start.x << "," <<  lots[0].sections[8].lines[0].start.y
+//					<< "  " <<  lots[0].sections[8].lines[0].end.x << "," << lots[0].sections[8].lines[0].end.y << endl;
+//		}
 
 
-	//cout<< "rendering " << endl;
-
-	for(int i = 0; i < (int)lots[0].sections.size(); i++){ // (int)sections.size()
-		glBegin(GL_POLYGON);
+		glBegin(GL_LINES);
 		//cout << "Section " << i << endl;
 		//	line longLine = findLongestEdge(sections[0]);
 		int longID  = findLongestEdge(lots[0].sections[i]).ID;
@@ -476,32 +483,30 @@ void SectionDivider::renderTest() {
 		float g = ((float)rand() / (RAND_MAX));srand(rand());
 		float b = ((float)rand() / (RAND_MAX));srand(rand());
 		for (line l : lots[0].sections[i].lines) {
-			//		cout <<"Checking ID "<< l.ID << endl;
-			//if(longID == l.ID){ // draw green if longest line
-			//glColor3f(0.0,1.0,0.0);
-			//			cout <<"Drawing longest line: "<< l.ID << endl;
-			//}
-			//else{
-			//			cout <<"Not     longest line: "<< l.ID << endl;
-
-
-
-			glColor3f(r,g, b); // otherwise draw red
-			//}
-
+			glColor3f(r,g, b);
 			glVertex2f(l.start.x, l.start.y);
 			glVertex2f(l.end.x, l.end.y);
 		}
 		glEnd();
 	}
-
 }
 
-//void SectionDivider::cleanUp(){
-//	for(line * l : sections[0].lines){
-//		free(l);
-//	}
-//}
+void SectionDivider::renderPoly(){
+	for(int i = 0; i < (int)lots[0].sections.size(); i++){
+		glBegin(GL_POLYGON);
+		int longID  = findLongestEdge(lots[0].sections[i]).ID;
+		srand(lots[0].sections[i].ID);
+		float r = ((float)rand() / (RAND_MAX));srand(rand());
+		float g = ((float)rand() / (RAND_MAX));srand(rand());
+		float b = ((float)rand() / (RAND_MAX));srand(rand());
+		for (line l : lots[0].sections[i].lines) {
+			glColor3f(r,g, b);
+			glVertex2f(l.start.x, l.start.y);
+			glVertex2f(l.end.x, l.end.y);
+		}
+		glEnd();
+	}
+}
 
 
 

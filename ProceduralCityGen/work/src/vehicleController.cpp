@@ -4,7 +4,6 @@
  *  Created on: 19/09/2015
  *      Author: bryerscame
  */
-
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -15,7 +14,9 @@
 
 #include "comp308.hpp"
 #include "vehicle.hpp"
+#include "vehicleController.hpp"
 #include "imageLoader.hpp"
+#include "roadNetwork.hpp"
 
 using namespace std;
 using namespace comp308;
@@ -29,7 +30,10 @@ VehicleController::VehicleController(string vehicles, string textures,
 	readConfig(vehicles);
 	readTextures(textures);
 	initVehicles();
+}
 
+void VehicleController::parseRoadNetwork(RoadNetwork *network) {
+	m_network = network;
 }
 
 void VehicleController::initVehicles() {

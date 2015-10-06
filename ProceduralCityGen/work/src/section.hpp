@@ -22,7 +22,7 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 2000; // Does not work at 11000 FIXME
+	float goalArea = 5500; // Does not work at 11000 FIXME
 	float minArea = 500;
 	std::vector<lot> lots;
 	int sectionID = 0;
@@ -39,6 +39,10 @@ private:
 	float getSectionSize(section);
 	lot removeUnusableSections(lot);
 	bool hasStreetAccess(section, lot);
+
+
+	void renderPoly();
+	void renderWireFrame();
 	//bool intersects(line *, float, float, line *);
 
 	//Lot Methods
