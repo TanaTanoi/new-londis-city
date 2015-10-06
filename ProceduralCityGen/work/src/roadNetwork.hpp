@@ -47,4 +47,18 @@ private:
 public:
 	void renderRoads();
 	void createRoads(section);
+
+	// Cam's methods
+
+	inline const std::map<int, std::vector<int> >& getAdjacencyList() const {
+		return adjacencyList;
+	}
+
+	inline const std::vector<roadNode>& getAllNodes() const {
+		return allNodes;
+	}
+
+	inline const std::vector<road>& getAllRoads() const {
+		return allRoads;
+	}
 };
