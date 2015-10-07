@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			drawSkycube(20.0f);
+			//drawSkycube(20.0f);
 		}else if(mode == 1 || mode == 3){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black

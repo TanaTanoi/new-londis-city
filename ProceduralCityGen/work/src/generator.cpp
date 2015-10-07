@@ -68,6 +68,9 @@ else if (c == '*') {
 		return "R";
 	}
 }
+else if (c == '$') {
+	return "$";
+}
 return "" + c;
 }
 
@@ -75,7 +78,7 @@ return "" + c;
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomBuildingString(int itrs) {
 	itrs = max(min(itrs, 6), 3);
-	string result = "*";			//axoim
+	string result = "$*";			//axoim
 	for (int i = 0; i < itrs; i++) {
 		//for each string
 		string next = "";
@@ -292,4 +295,6 @@ section Generator::createRandomSection(){
 
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
+	vector<buildingParams> toReturn;
+	return toReturn;
 }
