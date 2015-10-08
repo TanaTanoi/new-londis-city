@@ -168,6 +168,7 @@ int main(int argc, char **argv) {
 			}
 			else{
 				glPushMatrix();
+				glScalef(zoom,zoom,0);
 				glTranslatef(p_pos.x,p_pos.y,0);
 				g_network->renderRoads();
 				glPopMatrix();
@@ -377,7 +378,7 @@ void mouseMotionCallback2D(GLFWwindow* window, double xpos, double ypos) {
 	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
 
 	if (m_LeftButton) {
-		p_pos.x += (m_pos.x - xpos);
+		p_pos.x -= (m_pos.x - xpos);
 		p_pos.y += (m_pos.y - ypos);
 	}
 	m_pos = vec2(xpos, ypos);
