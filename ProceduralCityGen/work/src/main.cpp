@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 	/*Setup callback functions*/
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
-	glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+	glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
@@ -95,6 +95,13 @@ int main(int argc, char **argv) {
 
 	if(argc > 1 && argv[1] == BMODE ){
 		init();
+		string one = "1";
+		cout<<argv[2] <<endl;
+		if(std::string(argv[2]) == "1"){
+			cout<<"CAM MODE"<<endl;
+			cam_mode = 1;
+			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+		}
 		testList = building.generateBuildingFromString("testd");
 		mode = 0;
 		initLighting();
@@ -103,6 +110,7 @@ int main(int argc, char **argv) {
 		g_sections->testSection();
 		mode = 1;
 	}else if(argv[1] == RMODE){
+		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 		mode = 3;
@@ -153,7 +161,10 @@ int main(int argc, char **argv) {
 			g_sections->renderTest();
 			}
 			else{
+				glPushMatrix();
+				glTranslatef(p_pos.x,p_pos.y,0);
 				g_network->renderRoads();
+				glPopMatrix();
 			}
 		}else if(mode == 2){
 			// Draw vehicles
@@ -240,7 +251,7 @@ void setupCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	perspectiveGL(45.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
-	if (joystick) {
+	if (cam_mode) {
 		lookAt(p_pos, p_pos + p_front, p_up);
 	}
 	else {
@@ -306,7 +317,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		//p_pos-= normalize(p_dir);
 		//p_pos.z +=1;
 		//p_pos.y+=1;
-		p_pos += 0.05f*p_front;
+		p_pos += 0.05f*p_front*1;
+
+		//p_pos -= 0.05f*p_right*1;
+	}else if(key == 65 && action){
+		vec3 p_right = cross(p_up, p_front);
+		p_pos += 0.05f*p_right*1;
+	}else if(key == 68&&action){
+		vec3 p_right = cross(p_up, p_front);
+		p_pos -= 0.05f*p_right*1;
+	}else if(key == 63&&action){
+		p_pos -= 0.05f*p_front*1;
 	}
 
 }
@@ -315,11 +336,12 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
 
 	if (m_LeftButton) {
-		rotation.x += (m_pos.x - xpos);
-		rotation.y += (m_pos.y - ypos);
-		/*yaw += (xpos - m_pos.x)*0.05f;
-		pitch = (m_pos.x - ypos)*0.05f;
-
+		//vector normalised to give a -1 to 1 value on the screen
+		vec2 normalisedVec = vec2(
+				-((g_winWidth/2)-m_pos.x)/(g_winWidth/2),
+				((g_winHeight/2)-m_pos.y)/(g_winHeight/2));
+		yaw += (normalisedVec.x - 0.0f)*1.2f;
+		pitch += (normalisedVec.y)*1.2f;
 		if (pitch > 89.0f)
 			pitch = 89.0f;
 		if (pitch < -89.0f)
@@ -327,14 +349,33 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 
 		float pitchR = radians(pitch);
 		float yawR = radians(yaw);
-		p_dir.x =cos(yawR)*cos(pitchR);
-		p_dir.y =sin(pitchR);
-		p_dir.z =sin(yawR)*cos(pitchR);
-		p_front = normalize(p_dir);*/
+		p_dir.x = cos(yawR)*cos(pitchR);
+		p_dir.y = sin(pitchR);
+		p_dir.z = sin(yawR)*cos(pitchR);
+		p_front = normalize(p_dir);
 	}
 	m_pos = vec2(xpos, ypos);
 }
 
+void mouseMotionCallbackModelView(GLFWwindow* window, double xpos, double ypos) {
+	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+
+	if (m_LeftButton) {
+		rotation.x += (m_pos.x - xpos);
+		rotation.y += (m_pos.y - ypos);
+	}
+	m_pos = vec2(xpos, ypos);
+}
+
+void mouseMotionCallback2D(GLFWwindow* window, double xpos, double ypos) {
+	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+
+	if (m_LeftButton) {
+		p_pos.x += (m_pos.x - xpos);
+		p_pos.y += (m_pos.y - ypos);
+	}
+	m_pos = vec2(xpos, ypos);
+}
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {

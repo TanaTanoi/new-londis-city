@@ -51,7 +51,7 @@ comp308::vec2 rotation = comp308::vec2(0,0);
 
 /*If a joystick is present*/
 int joystick;
-
+int cam_mode = 0;//0 for model view, 1 for FPS
 
 Building building;
 Generator generator;
@@ -75,6 +75,8 @@ void drawSkycube(float);
 /*Callback delcarations*/
 void mouseButtonCallback(GLFWwindow* , int , int , int );
 void mouseMotionCallbackFPS(GLFWwindow*, double, double);
+void mouseMotionCallbackModelView(GLFWwindow*, double, double);
+void mouseMotionCallback2D(GLFWwindow*, double, double);
 void mouseScrollCallback(GLFWwindow*, double, double);
 void windowSizeCallback(GLFWwindow*, int , int);
 void keyCallback(GLFWwindow* , int , int , int , int );
