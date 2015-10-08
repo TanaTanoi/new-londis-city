@@ -94,11 +94,13 @@ int main(int argc, char **argv) {
 	string CMODE = "C";
 
 	if(argc > 1 && argv[1] == BMODE ){
+		cout << "Building mode" << endl;
 		init();
 		testList = building.generateBuildingFromString("testd");
 		mode = 0;
 		initLighting();
 	}else if(argv[1] == SMODE){
+		cout << "Section mode" << endl;
 		g_sections = new SectionDivider();
 		g_sections->testSection();
 		mode = 1;
@@ -108,7 +110,10 @@ int main(int argc, char **argv) {
 		g_network->testNetwork();
 		mode = 3;
 	}else if(argv[1] == CMODE){
+		cout << "Car mode" << endl;
 		mode = 2;
+	}else{
+		cout << "entered no loops" << endl;
 	}
 
 
@@ -154,7 +159,6 @@ int main(int argc, char **argv) {
 			g_sections->renderTest();
 			}
 			else{
-				cout << "rendering roads" << endl;
 				g_network->renderRoads();
 			}
 		}else if(mode == 2){

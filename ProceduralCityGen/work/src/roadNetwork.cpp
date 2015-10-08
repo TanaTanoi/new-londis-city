@@ -89,17 +89,51 @@ void RoadNetwork::addIntersection(int id1, int id2){
  * Adds new node to the list of all road nodes
  * giving it a new ID
  */
-void RoadNetwork::addNode(vec2 point){
+roadNode RoadNetwork::addNode(vec2 point){
 	roadNode r = {point, nodeID++};
 	allNodes.push_back(r);
+	adjacencyList[r.ID] =  vector<int>();
+	return r;
 }
 
 /**
  * Adds new road to list of all roads
  */
-void RoadNetwork::addRoad(roadNode start,roadNode end){
-	road r = {start,end};
+road RoadNetwork::addRoad(roadNode start,roadNode end){
+	road r = {start,end,roadID++};
 	allRoads.push_back(r);
+	return r;
+}
+
+/**
+ * Note, this method assumes you know that the road is split by
+ * the given node
+ */
+void RoadNetwork::updateAdjacencyList(road r, roadNode n){
+	// remove r from allRoads
+
+	// remove end from start and vice versa in adjacency list
+	for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
+		if(adjacencyList[r.start.ID][i] == r.end.ID){
+			adjacencyList[r.start.ID][i] = n.ID;
+			break;
+		}
+	}
+
+	for(int i = 0; i < (int)adjacencyList[r.end.ID].size(); i++){
+			if(adjacencyList[r.end.ID][i] == r.start.ID){
+				adjacencyList[r.end.ID][i]= n.ID;
+				break;
+			}
+		}
+
+	// adds start and end of road to n in adjacency list
+	adjacencyList[n.ID].push_back(r.start.ID);
+	adjacencyList[n.ID].push_back(r.end.ID);
+
+	// create two new roads start-n and n-end
+	road r1 = {r.start,n,roadID++};
+	road r2 = {n,r.end,roadID++};
 }
 
 /**
@@ -123,6 +157,34 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
+void RoadNetwork::recDivideGrid(road r, int level){
+	cout << "Dividing grid" << endl;
+
+	line l = {r.start.location,r.end.location};
+	vec2 perpBi = getBisector(l);
+	vec2 centrePoint = centrePointOfLine(l);
+
+	// Now needs to create a node at centre point and update the adjacency list
+	roadNode rn = addNode(centrePoint);
+	updateAdjacencyList(r,rn);
+	// Then needs to extend in to opposite directions from centrePoint and add
+	float length = getLength(l)/2;
+
+	vec2 a = getLineForLength(centrePoint,perpBi,length);
+	vec2 b = getLineForLength(centrePoint,-perpBi,length);
+
+	roadNode r1 = addNode(a);
+	roadNode r2 = addNode(b);
+	road left = addRoad(rn,r1);
+	road right = addRoad(rn,r2);
+
+	if(level < 5){
+		recDivideGrid(left, level+1);
+		recDivideGrid(right, level+1);
+	}
+
+}
+
 // Assumes square world
 void RoadNetwork::createNewYorkGrid(section s){
 	line l = s.lines[0]; // gets first line in outline
@@ -130,19 +192,24 @@ void RoadNetwork::createNewYorkGrid(section s){
 	// Creates first road
 	vec2 perpBi = getBisector(l);
 	vec2 start = centrePointOfLine(l);
-	vec2 end = vec2(start.x, 400);
-}
+	vec2 end = vec2(start.x, 100);
 
-void RoadNetwork::renderRoads(){
-	for(road r : allRoads){
-		// draw
-	}
+	// Adds first road
+	addNode(start);
+	addNode(end);
+	addRoad(allNodes[0],allNodes[1]);
+
+	// Adds second road
+
+	// Now recursively subdivide
+	recDivideGrid(allRoads[0],0);
+	recDivideGrid(allRoads[1],0);
 }
 
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	//createNewYorkGrid(outline);
+	createNewYorkGrid(outline);
 	// Now take in population density
 	// Now generate highways
 	// Now generate minor roads
@@ -150,10 +217,10 @@ void RoadNetwork::createRoads(section world){
 
 void RoadNetwork::testNetwork(){
 
-	line a = {vec2(500,500), vec2(100,500), 0};
-	line b = {vec2(100,500), vec2(100,100), 1};
-	line c = {vec2(100,100), vec2(500,100), 2};
-	line d = {vec2(500,100), vec2(500,500), 3};
+	line a = {vec2(400,400), vec2(100,400), 0};
+	line b = {vec2(100,400), vec2(100,100), 1};
+	line c = {vec2(100,100), vec2(400,100), 2};
+	line d = {vec2(400,100), vec2(400,400), 3};
 
 	vector<line> lines;
 	lines.push_back(a);
@@ -170,13 +237,29 @@ void RoadNetwork::testNetwork(){
 }
 
 void RoadNetwork::renderRoads(){
-	glColor3f(1.0f,1.0f,0.0f);
+	glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
 	glBegin(GL_LINES);
-		for(line l : outline.lines){
-			cout << " beep" << endl;
-			glVertex2f(l.start.x, l.start.y);
-			glVertex2f(l.end.x, l.end.y);
-		}
+	for(line l : outline.lines){
+		glVertex2f(l.start.x, l.start.y);
+		glVertex2f(l.end.x, l.end.y);
+	}
+	glEnd();
+
+	glColor3f(1.0f,0.0f,0.0f); // red roads
+	glBegin(GL_LINES);
+	for(road r : allRoads){
+		glVertex2f(r.start.location.x, r.start.location.y);
+		glVertex2f(r.end.location.x, r.end.location.y);
+	}
+	glEnd();
+
+	glColor3f(0.0,0.0,1.0); // blue intersections
+	glPointSize(10);
+
+	glBegin(GL_POINTS);
+	for(roadNode n : allNodes){
+		glVertex2f(n.location.x, n.location.y);
+	}
 	glEnd();
 }
 

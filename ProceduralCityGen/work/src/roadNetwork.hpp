@@ -18,6 +18,7 @@ struct roadNode{
 struct road{
 	roadNode start;
 	roadNode end;
+	int ID;
 	// Will have a quad to represent for drawing
 };
 
@@ -29,6 +30,7 @@ private:
 	std::vector<roadNode> allNodes; // has all nodes
 	std::vector<road> allRoads; // has all roads
 	int nodeID = 0;
+	int roadID = 0;
 
 	// Boundary variables
 	util::section outline; // gives the outline of the city
@@ -41,10 +43,12 @@ private:
 	int insideWorld(road);
 	road truncate(road);
 	void addIntersection(int,int);
-	void addNode(comp308::vec2);
-	void addRoad(roadNode,roadNode);
+	roadNode addNode(comp308::vec2);
+	road addRoad(roadNode,roadNode);
+	void updateAdjacencyList(road, roadNode);
 	void calulateBoundary();
-	void createNewYorkGrid();
+	void createNewYorkGrid(util::section s);
+	void recDivideGrid(road,int);
 
 
 
