@@ -123,6 +123,14 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
+// Assumes convex atm
+void RoadNetwork::createNewYorkGrid(){
+	line l = outline.lines[0]; // gets first line in outline
+	vec2 perpBi = getBisector(l);
+	vec2 start = centrePointOfLine(l);
+	//vec2 end =
+}
+
 void RoadNetwork::renderRoads(){
 	for(road r : allRoads){
 		// draw
@@ -132,6 +140,7 @@ void RoadNetwork::renderRoads(){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
+	createNewYorkGrid();
 	// Now take in population density
 	// Now generate highways
 	// Now generate minor roads

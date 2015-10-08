@@ -7,7 +7,8 @@
 
 #include <map>
 #include <vector>
-#include "section.hpp"
+#include "utility.hpp"
+#include "comp308.hpp"
 
 struct roadNode{
 	comp308::vec2 location;
@@ -30,26 +31,27 @@ private:
 	int nodeID = 0;
 
 	// Boundary variables
-	section outline; // gives the outline of the city
+	util::section outline; // gives the outline of the city
 	float maxHeight;
 	float minHeight;
 	float farLeft;
 	float farRight;
 
-	int insideWorld(vec2);
+	int insideWorld(comp308::vec2);
 	int insideWorld(road);
 	road truncate(road);
 	void addIntersection(int,int);
-	void addNode(vec2);
+	void addNode(comp308::vec2);
 	void addRoad(roadNode,roadNode);
 	void calulateBoundary();
+	void createNewYorkGrid();
 
 
 
 public:
 	RoadNetwork();
 	void renderRoads();
-	void createRoads(section);
+	void createRoads(util::section);
 	void recDivide(road);
 
 	// Testing

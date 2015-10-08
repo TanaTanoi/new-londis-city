@@ -7,17 +7,11 @@
 
 
 
-struct section {
-	std::vector<util::line > lines;
-	int ID;
-	float area;
-	//Building:: building;
-};
-
 struct lot{
-	section boundingBox;
-	std::vector<section > sections;
+	util::section boundingBox;
+	std::vector<util::section> sections;
 	int ID;
+	buildingLOD buildings;
 };
 
 class SectionDivider {
@@ -27,18 +21,18 @@ private:
 	std::vector<lot> lots;
 	int sectionID = 0;
 	//for testing
-	std::vector<section> sections;
+	std::vector<util::section> sections;
 
 	//Section Methods
-	util::line findLongestEdge(section);
-	lot recDivideSection(lot, section);
-	std::vector<section> splitSection(section);
-	void renderSection(section);
+	util::line findLongestEdge(util::section);
+	lot recDivideSection(lot,util::section);
+	std::vector<util::section> splitSection(util::section);
+	void renderSection(util::section);
 	comp308::vec2 getSharedPoint(util::line a, util::line b);
-	section getInnerSection(section, util::line, util::line, util::line);
-	float getSectionSize(section);
+	util::section getInnerSection(util::section, util::line, util::line, util::line);
+	float getSectionSize(util::section);
 	lot removeUnusableSections(lot);
-	bool hasStreetAccess(section, lot);
+	bool hasStreetAccess(util::section, lot);
 
 
 	void renderPoly();
@@ -54,6 +48,6 @@ public:
 	void cleanUp();
 	void renderSections();
 	void divideLot(lot);
-	void testSection(); // for testing
+	lot testSection(); // for testing
 	void renderTest(); // for testing
 };

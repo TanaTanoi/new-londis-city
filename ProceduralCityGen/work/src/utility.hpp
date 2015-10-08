@@ -39,6 +39,13 @@ struct line {
 	float length;
 };
 
+struct section {
+	std::vector<util::line > lines;
+	int ID;
+	float area;
+	//Building:: building;
+};
+
 class noIntersectionException : public exception
 {
 	const char* what() const throw() { return "The lines were parallel"; }
@@ -298,4 +305,45 @@ inline vector<vec2> linesToPoints(vector<line> lines) {
 	}
 	return toReturn;
 }
+
+inline vec2 getBisector(line l){
+	vec2 lineVec =  l.end - l.start;
+	vec2 lineVec2 =  l.start - l.end;
+	vec2 perpBi = vec2(-lineVec.y, lineVec.x); // gets perpendicular bisector to longest edge
+	return perpBi;
+}
+
+inline vec2 centrePointOfLine(line l){
+	float leng = abs(l.end.x - l.start.x);
+	float centreX = 0.0f;
+	float centreY = 0.0f;
+	if(l.end.x == l.start.x){
+		centreX = l.start.x;
+		leng = abs(l.end.y - l.start.y);
+		centreY = min(l.end.y, l.start.y) + 0.51*leng;//min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	}
+	else{
+		centreX = min(l.end.x, l.start.x) + 0.51*leng;        //min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+		float c = l.end.y - m*l.end.x;
+		centreY = m*centreX + c;
+	}
+	return vec2(centreX, centreY);
+}
+
+inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi, vec2 centrePoint, line longLine){
+	// Now finds the first intersection point with another line within the section
+	vector<line> intersectors = vector<line>();
+
+	for (int i = 0; i < (int)s.lines.size(); i++) {
+		if(s.lines[i].ID != longLine.ID){
+			if (intersects(s.lines[i],perpBi,centrePoint)) {
+				intersectors.push_back(s.lines[i]);
+			}
+		}
+	}
+	return intersectors;
+}
+
+
 }
