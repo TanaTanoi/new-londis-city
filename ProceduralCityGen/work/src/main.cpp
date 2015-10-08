@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			drawSkycube(20.0f);
+			//drawSkycube(20.0f);
 		}else if(mode == 1 || mode == 3){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
@@ -186,7 +186,7 @@ void init() {
 	/*Create a new building object*/
 	building = Building();
 	building.initTexture();
-	initSkybox("../work/res/textures/cubeMap.jpg");
+	initSkybox("../work/res/textures/officeSkybox.png");
 	skybox_shader =  makeShaderProgram("../work/res/shaders/skybox_shader.vert", "../work/res/shaders/skybox_shader.frag");
 }
 

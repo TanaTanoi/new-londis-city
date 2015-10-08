@@ -30,7 +30,7 @@ Building::Building(){
 
 GLuint tex_wall[2][2];
 GLuint tex_window[2][2];
-
+GLuint tex_door[2][2];
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -69,7 +69,9 @@ void Building::initTexture() {
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
 	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
 	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
+
 	loadTexture(tex_window[0][0], "../work/res/textures/glass01.jpg");
+	loadTexture(tex_door[0][0], "../work/res/textures/wooddoor02.jpg");
 }
 
 /*From the given floor plan, extrude to create a block of height 0.5f
@@ -100,7 +102,6 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 	return result;
 }
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
-
 	int n = floor.size();
 	vec2 mid = Generator::centerPoint(floor);
 	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
@@ -114,20 +115,28 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 		bot.push_back(vec3(v2.x, elevation, v2.y));
 		top.push_back(vec3(v2.x, height, v2.y));
 	}
-
+	
 	/*n amount of walls*/
+	
 	for (int i = 0; i < n; i++) {
+		//->
+		
 		vec3 topl = top[i];
 		vec3 topr = top[(i + 1) % n];
 		vec3 botr = bot[(i + 1) % n];
 		vec3 botl = bot[i];
+	
+		
 		vec3 normal = cross((botl - topr), (topl - topr));
-		normal = normalize(normal);
-
+		if (length(normal) > 0) {
+			normal = normalize(normal);
+		}
 		float len = abs(length(botl-botr));	//length of the wall
+	
 		len /=tex_wall_width;	//the proportion of the wall
-
+								//->		
 		//Use texture
+		
 		glBindTexture(GL_TEXTURE_2D,tex_wall[cur_tex_wall][cur_tex_wall_num]);
 		glBegin(GL_QUADS);
 			glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
@@ -140,12 +149,13 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 			glTexCoord2f(0,0);
 			glVertex3f(topl.x, topl.y, topl.z);
 		glEnd();
-
+		
 		//Generate windows
 		//if(cur_tex_wall!=SKYSCRAPER)
 			//generateWindows(floor[i], floor[(i + 1) % n], elevation, normal);
 
 	}
+	
 
 	glBegin(GL_TRIANGLES);
 	/*Render a roof here, or at least a top*/
@@ -162,6 +172,7 @@ float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation
 
 	}
 	glEnd();
+	
 	return height;
 }
 
@@ -185,8 +196,8 @@ void Building::renderWindows(vector<vec2> floor, float elevation) {
  */
 void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
 	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
-	cout << "Making " << endl;
-	float height = extendBuilding(floor, 0.0f);
+	//float height = extendBuilding(floor, 0.0f);
+	float height = 0.0f;
 	for (int i = 0; i < input.length(); i++) {
 		switch (input[i]) {
 		case 'S':
@@ -211,6 +222,10 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 			if (floor.size() == 4) { floor = subdivide(floor)[rand()%2]; }
 			break;
 		case '$':
+			vec3 normal = vec3(floor[1].x, 0, floor[1].y) - vec3(floor[0].x, 0, floor[0].y);
+			normal = cross(normal, vec3(0, 1, 0));
+			generateDoor(floor[0], floor[1],height, -normal);
+			//generateWindows(floor[0], floor[1], height, -normal);
 			height = extendBuilding(floor, height);
 		}
 
@@ -266,11 +281,6 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 
 	glBegin(GL_QUADS);
 	for (int j = 0; j < i; j+=2) {
-		if((j/2)%2 == 0){
-			glColor3f(1,0,0);
-		}else{
-			glColor3f(0,1,0);
-		}
 		vec2 start = (direction*margin) + (direction*WINDOW_WIDTH*j)+a;
 		vec2 end = (direction*WINDOW_WIDTH)+start;
 
@@ -289,6 +299,41 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 		glTexCoord2f(0,0);
 		glVertex3f(topL.x, topL.y, topL.z);
 	}
+	glEnd();
+}
+/*Finds the center point and generates a door along this wall*/
+void Building::generateDoor(vec2 a, vec2 b,float elevation, vec3 normal) {
+	glBindTexture(GL_TEXTURE_2D, tex_door[0][0]);
+	float bottom = elevation;
+	float top =  (BLOCK_SIZE - (BLOCK_SIZE*0.1));		//top of the door
+
+	float dist = (float)hypot(a.x - b.x, b.y - a.y);				//length of the wall
+
+	vec2 direction = a - b;
+	//make it a unit vector pointing from A to B
+	if (length(direction) <= 1) {
+		direction *= (1 / length(direction));
+	}else{
+		direction = normalize(direction);
+	}
+	vec2 center = b+direction*dist*0.5;
+	glBegin(GL_QUADS);
+	vec2 start = center + direction*0.1;
+	vec2 end = center - direction*0.1;
+	/*The 0.001 is to make it slightly jutt out from the wall*/
+	vec3 topL = vec3(start.x, top, start.y) + normal*0.001f;
+	vec3 topR = vec3(end.x, top, end.y) + normal*0.001f;
+	vec3 botR = vec3(end.x, bottom, end.y) + normal*0.001f;
+	vec3 botL = vec3(start.x, bottom, start.y) + normal*0.001f;
+	glNormal3f(normal.x, normal.y, normal.z);
+	glTexCoord2f(1, 0);
+	glVertex3f(topR.x, topR.y, topR.z);
+	glTexCoord2f(1, 1);
+	glVertex3f(botR.x, botR.y, botR.z);
+	glTexCoord2f(0, 1);
+	glVertex3f(botL.x, botL.y, botL.z);
+	glTexCoord2f(0, 0);
+	glVertex3f(topL.x, topL.y, topL.z);
 	glEnd();
 }
 
@@ -325,8 +370,6 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 			glVertex3f(botl.x, botl.y, botl.z);
 			glTexCoord2f(0.0f,0.0f);
 			glVertex3f(topl.x, topl.y, topl.z);
-
-
 
 		}
 		glEnd();
@@ -564,7 +607,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	vector<vector<vec2>> levels = vector<vector<vec2>>();
 	levels.push_back(Generator::generateFloorPlan(mid, minDist, rand() % 4 + 4));//add base
 	srand(rand());
-	//generate 1 to 4 plan changes
+	//generate 2 to 5 plan changes
 	for (int i = 0; i < rand() % 3 + 2; i++) {
 		srand(rand());
 		float xmul = rand() % 2 - 1;//-1 to 1;

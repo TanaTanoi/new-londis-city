@@ -69,6 +69,7 @@ public:
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);
 	void generateWindows(comp308::vec2,comp308::vec2 , float , comp308::vec3 );
+	void generateDoor(comp308::vec2 a, comp308::vec2 b,float, comp308::vec3 normal);
 	void generateFlatPointRoof(std::vector<comp308::vec2>,float);
 	Building(void);
 
