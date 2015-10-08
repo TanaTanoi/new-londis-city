@@ -112,11 +112,8 @@ int main(int argc, char **argv) {
 		g_sections->testSection();
 		mode = 1;
 	}else if(argv[1] == RMODE){
-<<<<<<< HEAD
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
-=======
 		cout << "Road mode" << endl;
->>>>>>> 7ba390cb3d5975f004f8e56068edce8a56341615
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 		mode = 3;
