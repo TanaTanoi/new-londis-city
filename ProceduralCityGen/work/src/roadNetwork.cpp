@@ -157,7 +157,7 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
-void RoadNetwork::recDivideGrid(road r, int level){
+void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	cout << "Dividing grid" << endl;
 
 	line l = {r.start.location,r.end.location};
@@ -168,7 +168,10 @@ void RoadNetwork::recDivideGrid(road r, int level){
 	roadNode rn = addNode(centrePoint);
 	updateAdjacencyList(r,rn);
 	// Then needs to extend in to opposite directions from centrePoint and add
-	float length = getLength(l)/2;
+	float length = getLength(l);
+	if (halfLength) {
+		length = length / 2.0;
+	}
 
 	vec2 a = getLineForLength(centrePoint,perpBi,length);
 	vec2 b = getLineForLength(centrePoint,-perpBi,length);
@@ -178,9 +181,9 @@ void RoadNetwork::recDivideGrid(road r, int level){
 	road left = addRoad(rn,r1);
 	road right = addRoad(rn,r2);
 
-	if(level < 5){
-		recDivideGrid(left, level+1);
-		recDivideGrid(right, level+1);
+	if(level < 6){
+		recDivideGrid(left, level+1,!halfLength);
+		recDivideGrid(right, level+1,!halfLength);
 	}
 
 }
@@ -198,12 +201,10 @@ void RoadNetwork::createNewYorkGrid(section s){
 	addNode(start);
 	addNode(end);
 	addRoad(allNodes[0],allNodes[1]);
-
-	// Adds second road
-
+	
 	// Now recursively subdivide
-	recDivideGrid(allRoads[0],0);
-	recDivideGrid(allRoads[1],0);
+	recDivideGrid(allRoads[0],0,true);
+	
 }
 
 void RoadNetwork::createRoads(section world){

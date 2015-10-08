@@ -48,7 +48,7 @@ private:
 	void updateAdjacencyList(road, roadNode);
 	void calulateBoundary();
 	void createNewYorkGrid(util::section s);
-	void recDivideGrid(road,int);
+	void recDivideGrid(road,int,bool);
 
 
 
