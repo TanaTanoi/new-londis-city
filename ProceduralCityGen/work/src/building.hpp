@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include "utility.hpp"
 #include "comp308.hpp"
 enum building_type { SKYSCRAPER = 0, RESIDENTIAL = 1, INDUSTRIAL = 2};
 struct buildingParams {
@@ -59,13 +59,16 @@ public:
 	float extendBuilding(std::vector<comp308::vec2>, float);
 
 	void renderWindows(std::vector<comp308::vec2> floor, float elevation);
-	
+
 	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
 
-	
+
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
-	int generateBuildingFromString(std::string);
+	int generateBuildingFromString(std::string);								//Test method
+
+	int generateBuildingsFromSections(std::string, std::vector<util::section>);	//Test method
+
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);
 	void generateWindows(comp308::vec2,comp308::vec2 , float , comp308::vec3 );

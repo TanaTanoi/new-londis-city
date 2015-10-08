@@ -9,7 +9,7 @@
 #include "building.hpp"
 using namespace std;
 using namespace comp308;
-
+using namespace util;
 
 
 /*Method that looks up the potential replacements/extensions for a given char*/
@@ -291,6 +291,14 @@ section Generator::createRandomSection(){
 		lines.push_back({points[i],points[(i+1)%n],i});
 	}
 	return {lines,0,0};
+}
+
+vector<vec2> Generator::sectionToPoints(util::section sec){
+	vector<vec2> toReturn = vector<vec2>();
+	for(line l: sec.lines){
+
+	}
+	return toReturn;
 }
 
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
