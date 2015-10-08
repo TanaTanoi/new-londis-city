@@ -313,6 +313,17 @@ inline vec2 getBisector(line l){
 	return perpBi;
 }
 
+inline float getLength(line l){
+	float xLength = abs(l.end.x - l.start.x);
+	float yLength = abs(l.end.y - l.start.y);
+	return sqrt(xLength*xLength + yLength*yLength);
+}
+
+inline vec2 getLineForLength(vec2 startPoint, vec2 direction, float length){
+	direction = normalize(direction);
+	return startPoint + (direction*length);
+}
+
 inline vec2 centrePointOfLine(line l){
 	float leng = abs(l.end.x - l.start.x);
 	float centreX = 0.0f;

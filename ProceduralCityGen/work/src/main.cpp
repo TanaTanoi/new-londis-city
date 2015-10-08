@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
 	string CMODE = "C";
 
 	if(argc > 1 && argv[1] == BMODE ){
+		cout << "Building mode" << endl;
 		init();
 		string one = "1";
 		cout<<argv[2] <<endl;
@@ -106,16 +107,24 @@ int main(int argc, char **argv) {
 		mode = 0;
 		initLighting();
 	}else if(argv[1] == SMODE){
+		cout << "Section mode" << endl;
 		g_sections = new SectionDivider();
 		g_sections->testSection();
 		mode = 1;
 	}else if(argv[1] == RMODE){
+<<<<<<< HEAD
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
+=======
+		cout << "Road mode" << endl;
+>>>>>>> 7ba390cb3d5975f004f8e56068edce8a56341615
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 		mode = 3;
 	}else if(argv[1] == CMODE){
+		cout << "Car mode" << endl;
 		mode = 2;
+	}else{
+		cout << "entered no loops" << endl;
 	}
 
 
