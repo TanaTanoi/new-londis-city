@@ -123,12 +123,14 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
-// Assumes convex atm
-void RoadNetwork::createNewYorkGrid(){
-	line l = outline.lines[0]; // gets first line in outline
+// Assumes square world
+void RoadNetwork::createNewYorkGrid(section s){
+	line l = s.lines[0]; // gets first line in outline
+
+	// Creates first road
 	vec2 perpBi = getBisector(l);
 	vec2 start = centrePointOfLine(l);
-	//vec2 end =
+	vec2 end = vec2(start.x, 400);
 }
 
 void RoadNetwork::renderRoads(){
@@ -140,14 +142,43 @@ void RoadNetwork::renderRoads(){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	createNewYorkGrid();
+	//createNewYorkGrid(outline);
 	// Now take in population density
 	// Now generate highways
 	// Now generate minor roads
 }
 
 void RoadNetwork::testNetwork(){
-	//createRoads();
+
+	line a = {vec2(500,500), vec2(100,500), 0};
+	line b = {vec2(100,500), vec2(100,100), 1};
+	line c = {vec2(100,100), vec2(500,100), 2};
+	line d = {vec2(500,100), vec2(500,500), 3};
+
+	vector<line> lines;
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(d);
+
+
+	section s;
+	s.lines = lines;
+
+	createRoads(s);
+
 }
+
+void RoadNetwork::renderRoads(){
+	glColor3f(1.0f,1.0f,0.0f);
+	glBegin(GL_LINES);
+		for(line l : outline.lines){
+			cout << " beep" << endl;
+			glVertex2f(l.start.x, l.start.y);
+			glVertex2f(l.end.x, l.end.y);
+		}
+	glEnd();
+}
+
 
 

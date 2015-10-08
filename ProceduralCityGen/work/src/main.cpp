@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
 		g_sections->testSection();
 		mode = 1;
 	}else if(argv[1] == RMODE){
+		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 		mode = 3;
@@ -153,6 +154,7 @@ int main(int argc, char **argv) {
 			g_sections->renderTest();
 			}
 			else{
+				cout << "rendering roads" << endl;
 				g_network->renderRoads();
 			}
 		}else if(mode == 2){
