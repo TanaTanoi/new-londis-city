@@ -199,6 +199,34 @@ vector<vec2> Generator::shrinkPoints(std::vector<vec2> points) {
 	return smallPoints;
 }
 
+/*From the given floor plan, extrude to create a block of height 0.5f
+*
+* *floor must be a list of points where a wall is connected between
+* point i and point i +1 (where last and first point are connected)
+*/
+vector<vector<vec2>> Generator::subdivide(vector<vec2> points) {
+	vector<vector<vec2>> result;
+	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
+	float cutDist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.5f) + 1.5f;
+	vec2 cutP1 = ((points[1] - points[0]) / cutDist) + points[0];
+	vec2 cutP2 = ((points[2] - points[3]) / cutDist) + points[3];
+	result.push_back(vector<vec2>());
+	result.push_back(vector<vec2>());
+
+	int i = cutDist >= 2.0f;
+	result[i].push_back(cutP1);
+	result[i].push_back(cutP2);
+	result[i].push_back(points[3]);
+	result[i].push_back(points[0]);
+
+	result[!i].push_back(cutP2);
+	result[!i].push_back(cutP1);
+	result[!i].push_back(points[1]);
+	result[!i].push_back(points[2]);
+
+	return result;
+}
+
 
 /*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
@@ -276,6 +304,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 
 }
 
+/*Generates a section based on a randomly created floor plan of points*/
 section Generator::createRandomSection(){
 	section s;
 	vector<vec2> points = generateFloorPlan(vec2(0,0),200,rand()%6+4);
@@ -293,6 +322,7 @@ section Generator::createRandomSection(){
 	return {lines,0,0};
 }
 
+/*Converts a section and its lines into a vector of points*/
 vector<vec2> Generator::sectionToPoints(util::section sec){
 	vector<vec2> toReturn = vector<vec2>();
 	int n = sec.lines.size();
@@ -302,6 +332,8 @@ vector<vec2> Generator::sectionToPoints(util::section sec){
 	return toReturn;
 }
 
+
+/*Converts a vector of sections into a vector of building parameters*/
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
 	vector<buildingParams> toReturn;
@@ -309,7 +341,7 @@ vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
 		buildingParams p;
 		p.boundingArea = sectionToPoints(sections[i]);
 		p.seed = rand();
-		p.b_type = (building_type)(p.seed % 2);
+		p.b_type = (building_type)(p.seed % 2);		//TODO make this have an effect, possibly
 		srand(p.seed);
 		toReturn.push_back(p);
 	}

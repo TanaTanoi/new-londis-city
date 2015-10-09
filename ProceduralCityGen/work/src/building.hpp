@@ -59,9 +59,6 @@ public:
 
 	void renderWindows(std::vector<comp308::vec2> floor, float elevation);
 
-	std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2>);
-
-
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
 	int generateBuildingFromString(std::string);								//Test method

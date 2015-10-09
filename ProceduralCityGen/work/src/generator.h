@@ -26,10 +26,12 @@ public:
 	static std::vector<comp308::vec2> generateFloorPlan(comp308::vec2,float,int);
 	static std::vector<comp308::vec2> generateModernFloorPlan(comp308::vec2, float);
 	static std::vector<comp308::vec2> cutEdges(std::vector<comp308::vec2> points);
-	static comp308::vec2 centerPoint(std::vector<comp308::vec2> points);
 	static std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
+	static std::vector<std::vector<comp308::vec2>> subdivide(std::vector<comp308::vec2> points);
 	static std::vector<comp308::vec2> combinePlans(std::vector<comp308::vec2>, std::vector<comp308::vec2>);
+	static comp308::vec2 centerPoint(std::vector<comp308::vec2> points);
 	static util::section createRandomSection(void);
 	static std::vector<buildingParams> sectionsToParams(std::vector<util::section> sections);
 	static std::vector<comp308::vec2> sectionToPoints(util::section);
+	
 };

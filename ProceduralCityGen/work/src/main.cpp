@@ -323,12 +323,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
 	cout<<"Key: " << key<<endl;
 	if(key == 87 && action){
-		//p_pos-= normalize(p_dir);
-		//p_pos.z +=1;
-		//p_pos.y+=1;
 		p_pos += 0.05f*p_front*1;
-
-		//p_pos -= 0.05f*p_right*1;
 	}else if(key == 65 && action){
 		vec3 p_right = cross(p_up, p_front);
 		p_pos += 0.05f*p_right*1;
@@ -439,10 +434,10 @@ void joystickEventsPoll() {
 			c_LSpos.x = 0;
 		}
 
-		p_pos -= 0.05f*p_front*c_LSpos.y;
+		p_pos -= 0.05f*p_front*c_LSpos.y*1.4;
 
 		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f*p_right*c_LSpos.x;
+		p_pos -= 0.05f*p_right*c_LSpos.x*1.4;
 
 	}
 

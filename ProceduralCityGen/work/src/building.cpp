@@ -88,33 +88,6 @@ void Building::initTexture() {
 	loadTexture(tex_door[0][0], "../work/res/textures/wooddoor02.jpg");
 }
 
-/*From the given floor plan, extrude to create a block of height 0.5f
- *
- * *floor must be a list of points where a wall is connected between
- * point i and point i +1 (where last and first point are connected)
- */
-vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
-	vector<vector<vec2>> result;
-	if (points.size() != 4) { result.push_back(points); result.push_back(points); return result; }
-	float cutDist = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 1.5f) + 1.5f;
-	vec2 cutP1 = ((points[1] - points[0]) / cutDist) + points[0];
-	vec2 cutP2 = ((points[2] - points[3]) / cutDist) + points[3];
-	result.push_back(vector<vec2>());
-	result.push_back(vector<vec2>());
-
-	int i = cutDist>=2.0f;
-	result[i].push_back(cutP1);
-	result[i].push_back(cutP2);
-	result[i].push_back(points[3]);
-	result[i].push_back(points[0]);
-
-	result[!i].push_back(cutP2);
-	result[!i].push_back(cutP1);
-	result[!i].push_back(points[1]);
-	result[!i].push_back(points[2]);
-
-	return result;
-}
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
 	vec2 mid = Generator::centerPoint(floor);
@@ -225,21 +198,19 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 
 			break;
 		case 'R':
-			if(rand()%2==0){
+			if(rand()%3==0){
 				generatePointRoof(floor, height);
 			}else{
 				generateFlatPointRoof(floor,height);
 			}
-			//return;
 			break;
 		case 'D':
-			if (floor.size() == 4) { floor = subdivide(floor)[rand()%2]; }
+			if (floor.size() == 4) { floor = Generator::subdivide(floor)[rand()%2]; }
 			break;
 		case '$':
 			vec3 normal = vec3(floor[1].x, 0, floor[1].y) - vec3(floor[0].x, 0, floor[0].y);
 			normal = cross(normal, vec3(0, 1, 0));
 			generateDoor(floor[0], floor[1],0.0f, -normal);
-			//generateWindows(floor[0], floor[1], height, -normal);
 			height = extendBuilding(floor, height);
 		}
 
@@ -411,7 +382,6 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 }
 
 
-
 /*Returns a display list containing fully random buildings */
 int Building::generateRandomBuildings() {
 	/*Generate a random bunch of floor plans*/
@@ -523,8 +493,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	for (vec2 v : floorPlan) {
 		minDist = min(minDist, (float)hypot(v.x-center.x,v.y-center.y));
 	}
-	//minDist /= 1.5f;
-	minDist*=0.8f;//shrink mindist a little to be safe
+	minDist*=0.8f;//shrink minDist a little to be safe
 	srand(parameters->seed);
 	//floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	int chance = rand()%100+1;
@@ -559,73 +528,6 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		}
 	}
 	
-	
-	//
-	//
-	//srand(rand());
-	//if(chance <=3){
-	//	// 80% chance keep 4 sided square
-	//	chance = rand()%5;srand(rand());
-	//	if(chance <=3){
-	//		//80% to stay square
-	//		chance = rand()%5;srand(rand());
-	//		if(chance <=2){
-	//			//60% chance to be normal square
-	//			chance = rand() % 5; srand(rand());
-	//			if (chance <= 2) {
-	//				//60% chance to stay same
-	//				//floor plan unchanged
-	//				glNewList(result->low, GL_COMPILE);
-	//				generateModernBuilding(parameters->boundingArea, center, minDist);
-	//				glEndList();
-	//				return;
-	//			}else {
-	//				//40% chance for residential building
-	//				result->low = glGenLists(1);
-	//				glNewList(result->low, GL_COMPILE);
-	//				generateResdientialBuilding(floorPlan);
-	//				glEndList();
-	//				return;
-	//			}
-
-
-	//		}else{
-	//			//40% chance to shrink
-	//			floorPlan = Generator::shrinkPoints(floorPlan);
-	//		}
-
-	//	}else{
-	//		//20% chance to be a cut square
-	//		floorPlan = Generator::cutEdges(floorPlan);
-	//	}
-	//}else{
-	//	//40% chance to change to more exciting shape
-	//	chance = rand() % 5; srand(rand());
-	//	if (chance <= 2) {
-	//		//60% chance for single shape of >=4 sides
-	//		chance = rand() % 5; srand(rand());
-	//		if (chance <= 1) {
-	//			//40% chance of rotated square
-	//			floorPlan = Generator::generateFloorPlan(center, minDist*1.5f, 4);
-	//		}else if(chance<=4){
-	//			//40% chance of new shape
-	//			floorPlan = Generator::generateFloorPlan(center, minDist, (rand()%4)+4);
-	//		}else {
-	//			//20% chance of really odd building
-	//			vector<vec2> shapeA = Generator::generateFloorPlan(center+vec2(minDist/2,minDist/2), minDist*2.0f, (rand() % 4) + 4);
-	//			floorPlan = Generator::combinePlans(shapeA, Generator::generateFloorPlan(center, minDist*2.0f, (rand() % 4) + 4));
-	//		}
-
-	//	}else {
-	//		//40% chance of modern building
-	//		result->low = glGenLists(1);
-	//		glNewList(result->low, GL_COMPILE);
-	//		generateModernBuilding(parameters->boundingArea, center, minDist);
-	//		glEndList();
-	//		return;
-	//	}
-	//}
-
 	cur_tex_wall = parameters->b_type;
 	cur_tex_wall_num = rand()%TOTAL_WALL_TEXTURES;
 	if (cur_tex_wall != SKYSCRAPER) {
@@ -640,9 +542,9 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 
 void Building::generateResdientialBuilding(vector<vec2> points) {
 	//set first two points to subdivion of original floor
-	vector<vector<vec2>> tiers = subdivide(points);
+	vector<vector<vec2>> tiers = Generator::subdivide(points);
 	vector<vec2> temp = tiers[0];
-	tiers = subdivide(tiers[1]);
+	tiers = Generator::subdivide(tiers[1]);
 	tiers.push_back(temp);
 	//tiers.push_back(subdivide(tiers[1])[1]);
 	//tiers[1] = subdivide(tiers[1])[0];
