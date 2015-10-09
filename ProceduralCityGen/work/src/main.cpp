@@ -145,13 +145,12 @@ int main(int argc, char **argv) {
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 		if(mode == 0){
-
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			//drawSkycube(20.0f);
+			drawSkycube(10.0f);
 		}else if(mode == 1 || mode == 3){
 
 			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
@@ -492,23 +491,26 @@ void drawSkycube(float size){
 	box.push_back(vec2(-size,-size));
 	box.push_back(vec2(-size,size));
 	box.push_back(vec2(size,size));
-	box.push_back(vec2(-size,size));
+	box.push_back(vec2(size,-size));
 
 	glBegin(GL_QUADS);
 	//Floor
+
+	size /= 1.5;
 	glNormal3f(0,1,0);
-	for(int i = 0; i < 4;i++){
-		glVertex3f(box[i].x,-size,box[i].y);
+	for(int i = 0; i <4;i++){
+		glVertex3f(box[i].x,0,box[i].y);
 	}
 	glNormal3f(0,-1,0);
-	for(int i = 0; i < 4;i++){
+	for (int i = 3; i >= 0; i--) {
 		glVertex3f(box[i].x,size,box[i].y);
 	}
+	
 	for(int i = 0; i < 4;i++){
-		vec3 normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
+		vec3 normal = vec3(0,0,0) - vec3(box[i].x,0,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(0,0);
-		glVertex3f(box[i].x,-size,box[i].y);
+		glVertex3f(box[i].x,0,box[i].y);
 		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(0,1);
@@ -520,7 +522,7 @@ void drawSkycube(float size){
 		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(1,0);
-		glVertex3f(box[(i+1)%4].x,-size,box[(i+1)%4].y);
+		glVertex3f(box[(i+1)%4].x,0,box[(i+1)%4].y);
 	}
 
 	glEnd();

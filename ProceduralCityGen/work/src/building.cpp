@@ -60,8 +60,6 @@ void Building::initTexture() {
 	initShader();
 	glUseProgram(g_shader);
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
-	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
-	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	for(int i = 0; i < 2;i++){
 		glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[i]);
 		
@@ -420,6 +418,7 @@ int Building::basicHashcode(string input) {
 }
 
 int Building::generateBuildingsFromSections(string input, vector<util::section> sections) {
+	
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
@@ -431,6 +430,7 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 	}
 	int newList = glGenLists(1);;
 	glNewList(newList, GL_COMPILE);
+	glUseProgram(g_shader);
 	for (buildingLOD b : buildings) {
 		glCallList(b.low);
 	}
