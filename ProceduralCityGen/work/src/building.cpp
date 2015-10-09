@@ -118,7 +118,7 @@ vector<vector<vec2>> Building::subdivide(vector<vec2> points) {
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
 	vec2 mid = Generator::centerPoint(floor);
-	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD){return elevation;}//Do nothing if it is too small
+	if(abs(length(floor[0]-mid))<EXTRUDE_THRESHOLD&&elevation>0.0f){return elevation;}//Do nothing if it is too small
 	vector<vec3> bot;
 	vector<vec3> top;
 	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
@@ -238,7 +238,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 		case '$':
 			vec3 normal = vec3(floor[1].x, 0, floor[1].y) - vec3(floor[0].x, 0, floor[0].y);
 			normal = cross(normal, vec3(0, 1, 0));
-			generateDoor(floor[0], floor[1],height, -normal);
+			generateDoor(floor[0], floor[1],0.0f, -normal);
 			//generateWindows(floor[0], floor[1], height, -normal);
 			height = extendBuilding(floor, height);
 		}
@@ -248,7 +248,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 
 /*Generates a pointed roof from the input*/
 void Building::generatePointRoof(std::vector<comp308::vec2> points, float elevation){
-	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 0.3f)+0.3f;
+	float height = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / 0.3f)+0.1f;
 	vec2 mid = Generator::centerPoint(points);
 	vec3 peak = vec3(mid.x, elevation +height,mid.y);
 	int n = points.size();
@@ -322,7 +322,7 @@ void Building::generateDoor(vec2 a, vec2 b,float elevation, vec3 normal) {
 	float top =  (BLOCK_SIZE - (BLOCK_SIZE*0.1));		//top of the door
 
 	float dist = (float)hypot(a.x - b.x, b.y - a.y);				//length of the wall
-
+	if (dist < 0.2) { return; }
 	vec2 direction = a - b;
 	//make it a unit vector pointing from A to B
 	if (length(direction) <= 1) {
