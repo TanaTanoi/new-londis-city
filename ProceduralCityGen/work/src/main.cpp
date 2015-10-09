@@ -97,8 +97,7 @@ int main(int argc, char **argv) {
 		cout << "Building mode" << endl;
 		init();
 		string one = "1";
-		cout<<argv[2] <<endl;
-		if(std::string(argv[2]) == "1"){
+		if(argc >=2&&std::string(argv[2]) == "1"){
 			cout<<"CAM MODE"<<endl;
 			cam_mode = 1;
 			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);

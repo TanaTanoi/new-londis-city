@@ -29,8 +29,8 @@ Building::Building(){
 }
 
 
-GLuint tex_wall[2][2];
-GLuint tex_window[2][2];
+GLuint tex_wall[2][TOTAL_WALL_TEXTURES];
+GLuint tex_window[2][TOTAL_WINDOW_TEXTURES];
 GLuint tex_door[2][2];
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
@@ -63,15 +63,28 @@ void Building::initTexture() {
 	// Set our sampler (texture0) to use GL_TEXTURE0 as the source
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	for(int i = 0; i < 2;i++){
-		glGenTextures(2, tex_wall[i]);
-		glGenTextures(2, tex_window[i]);
+		glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[i]);
+		
 	}
+
+	glGenTextures(TOTAL_WINDOW_TEXTURES, tex_window[0]);
+
+	glGenTextures(1, tex_door[0]);
+
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
+	loadTexture(tex_wall[0][2], "../work/res/textures/highrise003.jpg");
+
 	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
 	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
+	loadTexture(tex_wall[1][2], "../work/res/textures/brick003.jpg");
 
 	loadTexture(tex_window[0][0], "../work/res/textures/glass01.jpg");
+	loadTexture(tex_window[0][1], "../work/res/textures/window02.jpg");
+	loadTexture(tex_window[0][2], "../work/res/textures/window03.jpg");
+	loadTexture(tex_window[0][3], "../work/res/textures/window04.jpg");
+	loadTexture(tex_window[0][4], "../work/res/textures/window05.jpg");
+
 	loadTexture(tex_door[0][0], "../work/res/textures/wooddoor02.jpg");
 }
 
@@ -562,8 +575,10 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 
 	cur_tex_wall = parameters->b_type;
-	cur_tex_wall_num = rand()%2;
-
+	cur_tex_wall_num = rand()%TOTAL_WALL_TEXTURES;
+	if (cur_tex_wall != SKYSCRAPER) {
+		cur_tex_win_num = rand() % TOTAL_WINDOW_TEXTURES;
+	}
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
 	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
