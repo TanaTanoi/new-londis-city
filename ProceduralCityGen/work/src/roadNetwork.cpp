@@ -201,10 +201,10 @@ void RoadNetwork::createNewYorkGrid(section s){
 	addNode(start);
 	addNode(end);
 	addRoad(allNodes[0],allNodes[1]);
-	
+
 	// Now recursively subdivide
 	recDivideGrid(allRoads[0],0,true);
-	
+
 }
 
 void RoadNetwork::createRoads(section world){
@@ -264,5 +264,6 @@ void RoadNetwork::renderRoads(){
 	glEnd();
 }
 
-
-
+road RoadNetwork::findClosestRoads(vec3 position) {
+	return road();
+}

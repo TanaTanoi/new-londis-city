@@ -50,6 +50,9 @@ private:
 	// Direction that the vehicle is facing
 	Direction m_direction = NORTH;
 
+	// Goal that the vehicle is heading to
+	comp308::vec3 m_goal;
+
 	bool m_isMoving = false;
 	float m_velocity = 0;
 
@@ -64,6 +67,7 @@ public:
 	Vehicle(std::string);
 	Vehicle(std::string, comp308::vec3, comp308::vec3, comp308::vec3);
 
+	bool hasReachedGoal(comp308::vec3 *goal);
 	void renderVehicle();
 	void handleCommand(int);
 
@@ -120,7 +124,14 @@ public:
 	inline void setVelocity(float velocity = 0) {
 		m_velocity = velocity;
 	}
-};
 
+	inline const comp308::vec3& getGoal() const {
+		return m_goal;
+	}
+
+	inline void setGoal(const comp308::vec3& goal) {
+		m_goal = goal;
+	}
+};
 
 #endif /* SRC_VEHICLE_HPP_ */

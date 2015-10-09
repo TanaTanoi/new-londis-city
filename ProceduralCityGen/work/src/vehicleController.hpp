@@ -23,6 +23,9 @@ class VehicleController {
 
 private:
 
+	std::vector<comp308::vec3> m_keyframes;
+	std::vector<comp308::vec3> m_points;
+
 	// Pointer to road network
 	RoadNetwork *m_network;
 
@@ -48,15 +51,20 @@ private:
 	void initTexture(std::string, int);
 
 	float disToNextVehicle(Vehicle*);
+	Direction turnToTake(Vehicle*);
+	Direction calculateTurn(Direction, Direction, Direction, Direction, float);
 	intersection checkIntersections(comp308::vec3*);
-	void interpolate(Vehicle*, comp308::vec3*, comp308::vec3*);
+	comp308::vec3 findTarget(Vehicle*);
+	void interpolate_straight(Vehicle*, comp308::vec3*, comp308::vec3*);
+	void interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*);
 
 public:
 
 	VehicleController(std::string, std::string, std::vector<comp308::vec3>, comp308::vec3);
+	virtual ~VehicleController();
 
 	// Render all of the vehicles
-	void renderVehicles();
+	void tick();
 
 	// Render a specific vehicle given a transformation and a texture
 	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int);

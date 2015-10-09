@@ -239,3 +239,7 @@ void Vehicle::renderVehicle() {
 	glCallList(m_displayListPoly);
 	glPopMatrix();
 }
+
+bool Vehicle::hasReachedGoal(vec3 *goal) {
+	return goal == &m_goal;
+}
