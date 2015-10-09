@@ -102,7 +102,9 @@ int main(int argc, char **argv) {
 			cam_mode = 1;
 			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 		}
-		testList = building.generateBuildingFromString("testd");
+		//testList = building.generateBuildingFromString("testd");
+		g_sections = new SectionDivider();
+		testList = building.generateBuildingsFromSections("Tarrrhhhcdfdf", g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
 	}else if(argv[1] == SMODE){
@@ -312,7 +314,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 		string input;
 		cout << "Enter an input seed: ";
 		cin >> input;
-		testList = building.generateBuildingFromString(input);
+		//testList = building.generateBuildingFromString(input);
+		testList = building.generateBuildingsFromSections(input, g_sections->testSection().sections);
 	}
 }
 

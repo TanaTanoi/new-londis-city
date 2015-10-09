@@ -449,7 +449,24 @@ int Building::basicHashcode(string input) {
 	return current;
 }
 
-int Building::generateBuildingsFromSections(string input, vector<util::section> sections){
+int Building::generateBuildingsFromSections(string input, vector<util::section> sections) {
+	vector<buildingLOD> buildings;
+	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
+	srand(randStringInc);								//Reset srand
+	vector<buildingParams> params = Generator::sectionsToParams(sections);
+	for (int i = 0; i < params.size(); i++) {
+		buildingLOD building;
+		generateBuilding(&params[i], &building);
+		buildings.push_back(building);
+	}
+	int newList = glGenLists(1);;
+	glNewList(newList, GL_COMPILE);
+	for (buildingLOD b : buildings) {
+		glCallList(b.low);
+	}
+	glEndList();
+	return newList;
+
 return 0;
 }
 
@@ -507,72 +524,107 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		minDist = min(minDist, (float)hypot(v.x-center.x,v.y-center.y));
 	}
 	//minDist /= 1.5f;
-	minDist*=1.0f;
+	minDist*=0.8f;//shrink mindist a little to be safe
 	srand(parameters->seed);
 	//floorPlan = Generator::generateModernFloorPlan(center,minDist);
-	int chance = rand()%5;srand(rand());
-	if(chance <=3){
-		// 80% chance keep 4 sided square
-		chance = rand()%5;srand(rand());
-		if(chance <=3){
-			//80% to stay square
-			chance = rand()%5;srand(rand());
-			if(chance <=2){
-				//60% chance to be normal square
-				chance = rand() % 5; srand(rand());
-				if (chance <= 2) {
-					//60% chance to stay same
-					//floor plan unchanged
-					glNewList(result->low, GL_COMPILE);
-					generateModernBuilding(parameters->boundingArea, center, minDist);
-					glEndList();
-					return;
-				}else {
-					//40% chance for residential building
-					result->low = glGenLists(1);
-					glNewList(result->low, GL_COMPILE);
-					generateResdientialBuilding(floorPlan);
-					glEndList();
-					return;
-				}
-
-
-			}else{
-				//40% chance to shrink
-				floorPlan = Generator::shrinkPoints(floorPlan);
-			}
-
-		}else{
-			//20% chance to be a cut square
-			floorPlan = Generator::cutEdges(floorPlan);
-		}
-	}else{
-		//40% chance to change to more exciting shape
-		chance = rand() % 5; srand(rand());
-		if (chance <= 2) {
-			//60% chance for single shape of >=4 sides
-			chance = rand() % 5; srand(rand());
-			if (chance <= 1) {
-				//40% chance of rotated square
-				floorPlan = Generator::generateFloorPlan(center, minDist*1.5f, 4);
-			}else if(chance<=4){
-				//40% chance of new shape
-				floorPlan = Generator::generateFloorPlan(center, minDist, (rand()%4)+4);
-			}else {
-				//20% chance of really odd building
-				vector<vec2> shapeA = Generator::generateFloorPlan(center+vec2(minDist/2,minDist/2), minDist*2.0f, (rand() % 4) + 4);
-				floorPlan = Generator::combinePlans(shapeA, Generator::generateFloorPlan(center, minDist*2.0f, (rand() % 4) + 4));
-			}
-
+	int chance = rand()%100+1;
+	if (chance < 40) {
+		//40% for residential. Standard building type
+		result->low = glGenLists(1);
+		glNewList(result->low, GL_COMPILE);
+		generateResdientialBuilding(floorPlan);
+		glEndList();
+		return;
+	}else if (chance < 90) {
+		//50% chance to be square type (regular,shrink, 4cut) Varied slightly, but most common type
+		if (chance < 50) {
+			//10% chance for shrink
+			floorPlan = Generator::shrinkPoints(floorPlan);
+		}else if (chance < 60) {
+			//10%chance for cut edges
+			if(floorPlan.size()==4)
+				floorPlan = Generator::cutEdges(floorPlan);
+		}//else 40% chance to stay as given style
+	}else if(chance < 100){
+		//10% chance to be different shape (modern, single different shape)
+		if (chance < 97) {
+			//7% single different shape
+			floorPlan = floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
 		}else {
-			//40% chance of modern building
-			result->low = glGenLists(1);
+			//3% modern crazy style
 			glNewList(result->low, GL_COMPILE);
 			generateModernBuilding(parameters->boundingArea, center, minDist);
 			glEndList();
 			return;
 		}
 	}
+	
+	
+	//
+	//
+	//srand(rand());
+	//if(chance <=3){
+	//	// 80% chance keep 4 sided square
+	//	chance = rand()%5;srand(rand());
+	//	if(chance <=3){
+	//		//80% to stay square
+	//		chance = rand()%5;srand(rand());
+	//		if(chance <=2){
+	//			//60% chance to be normal square
+	//			chance = rand() % 5; srand(rand());
+	//			if (chance <= 2) {
+	//				//60% chance to stay same
+	//				//floor plan unchanged
+	//				glNewList(result->low, GL_COMPILE);
+	//				generateModernBuilding(parameters->boundingArea, center, minDist);
+	//				glEndList();
+	//				return;
+	//			}else {
+	//				//40% chance for residential building
+	//				result->low = glGenLists(1);
+	//				glNewList(result->low, GL_COMPILE);
+	//				generateResdientialBuilding(floorPlan);
+	//				glEndList();
+	//				return;
+	//			}
+
+
+	//		}else{
+	//			//40% chance to shrink
+	//			floorPlan = Generator::shrinkPoints(floorPlan);
+	//		}
+
+	//	}else{
+	//		//20% chance to be a cut square
+	//		floorPlan = Generator::cutEdges(floorPlan);
+	//	}
+	//}else{
+	//	//40% chance to change to more exciting shape
+	//	chance = rand() % 5; srand(rand());
+	//	if (chance <= 2) {
+	//		//60% chance for single shape of >=4 sides
+	//		chance = rand() % 5; srand(rand());
+	//		if (chance <= 1) {
+	//			//40% chance of rotated square
+	//			floorPlan = Generator::generateFloorPlan(center, minDist*1.5f, 4);
+	//		}else if(chance<=4){
+	//			//40% chance of new shape
+	//			floorPlan = Generator::generateFloorPlan(center, minDist, (rand()%4)+4);
+	//		}else {
+	//			//20% chance of really odd building
+	//			vector<vec2> shapeA = Generator::generateFloorPlan(center+vec2(minDist/2,minDist/2), minDist*2.0f, (rand() % 4) + 4);
+	//			floorPlan = Generator::combinePlans(shapeA, Generator::generateFloorPlan(center, minDist*2.0f, (rand() % 4) + 4));
+	//		}
+
+	//	}else {
+	//		//40% chance of modern building
+	//		result->low = glGenLists(1);
+	//		glNewList(result->low, GL_COMPILE);
+	//		generateModernBuilding(parameters->boundingArea, center, minDist);
+	//		glEndList();
+	//		return;
+	//	}
+	//}
 
 	cur_tex_wall = parameters->b_type;
 	cur_tex_wall_num = rand()%TOTAL_WALL_TEXTURES;

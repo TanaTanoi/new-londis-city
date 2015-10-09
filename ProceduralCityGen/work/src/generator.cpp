@@ -278,7 +278,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 
 section Generator::createRandomSection(){
 	section s;
-	vector<vec2> points = generateFloorPlan(vec2(200,200),100,rand()%5+5);
+	vector<vec2> points = generateFloorPlan(vec2(0,0),200,rand()%9+4);
 
 	vector<util::line> lines = vector<util::line>();
 	int n = points.size();
@@ -296,7 +296,7 @@ section Generator::createRandomSection(){
 vector<vec2> Generator::sectionToPoints(util::section sec){
 	vector<vec2> toReturn = vector<vec2>();
 	for(line l: sec.lines){
-
+		toReturn.push_back(l.start/50.0f);
 	}
 	return toReturn;
 }
@@ -304,5 +304,13 @@ vector<vec2> Generator::sectionToPoints(util::section sec){
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
 	vector<buildingParams> toReturn;
+	for (int i = 0; i < sections.size(); i++) {
+		buildingParams p;
+		p.boundingArea = sectionToPoints(sections[i]);
+		p.seed = rand();
+		p.b_type = (building_type)(p.seed % 2);
+		srand(p.seed);
+		toReturn.push_back(p);
+	}
 	return toReturn;
 }

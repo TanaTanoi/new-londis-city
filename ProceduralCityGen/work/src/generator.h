@@ -30,6 +30,6 @@ public:
 	static std::vector<comp308::vec2> shrinkPoints(std::vector<comp308::vec2>);
 	static std::vector<comp308::vec2> combinePlans(std::vector<comp308::vec2>, std::vector<comp308::vec2>);
 	static util::section createRandomSection(void);
-	std::vector<buildingParams> sectionsToParams(std::vector<util::section> sections);
-	std::vector<comp308::vec2> sectionToPoints(util::section);
+	static std::vector<buildingParams> sectionsToParams(std::vector<util::section> sections);
+	static std::vector<comp308::vec2> sectionToPoints(util::section);
 };
