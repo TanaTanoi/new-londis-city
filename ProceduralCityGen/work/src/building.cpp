@@ -32,6 +32,7 @@ Building::Building(){
 GLuint tex_wall[2][TOTAL_WALL_TEXTURES];
 GLuint tex_window[2][TOTAL_WINDOW_TEXTURES];
 GLuint tex_door[2][2];
+GLuint grass;
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -42,7 +43,7 @@ void Building::initShader() {
 void loadTexture(GLuint texture, const char* filename){
 
 	image tex(filename);
-
+	
 	glBindTexture(GL_TEXTURE_2D,texture);
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE , GL_MODULATE);
@@ -66,8 +67,8 @@ void Building::initTexture() {
 	}
 
 	glGenTextures(TOTAL_WINDOW_TEXTURES, tex_window[0]);
-
 	glGenTextures(1, tex_door[0]);
+	glGenTextures(1, &grass);
 
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
@@ -84,6 +85,8 @@ void Building::initTexture() {
 	loadTexture(tex_window[0][4], "../work/res/textures/window05.jpg");
 
 	loadTexture(tex_door[0][0], "../work/res/textures/wooddoor02.jpg");
+
+	loadTexture(grass, "../work/res/textures/grass001.jpg");
 }
 
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
@@ -497,11 +500,18 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	srand(parameters->seed);
 	//floorPlan = Generator::generateModernFloorPlan(center,minDist);
 	int chance = rand()%100+1;
+	if (chance < 10) {
+		glNewList(result->low, GL_COMPILE);
+		generatePark(floorPlan);
+		glEndList();
+		return;
+	}
 	if (chance < 40) {
 		//40% for residential. Standard building type
 		result->low = glGenLists(1);
 		glNewList(result->low, GL_COMPILE);
 		generateResdientialBuilding(floorPlan);
+		//generatePark(floorPlan);
 		glEndList();
 		return;
 	}else if (chance < 90) {
@@ -607,8 +617,79 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 
 
 }
+/*Generates a park area. Grass with brick fences */
+void Building::generatePark(vector<vec2> floor) {
+	int n = floor.size();
+	vector<vec2> boundingBox = Generator::getBoundingBox(floor);
+	// / 2 for scaling purposes
+	float bb_width = abs(boundingBox[0].x - boundingBox[1].x)*0.25;
+	float bb_height = abs(boundingBox[0].y - boundingBox[1].y)*0.25f;
 
-/*Subdivides the input 4 point floor plan into 2 sets of floor plans
- * Returns a vector of floor plans where index 0 is the larger half
- * and index 1 is the smaller
- */
+	glBindTexture(GL_TEXTURE_2D, grass);
+	glBegin(GL_POLYGON);
+	for (int i = n-1; i >= 0;i--){
+		vec2 v = floor[i];
+		//tex coord is the length 
+		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
+		glVertex3f(v.x, 0, v.y);
+	}
+	
+	glEnd();
+
+	vec2 mid = Generator::centerPoint(floor);
+	glBindTexture(GL_TEXTURE_2D,tex_wall[1][0] );
+	for (int i = 0; i < n; i++) {
+
+		if (i == n / 2) {
+
+		}
+
+		generateParkWall(floor[i], floor[(i + 1) % n], mid);
+	}
+}
+
+void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
+	float height = 0.08f;
+	float wall_width = 0.05f;
+
+	//the vectors on the inner part of the wall. This prevents glitching textures
+	vec2 inner_a = (mid-a)*wall_width + a;
+	vec2 inner_b = (mid - b)*wall_width + b;
+
+	float len = abs(length(a - b));	//length of the wall
+	len /= tex_wall_width;	//the proportion of the wall
+	float yLen = len / 3;
+	glBegin(GL_QUADS);
+
+	//outer facing wall of fence
+	glTexCoord2f(len, yLen);
+	glVertex3f(b.x, 0, b.y);
+	glTexCoord2f(0, yLen);
+	glVertex3f(a.x, 0, a.y);
+	glTexCoord2f(0, 0);
+	glVertex3f(a.x, height, a.y);
+	glTexCoord2f(len, 0);
+	glVertex3f(b.x, height, b.y);
+
+	//inner facing wall of fence
+	glTexCoord2f(len, yLen);
+	glVertex3f(inner_a.x, 0, inner_a.y);
+	glTexCoord2f(0, yLen);
+	glVertex3f(inner_b.x, 0, inner_b.y);
+	glTexCoord2f(0, 0);
+	glVertex3f(inner_b.x, height, inner_b.y);
+	glTexCoord2f(len, 0);
+	glVertex3f(inner_a.x, height, inner_a.y);
+
+	//top of wall
+	glVertex3f(inner_a.x, height, inner_a.y);
+	glVertex3f(inner_b.x, height, inner_b.y);
+	glVertex3f(b.x, height, b.y);
+	glVertex3f(a.x, height, a.y);
+	
+	
+	
+
+	glEnd();
+	
+}

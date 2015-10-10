@@ -77,6 +77,9 @@ public:
 	void generateResdientialBuilding(std::vector<comp308::vec2> points);
 	void generateModernBuilding(std::vector<comp308::vec2> points,comp308::vec2,float);
 
+	void generatePark(std::vector<comp308::vec2> floor);
+	void generateParkWall(comp308::vec2 a, comp308::vec2 b, comp308::vec2 mid);
+
 
 
 };

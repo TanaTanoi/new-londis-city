@@ -204,7 +204,7 @@ void init() {
 	/*Create a new building object*/
 	building = Building();
 	building.initTexture();
-	initSkybox("../work/res/textures/officeSkybox.png");
+	initSkybox("../work/res/textures/cubeMap.jpg");
 	skybox_shader =  makeShaderProgram("../work/res/shaders/skybox_shader.vert", "../work/res/shaders/skybox_shader.frag");
 }
 
@@ -451,7 +451,7 @@ void initSkybox(string filepath){
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxID);
 
 	image tex(filepath);
-	int cubeWidth = tex.w/4;
+	int cubeWidth = ceil(tex.w/4.0f);
 
 	//images for each part of the cubemap
 	image p_x =tex.subImage(cubeWidth*2,cubeWidth*1,cubeWidth,cubeWidth);//right
@@ -486,6 +486,7 @@ void initSkybox(string filepath){
 }
 
 void drawSkycube(float size){
+	const float floor = -1.0f;
 	glUseProgram(skybox_shader);
 	vector<vec2> box = vector<vec2>();
 	box.push_back(vec2(-size,-size));
@@ -499,7 +500,7 @@ void drawSkycube(float size){
 	size /= 1.5;
 	glNormal3f(0,1,0);
 	for(int i = 0; i <4;i++){
-		glVertex3f(box[i].x,0,box[i].y);
+		glVertex3f(box[i].x, floor,box[i].y);
 	}
 	glNormal3f(0,-1,0);
 	for (int i = 3; i >= 0; i--) {
@@ -510,7 +511,7 @@ void drawSkycube(float size){
 		vec3 normal = vec3(0,0,0) - vec3(box[i].x,0,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(0,0);
-		glVertex3f(box[i].x,0,box[i].y);
+		glVertex3f(box[i].x, floor,box[i].y);
 		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(0,1);
@@ -522,7 +523,7 @@ void drawSkycube(float size){
 		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
 		glNormal3f(normal.x,normal.y,normal.z);
 		glTexCoord2f(1,0);
-		glVertex3f(box[(i+1)%4].x,0,box[(i+1)%4].y);
+		glVertex3f(box[(i+1)%4].x, floor,box[(i+1)%4].y);
 	}
 
 	glEnd();

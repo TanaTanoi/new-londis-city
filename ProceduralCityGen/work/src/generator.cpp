@@ -347,3 +347,19 @@ vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
 	}
 	return toReturn;
 }
+/*Returns a bounding box for a given shape where r[0] == min and r[1] == max*/
+vector<vec2> Generator::getBoundingBox(vector<vec2> floor) {
+	vec2 min = vec2(1000000, 1000000);
+	vec2 max = vec2(-1000000, -100000);
+	for (vec2 v : floor) {
+		if (v.x < min.x)min.x = v.x;
+		if (v.y < min.y)min.y = v.y;
+		if (v.x > max.x)max.x = v.x;
+		if (v.y > max.y)max.y = v.y;
+	}
+	vector<vec2> toReturn = vector<vec2>();
+	toReturn.push_back(min);
+	toReturn.push_back(max);
+	return toReturn;
+
+}

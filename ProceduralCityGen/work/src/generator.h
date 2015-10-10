@@ -32,6 +32,7 @@ public:
 	static comp308::vec2 centerPoint(std::vector<comp308::vec2> points);
 	static util::section createRandomSection(void);
 	static std::vector<buildingParams> sectionsToParams(std::vector<util::section> sections);
+	static std::vector<comp308::vec2> getBoundingBox(std::vector<comp308::vec2> floor);
 	static std::vector<comp308::vec2> sectionToPoints(util::section);
 	
 };
