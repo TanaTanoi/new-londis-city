@@ -31,6 +31,9 @@ int testList;
 SectionDivider *g_sections = nullptr;
 RoadNetwork *g_network = nullptr;
 
+// Controls the vehicles in the city
+VehicleController *g_vehicleCtrl = nullptr;
+
 //0, bmode, 1, smode, 2 cmode, 3 rmode
 int mode = 0;
 //Main program
@@ -93,39 +96,42 @@ int main(int argc, char **argv) {
 	string RMODE = "R";
 	string CMODE = "C";
 
-	if(argc > 1 && argv[1] == BMODE ){
+	if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
 		init();
 		string one = "1";
-		if(argc >=2&&std::string(argv[2]) == "1"){
-			cout<<"CAM MODE"<<endl;
+		if (argc >= 2 && std::string(argv[2]) == "1") {
+			cout << "CAM MODE" << endl;
 			cam_mode = 1;
 			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 		}
 		//testList = building.generateBuildingFromString("testd");
 		g_sections = new SectionDivider();
-		testList = building.generateBuildingsFromSections("Tarrrhhhcdfdf", g_sections->testSection().sections);
+		testList = building.generateBuildingsFromSections("Tarrrhhhcdfdf",
+				g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
-	}else if(argv[1] == SMODE){
+	} else if (argv[1] == SMODE) {
 		cout << "Section mode" << endl;
 		g_sections = new SectionDivider();
 		g_sections->testSection();
 		mode = 1;
-	}else if(argv[1] == RMODE){
+	} else if (argv[1] == RMODE) {
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 		mode = 3;
-	}else if(argv[1] == CMODE){
+	} else if (argv[1] == CMODE) {
 		cout << "Car mode" << endl;
+		g_vehicleCtrl = new VehicleController(
+				"../work/res/assets/vehicle_config.txt",
+				"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
+		g_vehicleCtrl->tick();
 		mode = 2;
-	}else{
+	} else {
 		cout << "entered no loops" << endl;
 	}
-
-
 
 	glEnable(GL_SMOOTH);
 	//int testList = building.generateRandomBuildings();
@@ -136,7 +142,6 @@ int main(int argc, char **argv) {
 	//g_vehicleCtrl = new VehicleController(
 	//		"../work/res/assets/vehicle_config.txt",
 	//		"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
-
 	while (!glfwWindowShouldClose(window)) {
 
 		/*## Render here ##*/
@@ -144,17 +149,17 @@ int main(int argc, char **argv) {
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-		if(mode == 0){
+		if (mode == 0) {
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
 			drawSkycube(10.0f);
-		}else if(mode == 1 || mode == 3){
+		} else if (mode == 1 || mode == 3) {
 
-			glClearColor(0.0, 0.0, 0.0, 0.0);  //Set the cleared screen colour to black
-			glViewport(0, 0, g_winWidth, g_winHeight);   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
+			glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
+			glViewport(0, 0, g_winWidth, g_winHeight); //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -163,17 +168,16 @@ int main(int argc, char **argv) {
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 
-			if(mode == 1){
-			g_sections->renderTest();
-			}
-			else{
+			if (mode == 1) {
+				g_sections->renderTest();
+			} else {
 				glPushMatrix();
-				glScalef(zoom,zoom,0);
-				glTranslatef(p_pos.x,p_pos.y,0);
+				glScalef(zoom, zoom, 0);
+				glTranslatef(p_pos.x, p_pos.y, 0);
 				g_network->renderRoads();
 				glPopMatrix();
 			}
-		}else if(mode == 2){
+		} else if (mode == 2) {
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
 		}
@@ -185,9 +189,9 @@ int main(int argc, char **argv) {
 	}
 
 	// Delete pointers
-	//delete g_vehicleCtrl;
 	delete g_sections;
 	delete g_network;
+	delete g_vehicleCtrl;
 	glfwTerminate();
 
 }
@@ -205,7 +209,8 @@ void init() {
 	building = Building();
 	building.initTexture();
 	initSkybox("../work/res/textures/cubeMap.jpg");
-	skybox_shader =  makeShaderProgram("../work/res/shaders/skybox_shader.vert", "../work/res/shaders/skybox_shader.frag");
+	skybox_shader = makeShaderProgram("../work/res/shaders/skybox_shader.vert",
+			"../work/res/shaders/skybox_shader.frag");
 }
 
 void initLighting() {
@@ -236,7 +241,8 @@ void initLighting() {
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/
-void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar){
+void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear,
+		GLdouble zFar) {
 	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
 
@@ -247,7 +253,8 @@ void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar
 }
 
 void lookAt(vec3 pos, vec3 center, vec3 up) {
-	gluLookAt(pos.x, pos.y, pos.z, center.x, center.y, center.z, up.x, up.y, up.z);
+	gluLookAt(pos.x, pos.y, pos.z, center.x, center.y, center.z, up.x, up.y,
+			up.z);
 
 }
 
@@ -260,8 +267,7 @@ void setupCamera() {
 	perspectiveGL(45.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
 	if (cam_mode) {
 		lookAt(p_pos, p_pos + p_front, p_up);
-	}
-	else {
+	} else {
 		glTranslatef(0, 0, -50 * zoom);
 		glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
 		glRotatef(-rotation.x, 0.0f, 1.0f, 0.0f);
@@ -274,7 +280,6 @@ void setupCamera() {
 	//glRotatef(-p_dir.y,1.0f,0.0f,0.0f);
 	//glRotatef(-p_dir.x,0.0f,1.0f,0.0f);
 	//glTranslatef(-p_pos.x,-p_pos.y,-p_pos.z);
-
 
 }
 
@@ -309,42 +314,46 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
-	}else if (button == GLFW_MOUSE_BUTTON_2 && action){
+	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {
 		string input;
 		cout << "Enter an input seed: ";
 		cin >> input;
 		//testList = building.generateBuildingFromString(input);
-		testList = building.generateBuildingsFromSections(input, g_sections->testSection().sections);
+		testList = building.generateBuildingsFromSections(input,
+				g_sections->testSection().sections);
 	}
 }
 
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
-	cout<<"Key: " << key<<endl;
-	if(key == 87 && action){
-		p_pos += 0.05f*p_front*1;
-	}else if(key == 65 && action){
+void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+		int mods) {
+	cout << "Key: " << key << endl;
+	if (key == 87 && action) {
+		p_pos += 0.05f * p_front * 1;
+	} else if (key == 65 && action) {
 		vec3 p_right = cross(p_up, p_front);
-		p_pos += 0.05f*p_right*1;
-	}else if(key == 68&&action){
+		p_pos += 0.05f * p_right * 1;
+	} else if (key == 68 && action) {
 		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f*p_right*1;
-	}else if(key == 63&&action){
-		p_pos -= 0.05f*p_front*1;
+		p_pos -= 0.05f * p_right * 1;
+	} else if (key == 63 && action) {
+		p_pos -= 0.05f * p_front * 1;
 	}
 
 }
 bool firstM = true;
 void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
-	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+	if (firstM) {
+		m_pos = vec2(xpos, ypos);
+		firstM = false;
+	}
 
 	if (m_LeftButton) {
 		//vector normalised to give a -1 to 1 value on the screen
 		vec2 normalisedVec = vec2(
-				-((g_winWidth/2)-m_pos.x)/(g_winWidth/2),
-				((g_winHeight/2)-m_pos.y)/(g_winHeight/2));
-		yaw += (normalisedVec.x - 0.0f)*1.2f;
-		pitch += (normalisedVec.y)*1.2f;
+				-((g_winWidth / 2) - m_pos.x) / (g_winWidth / 2),
+				((g_winHeight / 2) - m_pos.y) / (g_winHeight / 2));
+		yaw += (normalisedVec.x - 0.0f) * 1.2f;
+		pitch += (normalisedVec.y) * 1.2f;
 		if (pitch > 89.0f)
 			pitch = 89.0f;
 		if (pitch < -89.0f)
@@ -352,16 +361,20 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 
 		float pitchR = radians(pitch);
 		float yawR = radians(yaw);
-		p_dir.x = cos(yawR)*cos(pitchR);
+		p_dir.x = cos(yawR) * cos(pitchR);
 		p_dir.y = sin(pitchR);
-		p_dir.z = sin(yawR)*cos(pitchR);
+		p_dir.z = sin(yawR) * cos(pitchR);
 		p_front = normalize(p_dir);
 	}
 	m_pos = vec2(xpos, ypos);
 }
 
-void mouseMotionCallbackModelView(GLFWwindow* window, double xpos, double ypos) {
-	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+void mouseMotionCallbackModelView(GLFWwindow* window, double xpos,
+		double ypos) {
+	if (firstM) {
+		m_pos = vec2(xpos, ypos);
+		firstM = false;
+	}
 
 	if (m_LeftButton) {
 		rotation.x += (m_pos.x - xpos);
@@ -371,7 +384,10 @@ void mouseMotionCallbackModelView(GLFWwindow* window, double xpos, double ypos) 
 }
 
 void mouseMotionCallback2D(GLFWwindow* window, double xpos, double ypos) {
-	if (firstM) { m_pos = vec2(xpos, ypos); firstM = false; }
+	if (firstM) {
+		m_pos = vec2(xpos, ypos);
+		firstM = false;
+	}
 
 	if (m_LeftButton) {
 		p_pos.x -= (m_pos.x - xpos);
@@ -383,7 +399,7 @@ void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 	if (yoffset > 0) {
 		zoom /= 1.1;
-	}else{
+	} else {
 		zoom *= 1.1;
 	}
 }
@@ -403,16 +419,15 @@ void joystickEventsPoll() {
 
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
-		vec2 c_RSpos = vec2((float)((int)(axes[3] * 100)) / 100.0f,
-			(float)((int)(axes[4] * 100)) / 100.0f);
+		vec2 c_RSpos = vec2((float) ((int) (axes[3] * 100)) / 100.0f,
+				(float) ((int) (axes[4] * 100)) / 100.0f);
 
-
-		float threshold = 0.2f;//stops drifting when the user isn't touching the controler
+		float threshold = 0.2f;	//stops drifting when the user isn't touching the controler
 		if (abs(c_RSpos.y) >= threshold) {
-			yaw += (c_RSpos.y - 0.0f)*1.2f;
+			yaw += (c_RSpos.y - 0.0f) * 1.2f;
 		}
 		if (abs(c_RSpos.x) >= threshold) {
-			pitch += (0.0f - c_RSpos.x)*1.2f;
+			pitch += (0.0f - c_RSpos.x) * 1.2f;
 		}
 		if (pitch > 89.0f)
 			pitch = 89.0f;
@@ -421,9 +436,9 @@ void joystickEventsPoll() {
 
 		float pitchR = radians(pitch);
 		float yawR = radians(yaw);
-		p_dir.x = cos(yawR)*cos(pitchR);
+		p_dir.x = cos(yawR) * cos(pitchR);
 		p_dir.y = sin(pitchR);
-		p_dir.z = sin(yawR)*cos(pitchR);
+		p_dir.z = sin(yawR) * cos(pitchR);
 		p_front = normalize(p_dir);
 
 		if (abs(c_LSpos.y) < threshold) {
@@ -433,33 +448,38 @@ void joystickEventsPoll() {
 			c_LSpos.x = 0;
 		}
 
-		p_pos -= 0.05f*p_front*c_LSpos.y*1.4;
+		p_pos -= 0.05f * p_front * c_LSpos.y * 1.4;
 
 		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f*p_right*c_LSpos.x*1.4;
+		p_pos -= 0.05f * p_right * c_LSpos.x * 1.4;
 
 	}
 
-
 }
 
-void initSkybox(string filepath){
+void initSkybox(string filepath) {
 
-	cout<<"Loading cubemap " << filepath<<endl;
+	cout << "Loading cubemap " << filepath << endl;
 
 	glGenTextures(1, &skyboxID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxID);
 
 	image tex(filepath);
-	int cubeWidth = ceil(tex.w/4.0f);
+	int cubeWidth = ceil(tex.w / 4.0f);
 
 	//images for each part of the cubemap
-	image p_x =tex.subImage(cubeWidth*2,cubeWidth*1,cubeWidth,cubeWidth);//right
-	image n_x =tex.subImage(cubeWidth*0,cubeWidth*1,cubeWidth,cubeWidth);//left
-	image p_y =tex.subImage(cubeWidth*1,cubeWidth*0,cubeWidth,cubeWidth);//top
-	image n_y =tex.subImage(cubeWidth*1,cubeWidth*2,cubeWidth,cubeWidth);//bot
-	image n_z =tex.subImage(cubeWidth*3,cubeWidth*1,cubeWidth,cubeWidth);//back
-	image p_z =tex.subImage(cubeWidth*1,cubeWidth*1,cubeWidth,cubeWidth);//front
+	image p_x = tex.subImage(cubeWidth * 2, cubeWidth * 1, cubeWidth,
+			cubeWidth);	//right
+	image n_x = tex.subImage(cubeWidth * 0, cubeWidth * 1, cubeWidth,
+			cubeWidth);	//left
+	image p_y = tex.subImage(cubeWidth * 1, cubeWidth * 0, cubeWidth,
+			cubeWidth);	//top
+	image n_y = tex.subImage(cubeWidth * 1, cubeWidth * 2, cubeWidth,
+			cubeWidth);	//bot
+	image n_z = tex.subImage(cubeWidth * 3, cubeWidth * 1, cubeWidth,
+			cubeWidth);	//back
+	image p_z = tex.subImage(cubeWidth * 1, cubeWidth * 1, cubeWidth,
+			cubeWidth);	//front
 	vector<image> faces = vector<image>();
 	faces.push_back(p_x);
 	faces.push_back(n_x);
@@ -467,9 +487,12 @@ void initSkybox(string filepath){
 	faces.push_back(n_y);
 	faces.push_back(p_z);
 	faces.push_back(n_z);
-	for(int i =0;i<6;i++){
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB8,cubeWidth,cubeWidth,0,GL_RGB,GL_UNSIGNED_BYTE,faces[i].dataPointer());
-		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL_RGB8, cubeWidth, cubeWidth,faces[i].glFormat(), GL_UNSIGNED_BYTE, faces[i].dataPointer());
+	for (int i = 0; i < 6; i++) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, cubeWidth,
+				cubeWidth, 0, GL_RGB, GL_UNSIGNED_BYTE, faces[i].dataPointer());
+		gluBuild2DMipmaps(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, GL_RGB8,
+				cubeWidth, cubeWidth, faces[i].glFormat(), GL_UNSIGNED_BYTE,
+				faces[i].dataPointer());
 	}
 
 	//Specify cubemap paramters
@@ -481,49 +504,50 @@ void initSkybox(string filepath){
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"), GL_TEXTURE_CUBE_MAP);
+	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
+	GL_TEXTURE_CUBE_MAP);
 
 }
 
-void drawSkycube(float size){
+void drawSkycube(float size) {
 	const float floor = -1.0f;
 	glUseProgram(skybox_shader);
 	vector<vec2> box = vector<vec2>();
-	box.push_back(vec2(-size,-size));
-	box.push_back(vec2(-size,size));
-	box.push_back(vec2(size,size));
-	box.push_back(vec2(size,-size));
+	box.push_back(vec2(-size, -size));
+	box.push_back(vec2(-size, size));
+	box.push_back(vec2(size, size));
+	box.push_back(vec2(size, -size));
 
 	glBegin(GL_QUADS);
 	//Floor
 
 	size /= 1.5;
-	glNormal3f(0,1,0);
-	for(int i = 0; i <4;i++){
-		glVertex3f(box[i].x, floor,box[i].y);
+	glNormal3f(0, 1, 0);
+	for (int i = 0; i < 4; i++) {
+		glVertex3f(box[i].x, floor, box[i].y);
 	}
-	glNormal3f(0,-1,0);
+	glNormal3f(0, -1, 0);
 	for (int i = 3; i >= 0; i--) {
-		glVertex3f(box[i].x,size,box[i].y);
+		glVertex3f(box[i].x, size, box[i].y);
 	}
-	
-	for(int i = 0; i < 4;i++){
-		vec3 normal = vec3(0,0,0) - vec3(box[i].x,0,box[i].y);
-		glNormal3f(normal.x,normal.y,normal.z);
-		glTexCoord2f(0,0);
-		glVertex3f(box[i].x, floor,box[i].y);
-		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
-		glNormal3f(normal.x,normal.y,normal.z);
-		glTexCoord2f(0,1);
-		glVertex3f(box[i].x,size,box[i].y);
-		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
-		glNormal3f(normal.x,normal.y,normal.z);
-		glTexCoord2f(1,1);
-		glVertex3f(box[(i+1)%4].x,size,box[(i+1)%4].y);
-		normal = vec3(0,0,0) - vec3(box[i].x,-size,box[i].y);
-		glNormal3f(normal.x,normal.y,normal.z);
-		glTexCoord2f(1,0);
-		glVertex3f(box[(i+1)%4].x, floor,box[(i+1)%4].y);
+
+	for (int i = 0; i < 4; i++) {
+		vec3 normal = vec3(0, 0, 0) - vec3(box[i].x, 0, box[i].y);
+		glNormal3f(normal.x, normal.y, normal.z);
+		glTexCoord2f(0, 0);
+		glVertex3f(box[i].x, floor, box[i].y);
+		normal = vec3(0, 0, 0) - vec3(box[i].x, -size, box[i].y);
+		glNormal3f(normal.x, normal.y, normal.z);
+		glTexCoord2f(0, 1);
+		glVertex3f(box[i].x, size, box[i].y);
+		normal = vec3(0, 0, 0) - vec3(box[i].x, -size, box[i].y);
+		glNormal3f(normal.x, normal.y, normal.z);
+		glTexCoord2f(1, 1);
+		glVertex3f(box[(i + 1) % 4].x, size, box[(i + 1) % 4].y);
+		normal = vec3(0, 0, 0) - vec3(box[i].x, -size, box[i].y);
+		glNormal3f(normal.x, normal.y, normal.z);
+		glTexCoord2f(1, 0);
+		glVertex3f(box[(i + 1) % 4].x, floor, box[(i + 1) % 4].y);
 	}
 
 	glEnd();

@@ -55,7 +55,6 @@ int cam_mode = 0;//0 for model view, 1 for FPS
 
 Building building;
 Generator generator;
-VehicleController *g_vehicleCtrl = nullptr;
 
 /*-----------------
 Method declarations
