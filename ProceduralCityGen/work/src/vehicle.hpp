@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include "comp308.hpp"
+#include "spline.hpp"
 
 struct vertex {
 	int p = 0; // index for point in m_points
@@ -28,6 +29,8 @@ struct triangle {
 enum Direction {
 	NORTH, EAST, SOUTH, WEST
 };
+
+class Spline;
 
 // This class will expand on the geometry class
 class Vehicle {
@@ -53,6 +56,9 @@ private:
 	// Goal that the vehicle is heading to
 	comp308::vec3 m_goal;
 
+	// Needed for vehicle to turn corners
+	Spline *m_spline = nullptr;
+
 	bool m_isMoving = false;
 	float m_velocity = 0;
 
@@ -66,11 +72,12 @@ public:
 
 	Vehicle(std::string);
 	Vehicle(std::string, comp308::vec3, comp308::vec3, comp308::vec3);
+	virtual ~Vehicle();
 
 	bool hasReachedGoal(comp308::vec3 *goal);
 	void renderVehicle();
-	void handleCommand(int);
 
+	void setSpline(std::vector<comp308::vec3>);
 	// Getters and setters
 
 	inline Direction getDirection() const {

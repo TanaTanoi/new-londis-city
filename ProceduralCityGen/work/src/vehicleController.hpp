@@ -27,7 +27,7 @@ private:
 	std::vector<comp308::vec3> m_points;
 
 	// Pointer to road network
-	RoadNetwork *m_network;
+	RoadNetwork *m_network = nullptr;
 
 	// Points that vehicles cannot occupy
 	std::vector<comp308::vec3> m_outOfBounds;
@@ -51,10 +51,14 @@ private:
 	void initTexture(std::string, int);
 
 	float disToNextVehicle(Vehicle*);
+	float calculateStoppingDistance(Vehicle*, comp308::vec3* target);
+
 	Direction turnToTake(Vehicle*);
 	Direction calculateTurn(Direction, Direction, Direction, Direction, float);
+
 	intersection checkIntersections(comp308::vec3*);
 	comp308::vec3 findTarget(Vehicle*);
+
 	void interpolate_straight(Vehicle*, comp308::vec3*, comp308::vec3*);
 	void interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*);
 
@@ -68,10 +72,6 @@ public:
 
 	// Render a specific vehicle given a transformation and a texture
 	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int);
-
-	// Delete all pointers
-	void cleanUp();
-
 };
 
 

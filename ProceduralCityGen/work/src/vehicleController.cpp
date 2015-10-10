@@ -32,6 +32,10 @@ VehicleController::VehicleController(string vehicles, string textures,
 	initVehicles();
 }
 
+VehicleController::~VehicleController() {
+	delete m_network;
+}
+
 void VehicleController::parseRoadNetwork(RoadNetwork *network) {
 	m_network = network;
 }
@@ -149,6 +153,13 @@ vec3 VehicleController::findTarget(Vehicle *vehicle) {
 	}
 
 	return currentPos;
+}
+
+/**
+ * Calculate the stopping distance so a vehicle can deccelerate
+ */
+float VehicleController::calculateStoppingDistance(Vehicle* vehicle, vec3* target) {
+	return -1;
 }
 
 // Find the distance to the nearest vehicle to a given vehicle
@@ -273,7 +284,7 @@ Direction VehicleController::calculateTurn(Direction dir1, Direction dir2,
 }
 /**
  * Interpolate a vehicle between a start point and an end point.
- * TODO allow the car to turn gorners.
+ * TODO slow the car down when it reaches the end of the road.
  */
 void VehicleController::interpolate_straight(Vehicle *vehicle, vec3 *from,
 		vec3 *goal) {
@@ -367,12 +378,3 @@ void VehicleController::readTextures(string filename) {
 	cout << "Finished reading texture files" << endl;
 }
 
-VehicleController::~VehicleController() {
-	// delete m_textures[];
-	// delete m_vehicles[];
-}
-
-// Probably don't need this
-void VehicleController::cleanUp() {
-
-}

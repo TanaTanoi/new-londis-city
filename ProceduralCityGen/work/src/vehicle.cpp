@@ -15,6 +15,7 @@
 
 #include "comp308.hpp"
 #include "vehicle.hpp"
+#include "spline.hpp"
 
 using namespace std;
 using namespace comp308;
@@ -32,6 +33,10 @@ Vehicle::Vehicle(string filename, vec3 start_pos, vec3 start_rot, vec3 scale) {
 	m_pos = start_pos;
 	m_rot = start_rot;
 	m_scale = scale;
+}
+
+Vehicle::~Vehicle() {
+	delete m_spline;
 }
 
 void Vehicle::init(string filename) {
@@ -147,6 +152,12 @@ void Vehicle::readOBJ(string filename) {
 	// If we didn't have any normals, create them
 	if (m_normals.size() <= 1)
 		createNormals();
+}
+
+
+
+void Vehicle::setSpline(vector<vec3> keyframes) {
+	m_spline = new Spline(keyframes);
 }
 
 void Vehicle::createNormals() {
