@@ -16,6 +16,7 @@ SET(headers
 	"vehicleController.hpp"
 	"utility.hpp"
 	"roadNetwork.hpp"
+	"spline.hpp"
 )
 
 
@@ -28,6 +29,7 @@ SET(sources
 	"vehicleController.cpp"
 	"vehicle.cpp"
 	"roadNetwork.cpp"
+	"spline.cpp"
 )
 
 # Add executable target and link libraries
