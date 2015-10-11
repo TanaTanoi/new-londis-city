@@ -130,7 +130,11 @@ int main(int argc, char **argv) {
 		g_vehicleCtrl->tick();
 		mode = 2;
 	} else {
-		cout << "entered no loops" << endl;
+		init();
+		g_sections = new SectionDivider();
+		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
+		//cout << "entered no loops" << endl;
+		mode = 4;//because I'm very lazy
 	}
 
 	glEnable(GL_SMOOTH);
@@ -148,7 +152,7 @@ int main(int argc, char **argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-
+		//TODO clean up all of this gross code when we integrate
 		if (mode == 0) {
 			setupCamera();
 			initLighting();
@@ -180,6 +184,27 @@ int main(int argc, char **argv) {
 		} else if (mode == 2) {
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
+		}else if (mode == 4) {
+			//Spline map mode 
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
+
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			glPointSize(10.0f);
+			glBegin(GL_POINTS);
+			glColor3f(1, 0, 0);
+
+			
+			for (vec2 point : heightmap_points) {
+				glVertex2f(point.x, point.y);
+			}
+			glEnd();
+
 		}
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -312,7 +337,11 @@ void drawGrid(double grid_size, double square_size) {
 //action = state, 1 is down, 0 is release
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-
+	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
+		heightmap_points.push_back(m_pos);
+		cout << "adding point " << m_pos.x << " " << m_pos.y << endl;
+		return;
+	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
 	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {
@@ -322,6 +351,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 		//testList = building.generateBuildingFromString(input);
 		testList = building.generateBuildingsFromSections(input,
 				g_sections->testSection().sections);
+		mode = 0;
 	}
 }
 
