@@ -43,7 +43,7 @@ void Building::initShader() {
 void loadTexture(GLuint texture, const char* filename){
 
 	image tex(filename);
-	
+
 	glBindTexture(GL_TEXTURE_2D,texture);
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE , GL_MODULATE);
@@ -63,7 +63,7 @@ void Building::initTexture() {
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
 	for(int i = 0; i < 2;i++){
 		glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[i]);
-		
+
 	}
 
 	glGenTextures(TOTAL_WINDOW_TEXTURES, tex_window[0]);
@@ -421,7 +421,7 @@ int Building::basicHashcode(string input) {
 }
 
 int Building::generateBuildingsFromSections(string input, vector<util::section> sections) {
-	
+
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
@@ -537,7 +537,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 			return;
 		}
 	}
-	
+
 	cur_tex_wall = parameters->b_type;
 	cur_tex_wall_num = rand()%TOTAL_WALL_TEXTURES;
 	if (cur_tex_wall != SKYSCRAPER) {
@@ -629,22 +629,25 @@ void Building::generatePark(vector<vec2> floor) {
 	glBegin(GL_POLYGON);
 	for (int i = n-1; i >= 0;i--){
 		vec2 v = floor[i];
-		//tex coord is the length 
+		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
 		glVertex3f(v.x, 0, v.y);
 	}
-	
+
 	glEnd();
 
 	vec2 mid = Generator::centerPoint(floor);
-	glBindTexture(GL_TEXTURE_2D,tex_wall[1][0] );
+	glBindTexture(GL_TEXTURE_2D,tex_wall[1][0]);
+
 	for (int i = 0; i < n; i++) {
-
-		if (i == n / 2) {
-
+		vec2 dir = (floor[(i + 1) % n]-floor[i]);
+		float dist = abs(length(dir));
+		if(i==n%2){
+			generateParkWall(floor[i],floor[i]+(dir*0.4),mid);
+			generateParkWall(floor[(i + 1) % n] - (dir*0.4),floor[(i + 1) % n],mid);
+		}else{
+			generateParkWall(floor[i], floor[(i + 1) % n], mid);
 		}
-
-		generateParkWall(floor[i], floor[(i + 1) % n], mid);
 	}
 }
 
@@ -658,7 +661,7 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 
 	float len = abs(length(a - b));	//length of the wall
 	len /= tex_wall_width;	//the proportion of the wall
-	float yLen = len / 3;
+	float yLen = 0.5f;
 	glBegin(GL_QUADS);
 
 	//outer facing wall of fence
@@ -686,10 +689,6 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 	glVertex3f(inner_b.x, height, inner_b.y);
 	glVertex3f(b.x, height, b.y);
 	glVertex3f(a.x, height, a.y);
-	
-	
-	
-
 	glEnd();
-	
+
 }

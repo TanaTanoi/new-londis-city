@@ -327,7 +327,7 @@ vector<vec2> Generator::sectionToPoints(util::section sec){
 	vector<vec2> toReturn = vector<vec2>();
 	int n = sec.lines.size();
 	for (int i = 0; i < n;i++) {
-		toReturn.push_back(sec.lines[(i+2)%n].start/50.0f);
+		toReturn.push_back(sec.lines[(i+2)%n].start/25.0f);
 	}
 	return toReturn;
 }

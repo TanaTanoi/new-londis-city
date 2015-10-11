@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 		}
 		//testList = building.generateBuildingFromString("testd");
 		g_sections = new SectionDivider();
-		testList = building.generateBuildingsFromSections("Tarrrhhhcdfdf",
+		testList = building.generateBuildingsFromSections("test",
 				g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			drawSkycube(10.0f);
+			drawSkycube(100.0f);//the further away it is the better it looks
 		} else if (mode == 1 || mode == 3) {
 
 			glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
@@ -223,15 +223,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
+//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
+	float light_position[] = { p_pos.x, p_pos.y, p_pos.z, 1.0f };
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
-	float spotlight_direction[] = { difference.x, difference.y, difference.z };
+	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90.0);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0.5f);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
+//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
+//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
+//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
@@ -419,8 +420,8 @@ void joystickEventsPoll() {
 
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
-		vec2 c_RSpos = vec2((float) ((int) (axes[3] * 100)) / 100.0f,
-				(float) ((int) (axes[4] * 100)) / 100.0f);
+		vec2 c_RSpos = vec2((float) ((int) (axes[4] * 100)) / 100.0f,
+				(float) ((int) (axes[3] * 100)) / 100.0f);
 
 		float threshold = 0.2f;	//stops drifting when the user isn't touching the controler
 		if (abs(c_RSpos.y) >= threshold) {
