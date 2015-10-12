@@ -24,9 +24,10 @@ string LSystemLookup(char c) {
 			return "E";
 		case 6:
 		case 8:
+		case 3:
 		case 9://30% chance of increasing in height
 			return "EE";
-		case 3:
+
 		case 5:
 		case 7://30% chance of shrinking
 			return "ES";
@@ -55,13 +56,13 @@ else if (c == '*') {
 	case 1:
 	case 2:
 	case 7:
-		return "S*";
+		return "ES*";
 	case 4:
 	case 3:
 		return "ED*";
 	case 5:
 	case 6:
-		return "ES*";
+		return "E*";
 
 	case 8:
 	case 9:

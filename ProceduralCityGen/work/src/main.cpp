@@ -1,15 +1,3 @@
-//
-// Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
-//
-// This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty.
-// In no event will the authors be held liable for any damages arising from
-// the use of this software.
-//
-// The contents of this file may not be copied or duplicated in any form
-// without the prior permission of its owner.
-//
-//----------------------------------------------------------------------------
 
 #include <cmath>
 #include <cstdlib>
@@ -40,7 +28,7 @@ int mode = 0;
 //
 int main(int argc, char **argv) {
 
-	cout << "CityGen v 0.1" << endl;
+	cout << "Procedural City Generator v 1.1" << endl;
 
 	/*Running some checks*/
 
@@ -107,7 +95,7 @@ int main(int argc, char **argv) {
 		}
 		//testList = building.generateBuildingFromString("testd");
 		g_sections = new SectionDivider();
-		testList = building.generateBuildingsFromSections("test",
+		testList = building.generateBuildingsFromSections("gfggghhhhtagagdg",
 				g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
@@ -192,6 +180,11 @@ int main(int argc, char **argv) {
 				glPopMatrix();
 			}
 		} else if (mode == 2) {
+			// Draw vehicles
+			//g_vehicleCtrl->renderVehicles();
+		}else if (mode == 3) {
+			//Spline map mode
+			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 //			glPushMatrix();
 //			glScalef(zoom, zoom, 0);
@@ -203,7 +196,6 @@ int main(int argc, char **argv) {
 
 		} else if (mode == 4) {
 			//Spline map mode
-
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
@@ -213,22 +205,26 @@ int main(int argc, char **argv) {
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-			glBegin(GL_POINTS);
 			glColor3f(1, 0, 0);
+			for (int i = 1; i < heightmap_points.size();i++) {
+				cout<< heightmap_points[i-1].x << endl;
+				glBegin(GL_LINES);
+				glVertex2f(heightmap_points[i-1].x, g_winHeight-heightmap_points[i-1].y);
+				glVertex2f(heightmap_points[i].x, g_winHeight-heightmap_points[i].y);
+				glEnd();
+				for (vec2 point : heightmap_points) {
+					glVertex2f(point.x, point.y);
+				}
 
-			for (vec2 point : heightmap_points) {
-				glVertex2f(point.x, point.y);
 			}
-			glEnd();
-
 		}
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
-		/* Poll for and process events */
-		glfwPollEvents();
-		joystickEventsPoll();
-	}
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+			/* Poll for and process events */
+			glfwPollEvents();
+			joystickEventsPoll();
 
+	}
 	// Delete pointers
 	delete g_sections;
 	delete g_network;
@@ -264,16 +260,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
+	//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
 	float light_position[] = { p_pos.x, p_pos.y, p_pos.z, 1.0f };
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
-//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
-//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
+	//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
+	//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
+	//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
@@ -353,9 +349,18 @@ void drawGrid(double grid_size, double square_size) {
 //action = state, 1 is down, 0 is release
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if (mode == 4 && action && button == GLFW_MOUSE_BUTTON_1) {
-		heightmap_points.push_back(m_pos);
-		cout << "adding point " << m_pos.x << " " << m_pos.y << endl;
+	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
+		if(heightmap_points.size()<2){
+			heightmap_points.push_back(m_pos);
+			return;
+		}
+		float x = heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
+		int i = 2;
+		while(x<m_pos.x&&i<=heightmap_points.size()){
+			x = heightmap_points[i].x;
+			++i;
+		}i--;
+		heightmap_points.insert(heightmap_points.begin()+i,m_pos);
 		return;
 	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
@@ -393,7 +398,6 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 		m_pos = vec2(xpos, ypos);
 		firstM = false;
 	}
-
 	if (m_LeftButton) {
 		//vector normalised to give a -1 to 1 value on the screen
 		vec2 normalisedVec = vec2(
@@ -552,7 +556,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-	GL_TEXTURE_CUBE_MAP);
+			GL_TEXTURE_CUBE_MAP);
 
 }
 

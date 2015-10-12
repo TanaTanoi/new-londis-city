@@ -68,7 +68,7 @@ inline float DotPerp(vec2 start, vec2 end){
 
 // Gets the clockwiseMost adjacent vertex
 // Returns the ID of it
-inline int getClockWiseMost(vec2 current, vector<vec2> adj){
+inline vec2 getClockwiseMost(vec2 current, vector<vec2> adj){
 	vec2 dCurr = vec2(0,-1); //support line
 	vec2 vnext = adj[0]; // sets up first adjacent vertex
 	vec2 dnext = vnext -current;
@@ -77,16 +77,79 @@ inline int getClockWiseMost(vec2 current, vector<vec2> adj){
 	for(int i = 1; i < (int)adj.size(); i++){
 		vec2 dirAdj = adj[i] - current; // gets direction of adjacent vertex
 		if(vcurrIsConvex){
-			if(DotPerp(dCurr,dirAdj) < 0 || DotPerp(dnext,dirAdj)){
-
+			if(DotPerp(dCurr,dirAdj) < 0 || DotPerp(dnext,dirAdj) < 0){
+				vnext = adj[i];
+				dnext = dirAdj;
+				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
 			}
 		}
 		else{
-
+			if(DotPerp(dCurr,dirAdj) < 0 && DotPerp(dnext,dirAdj) < 0){
+				vnext = adj[i];
+				dnext = dirAdj;
+				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+			}
 
 		}
 	}
-	return 0;
+	return vnext;
+}
+
+// Gets the clockwiseMost adjacent vertex
+// Returns the ID of it
+inline vec2 getAntiClockwiseMost(roadNode vprev, roadNode current, vector<roadNode> adj){
+	vec2 dCurr = current.location - vprev.location; //support line
+	vec2 vnext = adj[0].location; // sets up first adjacent vertex
+
+	if(adj[0].ID == vprev.ID){
+		vnext = adj[1].location;
+	}
+
+	vec2 dnext = vnext -current.location;
+	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+
+	for(int i = 1; i < (int)adj.size(); i++){
+		if(adj[i].ID != vprev.ID){
+			vec2 dirAdj = adj[i].location - current.location; // gets direction of adjacent vertex
+			if(vcurrIsConvex){
+				if(DotPerp(dCurr,dirAdj) > 0 && DotPerp(dnext,dirAdj) > 0){
+					vnext = adj[i].location;
+					dnext = dirAdj;
+					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				}
+			}
+			else{
+				if(DotPerp(dCurr,dirAdj) > 0 || DotPerp(dnext,dirAdj) > 0){
+					vnext = adj[i].location;
+					dnext = dirAdj;
+					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				}
+
+			}
+		}
+	}
+	return vnext;
+}
+
+inline void testAntiClockwise(){
+	roadNode start = {vec2(100,100),0};
+
+	roadNode a = {vec2(300,100),1};
+	roadNode b = {vec2(250,75),2};
+	roadNode c = {vec2(50,50),3};
+	roadNode d = {vec2(150,50),4};
+
+	vector<roadNode> adj;
+	adj.push_back(a);
+	adj.push_back(b);
+	adj.push_back(c);
+	adj.push_back(d);
+
+	vec2 result = getAntiClockwiseMost(c,start,adj);
+
+	cout << "Result" << endl;
+	cout<< result.x << " " << result.y << endl;
+
 }
 
 }
