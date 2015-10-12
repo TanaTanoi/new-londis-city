@@ -1,15 +1,3 @@
-//
-// Copyright (c) 2015 Taehyun Rhee, Joshua Scott, Ben Allen
-//
-// This software is provided 'as-is' for assignment of COMP308 in ECS,
-// Victoria University of Wellington, without any express or implied warranty.
-// In no event will the authors be held liable for any damages arising from
-// the use of this software.
-//
-// The contents of this file may not be copied or duplicated in any form
-// without the prior permission of its owner.
-//
-//----------------------------------------------------------------------------
 
 #include <cmath>
 #include <cstdlib>
@@ -40,7 +28,7 @@ int mode = 0;
 //
 int main(int argc, char **argv) {
 
-	cout << "CityGen v 0.1" << endl;
+	cout << "Procedural City Generator v 1.1" << endl;
 
 	/*Running some checks*/
 
@@ -107,7 +95,7 @@ int main(int argc, char **argv) {
 		}
 		//testList = building.generateBuildingFromString("testd");
 		g_sections = new SectionDivider();
-		testList = building.generateBuildingsFromSections("test",
+		testList = building.generateBuildingsFromSections("gfggghhhhtagagdg",
 				g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
@@ -185,8 +173,8 @@ int main(int argc, char **argv) {
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
 		}else if (mode == 4) {
-			//Spline map mode 
-
+			//Spline map mode
+			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
@@ -196,14 +184,16 @@ int main(int argc, char **argv) {
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-			glBegin(GL_POINTS);
-			glColor3f(1, 0, 0);
 
-			
-			for (vec2 point : heightmap_points) {
-				glVertex2f(point.x, point.y);
+
+			glColor3f(1, 0, 0);
+			for (int i = 1; i < heightmap_points.size();i++) {
+				cout<< heightmap_points[i-1].x << endl;
+				glBegin(GL_LINES);
+				glVertex2f(heightmap_points[i-1].x, g_winHeight-heightmap_points[i-1].y);
+				glVertex2f(heightmap_points[i].x, g_winHeight-heightmap_points[i].y);
+				glEnd();
 			}
-			glEnd();
 
 		}
 		/* Swap front and back buffers */
@@ -338,6 +328,19 @@ void drawGrid(double grid_size, double square_size) {
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
 	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
+		if(heightmap_points.size()<2){
+			heightmap_points.push_back(m_pos);
+				return;
+			}
+			float x = heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
+			int i = 2;
+			while(x<m_pos.x&&i<=heightmap_points.size()){
+				x = heightmap_points[i].x;
+				++i;
+			}i--;
+			heightmap_points.insert(heightmap_points.begin()+i,m_pos);
+
+
 		heightmap_points.push_back(m_pos);
 		cout << "adding point " << m_pos.x << " " << m_pos.y << endl;
 		return;
@@ -377,7 +380,6 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 		m_pos = vec2(xpos, ypos);
 		firstM = false;
 	}
-
 	if (m_LeftButton) {
 		//vector normalised to give a -1 to 1 value on the screen
 		vec2 normalisedVec = vec2(
