@@ -158,19 +158,19 @@ void VehicleController::generateGoal(Vehicle* vehicle) {
  */
 bool VehicleController::reachedGoal(Vehicle* vehicle) {
 
-	if (vehicle->getGoal() == NULL)
-		return true;
+//	if (vehicle->getGoal() == NULL)
+//		return true;
 
-	if (vehicle->getPos() == vehicle->getGoal())
-		return true;
+//	if (vehicle->getPos() == vehicle->getGoal())
+//		return true;
 
 	return false;
 }
 
 bool VehicleController::reachedTarget(Vehicle *vehicle, vec3 target) {
 
-	if (vehicle->getPos() == target)
-		return true;
+	// if (vehicle->getPos() == target)
+	//	return true;
 
 	return false;
 }
