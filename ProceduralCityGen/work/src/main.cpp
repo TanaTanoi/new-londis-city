@@ -130,8 +130,13 @@ int main(int argc, char **argv) {
 				"../work/res/assets/vehicle_config.txt",
 				"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
 
-		// Parse the road network
-		g_vehicleCtrl->parseRoadNetwork(g_network);
+		if (argc > 2 && std::string(argv[2]) == "2") {
+
+			g_network = new RoadNetwork();
+			g_network->testNetwork();
+			// Parse the road network
+			g_vehicleCtrl->parseRoadNetwork(g_network);
+		}
 
 		mode = 2;
 	} else {
@@ -188,6 +193,11 @@ int main(int argc, char **argv) {
 			}
 		} else if (mode == 2) {
 
+//			glPushMatrix();
+//			glScalef(zoom, zoom, 0);
+//			glTranslatef(p_pos.x, p_pos.y, 0);
+//			g_network->renderRoads();
+//			glPopMatrix();
 			// Render the vehicles
 			g_vehicleCtrl->tick();
 
