@@ -5,6 +5,8 @@
  *      Author: craighhann
  */
 
+#pragma once
+
 #include "comp308.hpp"
 #include <cmath>
 #include <algorithm>

@@ -61,7 +61,7 @@ public:
 
 	road findClosestRoads(vec3);
 
-	inline const std::map<int, std::vector<int> >& getAdjacencyList() const {cycle::
+	inline const std::map<int, std::vector<int> >& getAdjacencyList() const {
 		return adjacencyList;
 	}
 
