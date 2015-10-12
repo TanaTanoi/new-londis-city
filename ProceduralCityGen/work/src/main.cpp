@@ -202,18 +202,19 @@ int main(int argc, char **argv) {
 				glVertex2f(heightmap_points[i-1].x, g_winHeight-heightmap_points[i-1].y);
 				glVertex2f(heightmap_points[i].x, g_winHeight-heightmap_points[i].y);
 				glEnd();
-			for (vec2 point : heightmap_points) {
-				glVertex2f(point.x, point.y);
+				for (vec2 point : heightmap_points) {
+					glVertex2f(point.x, point.y);
+				}
+
 			}
-
 		}
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
-		/* Poll for and process events */
-		glfwPollEvents();
-		joystickEventsPoll();
-	}
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+			/* Poll for and process events */
+			glfwPollEvents();
+			joystickEventsPoll();
 
+	}
 	// Delete pointers
 	delete g_sections;
 	delete g_network;
@@ -249,16 +250,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
+	//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
 	float light_position[] = { p_pos.x, p_pos.y, p_pos.z, 1.0f };
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
-//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
-//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
+	//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
+	//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
+	//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
@@ -341,16 +342,17 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
 		if(heightmap_points.size()<2){
 			heightmap_points.push_back(m_pos);
-				return;
-			}
-			float x = heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
-			int i = 2;
-			while(x<m_pos.x&&i<=heightmap_points.size()){
-				x = heightmap_points[i].x;
-				++i;
-			}i--;
-			heightmap_points.insert(heightmap_points.begin()+i,m_pos);
-
+			return;
+		}
+		float x = heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
+		int i = 2;
+		while(x<m_pos.x&&i<=heightmap_points.size()){
+			x = heightmap_points[i].x;
+			++i;
+		}i--;
+		heightmap_points.insert(heightmap_points.begin()+i,m_pos);
+		return;
+	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
 	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {
@@ -544,7 +546,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-	GL_TEXTURE_CUBE_MAP);
+			GL_TEXTURE_CUBE_MAP);
 
 }
 
