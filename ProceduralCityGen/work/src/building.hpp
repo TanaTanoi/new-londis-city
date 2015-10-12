@@ -80,6 +80,6 @@ public:
 	void generatePark(std::vector<comp308::vec2> floor);
 	void generateParkWall(comp308::vec2 a, comp308::vec2 b, comp308::vec2 mid);
 
-
+	void generateRoad(comp308::vec2,comp308::vec2,float);
 
 };

@@ -33,6 +33,7 @@ GLuint tex_wall[2][TOTAL_WALL_TEXTURES];
 GLuint tex_window[2][TOTAL_WINDOW_TEXTURES];
 GLuint tex_door[2][2];
 GLuint grass;
+GLuint road;
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -69,6 +70,7 @@ void Building::initTexture() {
 	glGenTextures(TOTAL_WINDOW_TEXTURES, tex_window[0]);
 	glGenTextures(1, tex_door[0]);
 	glGenTextures(1, &grass);
+	glGenTextures(1, &road);
 
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
@@ -87,6 +89,8 @@ void Building::initTexture() {
 	loadTexture(tex_door[0][0], "../work/res/textures/wooddoor02.jpg");
 
 	loadTexture(grass, "../work/res/textures/grass001.jpg");
+
+	loadTexture(road, "../work/res/textures/road01.jpg");
 }
 
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
@@ -431,7 +435,7 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 		generateBuilding(&params[i], &building);
 		buildings.push_back(building);
 	}
-	int newList = glGenLists(1);;
+	int newList = glGenLists(1);
 	glNewList(newList, GL_COMPILE);
 	glUseProgram(g_shader);
 	for (buildingLOD b : buildings) {
@@ -619,6 +623,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 }
 /*Generates a park area. Grass with brick fences */
 void Building::generatePark(vector<vec2> floor) {
+
 	int n = floor.size();
 	vector<vec2> boundingBox = Generator::getBoundingBox(floor);
 	// / 2 for scaling purposes
@@ -647,6 +652,7 @@ void Building::generatePark(vector<vec2> floor) {
 			generateParkWall(floor[(i + 1) % n] - (dir*0.4),floor[(i + 1) % n],mid);
 		}else{
 			generateParkWall(floor[i], floor[(i + 1) % n], mid);
+
 		}
 	}
 }
@@ -691,4 +697,34 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 	glVertex3f(a.x, height, a.y);
 	glEnd();
 
+}
+
+
+/*Renders a road between two points of a given width*/
+void Building::generateRoad(vec2 a, vec2 b,float width){
+	vec2 dir = (b-a);
+	vec3 dir3D = vec3(dir.x,0,dir.y);
+	dir3D = normalize(dir3D);
+	vec3 right3D = cross(dir3D, vec3(0,1,0));
+	right3D = normalize(right3D);
+	vec2 right = vec2(right3D.x,right3D.z);
+	float leng = abs(length(dir));
+	leng/=tex_wall_width;
+	vector<vec2> roadPoints = vector<vec2>();
+	roadPoints.push_back(a+(right*width));
+	roadPoints.push_back(b+(right*width));
+	roadPoints.push_back(b-(right*width));
+	roadPoints.push_back(a-(right*width));
+
+	glBindTexture(GL_TEXTURE_2D, road);
+	glBegin(GL_QUADS);
+	glTexCoord2d(0,0);
+	glVertex3f(roadPoints[0].x,0,roadPoints[0].y);
+	glTexCoord2d(0,leng);
+	glVertex3f(roadPoints[1].x,0,roadPoints[1].y);
+	glTexCoord2d(1,leng);
+	glVertex3f(roadPoints[2].x,0,roadPoints[2].y);
+	glTexCoord2d(1,0);
+	glVertex3f(roadPoints[3].x,0,roadPoints[3].y);
+	glEnd();
 }
