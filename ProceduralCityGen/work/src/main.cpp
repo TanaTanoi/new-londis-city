@@ -124,17 +124,22 @@ int main(int argc, char **argv) {
 		mode = 3;
 	} else if (argv[1] == CMODE) {
 		cout << "Car mode" << endl;
+
+		// Load the vehicle files and textures
 		g_vehicleCtrl = new VehicleController(
 				"../work/res/assets/vehicle_config.txt",
 				"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
-		g_vehicleCtrl->tick();
+
+		// Parse the road network
+		g_vehicleCtrl->parseRoadNetwork(g_network);
+
 		mode = 2;
 	} else {
 		init();
 		g_sections = new SectionDivider();
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		//cout << "entered no loops" << endl;
-		mode = 4;//because I'm very lazy
+		mode = 4; //because I'm very lazy
 	}
 
 	glEnable(GL_SMOOTH);
@@ -159,7 +164,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			drawSkycube(100.0f);//the further away it is the better it looks
+			drawSkycube(100.0f);	//the further away it is the better it looks
 		} else if (mode == 1 || mode == 3) {
 
 			glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
@@ -182,10 +187,12 @@ int main(int argc, char **argv) {
 				glPopMatrix();
 			}
 		} else if (mode == 2) {
-			// Draw vehicles
-			//g_vehicleCtrl->renderVehicles();
-		}else if (mode == 4) {
-			//Spline map mode 
+
+			// Render the vehicles
+			g_vehicleCtrl->tick();
+
+		} else if (mode == 4) {
+			//Spline map mode
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -199,7 +206,6 @@ int main(int argc, char **argv) {
 			glBegin(GL_POINTS);
 			glColor3f(1, 0, 0);
 
-			
 			for (vec2 point : heightmap_points) {
 				glVertex2f(point.x, point.y);
 			}
@@ -337,7 +343,7 @@ void drawGrid(double grid_size, double square_size) {
 //action = state, 1 is down, 0 is release
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
+	if (mode == 4 && action && button == GLFW_MOUSE_BUTTON_1) {
 		heightmap_points.push_back(m_pos);
 		cout << "adding point " << m_pos.x << " " << m_pos.y << endl;
 		return;

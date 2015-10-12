@@ -17,6 +17,7 @@
 #include "vehicleController.hpp"
 #include "imageLoader.hpp"
 #include "roadNetwork.hpp"
+#include "cycleUtil.hpp"
 
 using namespace std;
 using namespace comp308;
@@ -34,6 +35,7 @@ VehicleController::VehicleController(string vehicles, string textures,
 
 VehicleController::~VehicleController() {
 	delete m_network;
+	delete m_textures;
 }
 
 void VehicleController::parseRoadNetwork(RoadNetwork *network) {
@@ -77,9 +79,11 @@ void VehicleController::initTexture(string filename, int index) {
 	 **/
 }
 
-// Move a vehicle from one intersection to another.
-//	- It should accelerate towards the intersection then
-// decelerate to a stop when it arrives at the intersection
+/**
+ * Go through each vehicle and update their positions. Little bit of jargon,
+ * GOAL is the final position that the vehicle is aiming for,
+ * TARGET is the end of the road that the vehicle is currently on.
+ */
 void VehicleController::tick() {
 	for (Vehicle v : m_vehicles) {
 
@@ -88,18 +92,39 @@ void VehicleController::tick() {
 		// Current position that the vehicle is at
 		vec3 start = v.getPos();
 
-		// The goal that the vehicle is heading towards
+		// Generate a goal for the vehicle
+		if (reachedGoal(&v))
+			generateGoal(&v);
+
+		// The target that the vehicle is heading towards
 		vec3 target = findTarget(&v);
 
+		Direction turn;
+		// Check if vehicle has reached the intersection
+		if (reachedTarget(&v, target)) {
+
+			// Find the turning direction
+			turn = turnToTake(&v);
+
+			v.setTurning(true);
+		}
+
+		// If the vehicle is turning
+		if (v.isTurning())
+			interpolate_curve(&v, &start, &target, turn);
+
 		// If the vehicle is traveling straight
-		// TODO make a condition to check if the vehicle needs to turn
-		interpolate_straight(&v, &start, &target);
+		else
+			interpolate_straight(&v, &start, &target);
 
 		// Finally render the vehicle
-		renderVehicle(&v, start, rot, vec3(0.1, 0.1, 0.1), -1);
+		renderVehicle(&v, start, rot, vec3(0.1, 0.1, 0.1));
 	}
 }
 
+/**
+ * Render a vehicle given a transformation and a texture
+ */
 void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 		vec3 rotate, vec3 scale, int texture) {
 
@@ -113,6 +138,41 @@ void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 	glRotatef(rotate.x, rotate.y, rotate.z, 1);
 	vehicle->renderVehicle();
 	glPopMatrix();
+}
+
+void VehicleController::generateGoal(Vehicle* vehicle) {
+
+	// Vector of all of the possible goals
+	vector<cycle::roadNode> goals = m_network->getAllNodes();
+	int randomNumber = rand() % goals.size();
+
+	// Choose a goal at random
+	vec2 location = goals[randomNumber].location;
+	vec3 goal = vec3(location.x, 0, location.y);
+
+	vehicle->setGoal(goal);
+}
+
+/**
+ * Has the vehicle reached it's goal?
+ */
+bool VehicleController::reachedGoal(Vehicle* vehicle) {
+
+	if (vehicle->getGoal() == NULL)
+		return true;
+
+	if (vehicle->getPos() == vehicle->getGoal())
+		return true;
+
+	return false;
+}
+
+bool VehicleController::reachedTarget(Vehicle *vehicle, vec3 target) {
+
+	if (vehicle->getPos() == target)
+		return true;
+
+	return false;
 }
 
 // Find a target for a vehicle
@@ -158,7 +218,8 @@ vec3 VehicleController::findTarget(Vehicle *vehicle) {
 /**
  * Calculate the stopping distance so a vehicle can deccelerate
  */
-float VehicleController::calculateStoppingDistance(Vehicle* vehicle, vec3* target) {
+float VehicleController::calculateStoppingDistance(Vehicle* vehicle,
+		vec3* target) {
 	return -1;
 }
 
@@ -321,7 +382,7 @@ void VehicleController::interpolate_straight(Vehicle *vehicle, vec3 *from,
 }
 
 void VehicleController::interpolate_curve(Vehicle* vehicle, vec3* from,
-		vec3* goal) {
+		vec3* target, Direction turn) {
 
 	// cout << "RENDERING SPLINE..." << endl;
 	// cout << numPts << endl;
