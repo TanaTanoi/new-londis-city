@@ -112,17 +112,22 @@ int main(int argc, char **argv) {
 		mode = 3;
 	} else if (argv[1] == CMODE) {
 		cout << "Car mode" << endl;
+
+		// Load the vehicle files and textures
 		g_vehicleCtrl = new VehicleController(
 				"../work/res/assets/vehicle_config.txt",
 				"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
-		g_vehicleCtrl->tick();
+
+		// Parse the road network
+		g_vehicleCtrl->parseRoadNetwork(g_network);
+
 		mode = 2;
 	} else {
 		init();
 		g_sections = new SectionDivider();
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		//cout << "entered no loops" << endl;
-		mode = 4;//because I'm very lazy
+		mode = 4; //because I'm very lazy
 	}
 
 	glEnable(GL_SMOOTH);
@@ -147,7 +152,7 @@ int main(int argc, char **argv) {
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
 			glCallList(testList);
-			drawSkycube(100.0f);//the further away it is the better it looks
+			drawSkycube(100.0f);	//the further away it is the better it looks
 		} else if (mode == 1 || mode == 3) {
 
 			glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
@@ -172,9 +177,15 @@ int main(int argc, char **argv) {
 		} else if (mode == 2) {
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
-		}else if (mode == 4) {
+		}else if (mode == 3) {
 			//Spline map mode
 			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+
+			// Render the vehicles
+			g_vehicleCtrl->tick();
+
+		} else if (mode == 4) {
+			//Spline map mode
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
@@ -184,8 +195,6 @@ int main(int argc, char **argv) {
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-
-
 			glColor3f(1, 0, 0);
 			for (int i = 1; i < heightmap_points.size();i++) {
 				cout<< heightmap_points[i-1].x << endl;
@@ -193,6 +202,8 @@ int main(int argc, char **argv) {
 				glVertex2f(heightmap_points[i-1].x, g_winHeight-heightmap_points[i-1].y);
 				glVertex2f(heightmap_points[i].x, g_winHeight-heightmap_points[i].y);
 				glEnd();
+			for (vec2 point : heightmap_points) {
+				glVertex2f(point.x, point.y);
 			}
 
 		}
@@ -340,11 +351,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 			}i--;
 			heightmap_points.insert(heightmap_points.begin()+i,m_pos);
 
-
-		heightmap_points.push_back(m_pos);
-		cout << "adding point " << m_pos.x << " " << m_pos.y << endl;
-		return;
-	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
 	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {

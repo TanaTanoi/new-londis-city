@@ -59,7 +59,8 @@ private:
 	// Needed for vehicle to turn corners
 	Spline *m_spline = nullptr;
 
-	bool m_isMoving = false;
+
+	bool m_isMoving = false, m_isTurning = false;
 	float m_velocity = 0;
 
 	void init(std::string);
@@ -138,6 +139,14 @@ public:
 
 	inline void setGoal(const comp308::vec3& goal) {
 		m_goal = goal;
+	}
+
+	inline const bool isTurning() const {
+		return m_isTurning;
+	}
+
+	inline void setTurning(bool isTurning = false) {
+		m_isTurning = isTurning;
 	}
 };
 

@@ -9,15 +9,11 @@
 #include <vector>
 #include "utility.hpp"
 #include "comp308.hpp"
-
-struct roadNode{
-	comp308::vec2 location;
-	int ID;
-};
+#include "cycleUtil.hpp"
 
 struct road{
-	roadNode start;
-	roadNode end;
+	cycle::roadNode start;
+	cycle::roadNode end;
 	int ID;
 	// Will have a quad to represent for drawing
 };
@@ -27,7 +23,7 @@ struct road{
 class RoadNetwork{
 private:
 	std::map<int,std::vector<int>> adjacencyList; // stores road ID to other roadID's it connects to
-	std::vector<roadNode> allNodes; // has all nodes
+	std::vector<cycle::roadNode> allNodes; // has all nodes
 	std::vector<road> allRoads; // has all roads
 	int nodeID = 0;
 	int roadID = 0;
@@ -43,9 +39,9 @@ private:
 	int insideWorld(road);
 	road truncate(road);
 	void addIntersection(int,int);
-	roadNode addNode(comp308::vec2);
-	road addRoad(roadNode,roadNode);
-	void updateAdjacencyList(road, roadNode);
+	cycle::roadNode addNode(comp308::vec2);
+	road addRoad(cycle::roadNode,cycle::roadNode);
+	void updateAdjacencyList(road, cycle::roadNode);
 	void calulateBoundary();
 	void createNewYorkGrid(util::section s);
 	void recDivideGrid(road,int,bool);
@@ -69,7 +65,7 @@ public:
 		return adjacencyList;
 	}
 
-	inline const std::vector<roadNode>& getAllNodes() const {
+	inline const std::vector<cycle::roadNode>& getAllNodes() const {
 		return allNodes;
 	}
 

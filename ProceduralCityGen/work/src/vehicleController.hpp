@@ -46,7 +46,6 @@ private:
 
 	void readConfig(std::string);
 	void readTextures(std::string);
-	void parseRoadNetwork(RoadNetwork*);
 	void initVehicles();
 	void initTexture(std::string, int);
 
@@ -58,20 +57,25 @@ private:
 
 	intersection checkIntersections(comp308::vec3*);
 	comp308::vec3 findTarget(Vehicle*);
+	bool reachedTarget(Vehicle*, comp308::vec3);
+	void generateGoal(Vehicle*);
+	bool reachedGoal(Vehicle*);
 
 	void interpolate_straight(Vehicle*, comp308::vec3*, comp308::vec3*);
-	void interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*);
+	void interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*, Direction);
 
 public:
 
 	VehicleController(std::string, std::string, std::vector<comp308::vec3>, comp308::vec3);
 	virtual ~VehicleController();
 
+	void parseRoadNetwork(RoadNetwork*);
+
 	// Render all of the vehicles
 	void tick();
 
 	// Render a specific vehicle given a transformation and a texture
-	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int);
+	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int texture = -1);
 };
 
 
