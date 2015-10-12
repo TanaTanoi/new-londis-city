@@ -597,6 +597,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	srand(rand());
 	//generate 2 to 5 plan changes
 	for (int i = 0; i < rand() % 3 + 2; i++) {
+		cout<<"Level " << i <<" has " << levels[i].size() << "edges"<<endl;
 		srand(rand());
 		float xmul = rand() % 2 - 1;//-1 to 1;
 		srand(rand());
@@ -604,7 +605,13 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 		srand(rand());
 		vec2 offset = vec2(xmul*(minDist/2.0f),(minDist/2.0f)*ymul);
 		//in this case, i is the most recently added level (i.e. the largest floorplan)
-		levels.push_back(Generator::combinePlans(levels[i], Generator::generateFloorPlan(mid+offset, minDist, rand() % 4 + 4)));
+		vector<vec2> toAdd =Generator::combinePlans(levels[i], Generator::generateFloorPlan(mid+offset, minDist, rand() % 4 + 4));
+		//if the plan didn't combine, try again with another plan
+		if(toAdd.size() == levels[i].size()){
+			srand(rand());
+			Generator::combinePlans(levels[i], Generator::generateFloorPlan(mid+offset, minDist, rand() % 4 + 4));
+		}
+		levels.push_back(toAdd);
 	}
 	//the end of levels now contains the ground floor
 
