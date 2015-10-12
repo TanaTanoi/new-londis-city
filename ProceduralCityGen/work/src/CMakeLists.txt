@@ -17,6 +17,7 @@ SET(headers
 	"utility.hpp"
 	"roadNetwork.hpp"
 	"spline.hpp"
+	"cycleUtil.hpp"
 )
 
 

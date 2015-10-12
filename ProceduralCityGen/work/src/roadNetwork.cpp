@@ -8,8 +8,10 @@
 #include "roadNetwork.hpp"
 #include "comp308.hpp"
 #include "utility.hpp"
+#include "cycleUtil.hpp"
 
 using namespace util;
+using namespace cycle;
 using namespace comp308;
 using namespace std;
 
