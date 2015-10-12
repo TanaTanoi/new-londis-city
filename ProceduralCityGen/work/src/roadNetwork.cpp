@@ -212,6 +212,7 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
+	testClockwise();
 	createNewYorkGrid(outline);
 	// Now take in population density
 	// Now generate highways
