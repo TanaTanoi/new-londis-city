@@ -42,9 +42,11 @@ private:
 	std::vector<cycle::primitive> extractPrimitives();
 	void extractIsolatedVertex(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> *);
 	void extractFilament(int, int, std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> * , std::vector<cycle::road> * );
-	void extractPrimitive(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> * );
+	void extractPrimitive(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> *, std::vector<cycle::road> *);
 	cycle::roadNode getClockwiseMost(cycle::roadNode, std::vector<int>);
 	cycle::roadNode getAntiClockwiseMost(cycle::roadNode,cycle::roadNode, std::vector<int>);
+	void removeAdjacencyLinks(int, std::map<int,std::vector<int>> * );
+	void setCycleEdge(std::vector<cycle::road> *, int, int);
 
 public:
 	RoadNetwork();
