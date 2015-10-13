@@ -77,11 +77,11 @@ inline vector<roadNode> sortPoints(vector<roadNode> points){
 
 }
 
-inline road findRoad(vector<road> roads, int sID, int eID){
+inline int findRoadIndex(vector<road> roads, int sID, int eID){
 	int low = 0; int high = (int)roads.size(); int mid = (low+high)/2;
 	while(low < high){
 		if(sID == roads[mid].start.ID && eID == roads[mid].end.ID){ // Found object
-			return roads[mid];
+			return mid;
 		}
 		else if((sID == roads[mid].start.ID && eID < roads[mid].end.ID) || (sID < roads[mid].start.ID)){ // Less than
 			high = mid;
@@ -92,7 +92,7 @@ inline road findRoad(vector<road> roads, int sID, int eID){
 			mid = (low+high)/2;
 		}
 	}
-	return roads[low];
+	return low;
 }
 
 /*
@@ -132,6 +132,26 @@ inline float DotPerp(vec2 start, vec2 end){
 	return start.x * end.y -  end.x * start.y;
 }
 
+inline void removeFromHeap(vector<roadNode> * heap, int ID){
+	for(int i = 0; i < (int)heap->size(); i++){
+		if(ID == (*heap)[i].ID){
+			heap->erase(heap->begin() + i);
+			return;
+		}
+	}
+}
+
+/**
+ * Checks if a vector of roadNodes contains a given node
+ */
+inline bool contains(vector<roadNode> visited, roadNode node){
+	for(roadNode n : visited){
+		if(n.ID == node.ID){
+			return true;
+		}
+	}
+	return false;
+}
 
 
 

@@ -45,6 +45,7 @@ private:
 	void extractPrimitive(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> * );
 	cycle::roadNode getClockwiseMost(cycle::roadNode, std::vector<int>);
 	cycle::roadNode getAntiClockwiseMost(cycle::roadNode,cycle::roadNode, std::vector<int>);
+	void removeAdjacencyLinks(int, std::map<int,std::vector<int>> * );
 
 public:
 	RoadNetwork();

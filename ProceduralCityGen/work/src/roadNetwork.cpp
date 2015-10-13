@@ -309,71 +309,77 @@ void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives, vector<r
 // Note: visiting a vertex should remove it from adjacency list
 
 void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
-	//if(findRoad(startID,endID,(*roads)) ){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
-	if((int)(*adjs)[startID].size() >= 3){
-		//remove edge v0 to v1
-		startID = endID;
-		if((int)(*adjs)[startID].size() == 1){
+	if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
+		if((int)(*adjs)[startID].size() >= 3){
+
+			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+			roads->erase(roads->begin() + toRemove);
+
+			startID = endID;
+			if((int)(*adjs)[startID].size() == 1){
+				endID = (*adjs)[startID][0];
+			}
+		}
+
+		while((int)(*adjs)[startID].size() == 1){
 			endID = (*adjs)[startID][0];
+
+			if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){//  if cycle edge
+				removeFromHeap(heap,startID);// remove from heap
+				int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+				roads->erase(roads->begin() + toRemove);// remove edge
+				removeAdjacencyLinks(startID,adjs); //remove vertex
+				startID = endID;
+			}
+			else{
+				break;
+			}
+		}
+
+		if((int)(*adjs)[startID].size() == 0){
+			removeFromHeap(heap,startID);//remove from heap
+			removeAdjacencyLinks(startID,adjs); //remove vertex
 		}
 	}
+	else{
+		primitive p;
+		p.type = 1; // sets to filament
 
-	while((int)(*adjs)[startID].size() == 1){
-		endID = (*adjs)[startID][0];
-
-		//  if cycle edge
-		// remove from heap
-		// remove edge
-		allNodes[startID].visited;
-		startID = endID;
-		//
-		//else{
-			break;
-		//}
-	}
-
-	if((int)(*adjs)[startID].size() == 0){
-		//remove from heap
-		allNodes[startID].visited;
-	}
-	//	}
-	//else
-	primitive p;
-	p.type = 1; // sets to filament
-
-	if((int)adjs[startID].size() >= 3){
-		p.vertices.push_back(allNodes[startID]);
-		//remove edge
-		startID = endID;
-		if((int)(*adjs)[startID].size() == 1){
-			endID = (*adjs)[startID][0];
+		if((int)adjs[startID].size() >= 3){
+			p.vertices.push_back(allNodes[startID]);
+			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+			roads->erase(roads->begin() + toRemove);//remove edge
+			startID = endID;
+			if((int)(*adjs)[startID].size() == 1){
+				endID = (*adjs)[startID][0];
+			}
 		}
-	}
 
-	while((int)(*adjs)[startID].size() == 1){
+		while((int)(*adjs)[startID].size() == 1){
+			p.vertices.push_back(allNodes[startID]);
+			endID = (*adjs)[startID][0];
+			removeFromHeap(heap,startID);//remove from heap
+			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+			roads->erase(roads->begin() + toRemove);//remove edge
+			removeAdjacencyLinks(startID,adjs); //remove vertex
+			startID = endID;
+		}
+
 		p.vertices.push_back(allNodes[startID]);
-		endID = (*adjs)[startID][0];
-		//remove from heap
-		//remove edge
-		allNodes[startID].visited;
-		startID = endID;
+		if((int)(*adjs)[startID].size() == 0){
+			removeFromHeap(heap,startID);//remove from heap
+			removeAdjacencyLinks(startID,adjs); //remove vertex
+		}
+		primitives->push_back(p);
 	}
-
-	p.vertices.push_back(allNodes[startID]);
-	if((int)(*adjs)[startID].size() == 0){
-		//remove from heap
-		allNodes[startID].visited;
-	}
-	primitives->push_back(p);
-	//
 }
 
 void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs){
 	vector<roadNode> visited;
 	vector<roadNode> sequence;
 
-	roadNode start = (*heap)[0];
-	roadNode vnext = getClockwiseMost(start, (*adjs)[start.ID]);
+	roadNode start = (*heap)[0]; // v0
+	roadNode vnext = getClockwiseMost(start, (*adjs)[start.ID]); // v1
 
 	sequence.push_back(start);
 
@@ -382,10 +388,29 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 
 
 
-//	while(){
-//
-//	}
+	while(vcurr.ID != start.ID && contains(visited,vcurr)){
+		if((int)(*adjs)[vcurr.ID].size() == 1){
+			break;
+		}
+		sequence.push_back(vcurr);
+		visited.push_back(vcurr);
 
+		vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);
+		vprev = vcurr;
+		vcurr = vnext;
+	}
+
+	if((int)(*adjs)[vcurr.ID].size() == 1){
+
+	}
+
+	else if(vcurr.ID == start.ID){
+
+	}
+
+	else{
+
+	}
 
 }
 
@@ -456,4 +481,18 @@ roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current, vec
 		}
 	}
 	return vnext;
+}
+
+void RoadNetwork::removeAdjacencyLinks(int ID, map<int,vector<int>> * adjs){
+	// Removes itself from other vertices links
+	for(int i : (*adjs)[ID]){
+		for(int j = 0; j < (int)(*adjs)[i].size(); j++){
+			if(ID == (*adjs)[i].at(j)){				vector<int> near = (*adjs)[i];
+			near.erase(near.begin() + j);
+			(*adjs)[i] = near;
+			}
+		}
+	}
+	//Deletes it's own links
+	adjs->erase(ID);
 }
