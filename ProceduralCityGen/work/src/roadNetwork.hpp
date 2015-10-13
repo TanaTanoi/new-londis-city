@@ -21,6 +21,7 @@ private:
 	std::map<int,std::vector<int>> adjacencyList; // stores road ID to other roadID's it connects to
 	std::vector<cycle::roadNode> allNodes; // has all nodes
 	std::vector<cycle::road> allRoads; // has all roads
+	std::vector<cycle::primitive> cycles;
 	int nodeID = 0;
 	int roadID = 0;
 
