@@ -49,6 +49,7 @@ private:
 	cycle::roadNode getAntiClockwiseMost(cycle::roadNode,cycle::roadNode, std::vector<int>);
 	void removeAdjacencyLinks(int, std::map<int,std::vector<int>> * );
 	void setCycleEdge(std::vector<cycle::road> *, int, int);
+	void findMinimumCycles();
 
 public:
 	RoadNetwork();
