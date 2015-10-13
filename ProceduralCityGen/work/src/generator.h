@@ -22,7 +22,7 @@ private:
 
 public:
 
-
+	static float SECTION_TO_POINT_SCALE(void);
 	static std::string generateRandomBuildingString(int);
 	static std::string generateResdidentialBuildingString(int);
 	static std::vector<comp308::vec2> generateFloorPlan(comp308::vec2,float,int);

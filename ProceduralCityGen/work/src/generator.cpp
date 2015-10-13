@@ -12,7 +12,9 @@ using namespace std;
 using namespace comp308;
 using namespace util;
 
-float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
+static const float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
+
+float Generator::SECTION_TO_POINT_SCALE(){return SECTION_TO_POINTS_SCALE;}
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
@@ -75,7 +77,6 @@ else if (c == '$') {
 }
 return "" + c;
 }
-
 
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomBuildingString(int itrs) {
