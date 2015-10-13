@@ -36,7 +36,8 @@ Vehicle::Vehicle(string filename, vec3 start_pos, vec3 start_rot, vec3 scale) {
 }
 
 Vehicle::~Vehicle() {
-	delete m_spline;
+	if (m_spline)
+		delete m_spline;
 }
 
 void Vehicle::init(string filename) {
@@ -153,8 +154,6 @@ void Vehicle::readOBJ(string filename) {
 	if (m_normals.size() <= 1)
 		createNormals();
 }
-
-
 
 void Vehicle::setSpline(vector<vec3> keyframes) {
 	m_spline = new Spline(keyframes);

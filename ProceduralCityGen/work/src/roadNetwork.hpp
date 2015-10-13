@@ -1,10 +1,12 @@
+#pragma once
+#ifndef SRC_ROADNETWORK_HPP_
+#define SRC_ROADNETWORK_HPP_
 /*
  * roadNetwork.hpp
  *
  *  Created on: 30/09/2015
  *      Author: craighhann
  */
-
 #include <map>
 #include <vector>
 #include "utility.hpp"
@@ -73,3 +75,5 @@ public:
 		return allRoads;
 	}
 };
+
+#endif /* SRC_ROADNETWORK_HPP_ */

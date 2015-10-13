@@ -54,7 +54,7 @@ private:
 	Direction m_direction = NORTH;
 
 	// Goal that the vehicle is heading to
-	comp308::vec3 m_goal;
+	comp308::vec3 m_goal = comp308::vec3(-1);
 
 	// Needed for vehicle to turn corners
 	Spline *m_spline = nullptr;

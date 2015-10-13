@@ -23,6 +23,10 @@ using namespace std;
 using namespace comp308;
 
 const float ACCEL = 0.5;
+const comp308::vec3 scale = vec3(1);
+
+// Amount of error when checking if a vehicle has reached the goal
+const float GIVE = 10;
 time_t previous_time;
 
 VehicleController::VehicleController(string vehicles, string textures,
@@ -34,8 +38,8 @@ VehicleController::VehicleController(string vehicles, string textures,
 }
 
 VehicleController::~VehicleController() {
-	delete m_network;
-	delete m_textures;
+//	if (m_network)
+//		delete m_network;
 }
 
 void VehicleController::parseRoadNetwork(RoadNetwork *network) {
@@ -101,13 +105,15 @@ void VehicleController::tick() {
 
 		Direction turn;
 		// Check if vehicle has reached the intersection
-		if (reachedTarget(&v, target)) {
-
-			// Find the turning direction
-			turn = turnToTake(&v);
-
-			v.setTurning(true);
-		}
+//		if (reachedTarget(&v, target)) {
+//
+//			cout << "Reached Target" << endl;
+//
+//			// Find the turning direction
+//			turn = turnToTake(&v);
+//
+//			v.setTurning(true);
+//		}
 
 		// If the vehicle is turning
 		if (v.isTurning())
@@ -118,7 +124,7 @@ void VehicleController::tick() {
 			interpolate_straight(&v, &start, &target);
 
 		// Finally render the vehicle
-		renderVehicle(&v, start, rot, vec3(0.1, 0.1, 0.1));
+		renderVehicle(&v, start, rot, scale);
 	}
 }
 
@@ -158,19 +164,32 @@ void VehicleController::generateGoal(Vehicle* vehicle) {
  */
 bool VehicleController::reachedGoal(Vehicle* vehicle) {
 
-//	if (vehicle->getGoal() == NULL)
-//		return true;
+	// If a goal has not been set
+	if (vehicle->getGoal().y == -1)
+		return false;
 
-//	if (vehicle->getPos() == vehicle->getGoal())
-//		return true;
+	vec3 goal = vehicle->getGoal();
+	vec3 currentPos = vehicle->getPos();
+
+	vec3 res = abs(goal - currentPos);
+
+	if (length(res) <= GIVE)
+		return true;
 
 	return false;
 }
 
+/**
+ * Has the vehicle reached it's target?
+ */
 bool VehicleController::reachedTarget(Vehicle *vehicle, vec3 target) {
 
-	// if (vehicle->getPos() == target)
-	//	return true;
+	vec3 currentPos = vehicle->getPos();
+
+	vec3 res = abs(target - currentPos);
+
+	if (length(res) <= GIVE)
+		return true;
 
 	return false;
 }
