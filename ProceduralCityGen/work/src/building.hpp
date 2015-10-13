@@ -21,6 +21,7 @@ struct buildingParams {
 	std::vector<comp308::vec2> boundingArea;	//the area in which this building is limited
 	unsigned int seed = 0;								//the seed for generation
 	building_type b_type = SKYSCRAPER;// = building_type.SKYSCRAPER;
+	int height = 3;
 
 };
 
@@ -34,10 +35,9 @@ struct buildingLOD {
 
 const float BLOCK_SIZE = 0.3f;
 const float WINDOW_WIDTH = 0.1f;
-const float EXTRUDE_THRESHOLD = 0.3f;//TODO make extrude_threshold a function of floorplan size
+const float EXTRUDE_THRESHOLD = 0.1f;//default 0.3
 const int TOTAL_WALL_TEXTURES = 3;
 const int TOTAL_WINDOW_TEXTURES = 5;
-
 
 class Building {
 
@@ -53,6 +53,8 @@ private:
 	void initShader(void);//not currently working
 
 public:
+	std::vector<comp308::vec2> heightmap_points= std::vector<comp308::vec2>();
+
 	void initTexture(void);//not currently working
 
 	float extendBuilding(std::vector<comp308::vec2>, float);
@@ -74,7 +76,7 @@ public:
 
 	void generateBuilding(buildingParams*, buildingLOD*);
 
-	void generateResdientialBuilding(std::vector<comp308::vec2> points);
+	void generateResdientialBuilding(std::vector<comp308::vec2>,int);
 	void generateModernBuilding(std::vector<comp308::vec2> points,comp308::vec2,float);
 
 	void generatePark(std::vector<comp308::vec2> floor);

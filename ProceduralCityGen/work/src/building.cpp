@@ -429,7 +429,7 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
-	vector<buildingParams> params = Generator::sectionsToParams(sections);
+	vector<buildingParams> params = Generator::sectionsToParams(sections,heightmap_points);
 	for (int i = 0; i < params.size(); i++) {
 		buildingLOD building;
 		generateBuilding(&params[i], &building);
@@ -514,7 +514,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		//40% for residential. Standard building type
 		result->low = glGenLists(1);
 		glNewList(result->low, GL_COMPILE);
-		generateResdientialBuilding(floorPlan);
+		generateResdientialBuilding(floorPlan,parameters->height);
 		//generatePark(floorPlan);
 		glEndList();
 		return;
@@ -549,22 +549,21 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
-	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
+//	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
+		generateFromString(floorPlan, Generator::generateRandomBuildingString(parameters->height));
 	glEndList();
 
 }
 
-void Building::generateResdientialBuilding(vector<vec2> points) {
+void Building::generateResdientialBuilding(vector<vec2> points,int height) {
 	//set first two points to subdivion of original floor
 	vector<vector<vec2>> tiers = Generator::subdivide(points);
 	vector<vec2> temp = tiers[0];
 	tiers = Generator::subdivide(tiers[1]);
 	tiers.push_back(temp);
-	//tiers.push_back(subdivide(tiers[1])[1]);
-	//tiers[1] = subdivide(tiers[1])[0];
 
 	srand(rand());
-	int n = rand() % 10 + 5;		//between 5 and 15
+	int n = rand() % height + 5;		//between 5 and 15
 	float cur_elev = 0.0f;
 	//extend main tier random amount of times
 	for(int i = 0; i < n ;i++){
@@ -586,7 +585,6 @@ void Building::generateResdientialBuilding(vector<vec2> points) {
 			renderWindows(tiers[1], cur_elev);
 		cur_elev = extendBuilding(tiers[1], cur_elev);
 	}
-
 
 }
 

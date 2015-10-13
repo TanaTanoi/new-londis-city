@@ -21,6 +21,7 @@
 
 using namespace std;
 using namespace comp308;
+using namespace cycle;
 
 const float ACCEL = 0.5;
 const comp308::vec3 scale = vec3(1);

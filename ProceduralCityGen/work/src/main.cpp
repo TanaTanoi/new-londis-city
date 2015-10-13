@@ -132,7 +132,11 @@ int main(int argc, char **argv) {
 		g_sections = new SectionDivider();
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		//cout << "entered no loops" << endl;
-		mode = 4; //because I'm very lazy
+		mode = 5; //because I'm very lazy
+		building.heightmap_points.push_back(vec2(0,g_winHeight/2));
+		building.heightmap_points.push_back(vec2(0,g_winHeight/2));
+		building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
+		building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
 	}
 
 	glEnable(GL_SMOOTH);
@@ -182,7 +186,7 @@ int main(int argc, char **argv) {
 		} else if (mode == 2) {
 			// Draw vehicles
 			//g_vehicleCtrl->renderVehicles();
-		}else if (mode == 3) {
+		}else if (mode == 4) {
 			//Spline map mode
 			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -194,7 +198,7 @@ int main(int argc, char **argv) {
 			// Render the vehicles
 			g_vehicleCtrl->tick();
 
-		} else if (mode == 4) {
+		} else if (mode == 5) {
 			//Spline map mode
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -206,17 +210,17 @@ int main(int argc, char **argv) {
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
 			glColor3f(1, 0, 0);
-			for (int i = 1; i < heightmap_points.size();i++) {
-				cout<< heightmap_points[i-1].x << endl;
-				glBegin(GL_LINES);
-				glVertex2f(heightmap_points[i-1].x, g_winHeight-heightmap_points[i-1].y);
-				glVertex2f(heightmap_points[i].x, g_winHeight-heightmap_points[i].y);
-				glEnd();
-				for (vec2 point : heightmap_points) {
-					glVertex2f(point.x, point.y);
+			glBegin(GL_LINE_STRIP);
+			for (int i = 2; i < building.heightmap_points.size()-2;i++) {
+				for(float time = 0.0f;time<=1.0f;time+=0.1f){
+					vec2 splinePoint = Spline::calculatePoint(building.heightmap_points[i-2],building.heightmap_points[i-1],
+															 building.heightmap_points[i],building.heightmap_points[i],time);
+					glVertex2f(splinePoint.x, g_winHeight-splinePoint.y);
 				}
-
+//				glVertex2f(building.heightmap_points[i-1].x, g_winHeight-building.heightmap_points[i-1].y);
+//				glVertex2f(building.heightmap_points[i].x, g_winHeight-building.heightmap_points[i].y);
 			}
+			glEnd();
 		}
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
@@ -349,18 +353,18 @@ void drawGrid(double grid_size, double square_size) {
 //action = state, 1 is down, 0 is release
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if (mode == 4&&action&&button == GLFW_MOUSE_BUTTON_1) {
-		if(heightmap_points.size()<2){
-			heightmap_points.push_back(m_pos);
+	if (mode == 5&&action&&button == GLFW_MOUSE_BUTTON_1) {
+		if(building.heightmap_points.size()<2){
+			building.heightmap_points.push_back(m_pos);
 			return;
 		}
-		float x = heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
+		float x = building.heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
 		int i = 2;
-		while(x<m_pos.x&&i<=heightmap_points.size()){
-			x = heightmap_points[i].x;
+		while(x<m_pos.x&&i<=building.heightmap_points.size()){
+			x = building.heightmap_points[i].x;
 			++i;
 		}i--;
-		heightmap_points.insert(heightmap_points.begin()+i,m_pos);
+		building.heightmap_points.insert(building.heightmap_points.begin()+i,m_pos);
 		return;
 	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
@@ -373,6 +377,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 		testList = building.generateBuildingsFromSections(input,
 				g_sections->testSection().sections);
 		mode = 0;
+		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
 	}
 }
 

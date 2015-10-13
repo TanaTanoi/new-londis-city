@@ -7,6 +7,7 @@
 
 #pragma once
 
+
 #include "comp308.hpp"
 #include <cmath>
 #include <algorithm>
@@ -18,8 +19,23 @@ using namespace std;
 namespace cycle{
 
 struct roadNode{
-	comp308::vec2 location;
+	vec2 location;
 	int ID;
+	bool visited = false;
+};
+
+struct road{
+	cycle::roadNode start;
+	cycle::roadNode end;
+	int ID;
+	bool isCycleEdge = false;
+	// Will have a quad to represent for drawing
+};
+
+
+struct primitive{
+	vector<roadNode> vertices;
+	int type; // 0 isolated vertex, 1 filament, 2 cycle/filament
 };
 
 /**
@@ -61,75 +77,88 @@ inline vector<roadNode> sortPoints(vector<roadNode> points){
 
 }
 
+inline int findRoadIndex(vector<road> roads, int sID, int eID){
+	int low = 0; int high = (int)roads.size(); int mid = (low+high)/2;
+	while(low < high){
+		if(sID == roads[mid].start.ID && eID == roads[mid].end.ID){ // Found object
+			return mid;
+		}
+		else if((sID == roads[mid].start.ID && eID < roads[mid].end.ID) || (sID < roads[mid].start.ID)){ // Less than
+			high = mid;
+			mid = (low+high)/2;
+		}
+		else{ // greater than
+			low = mid + 1;
+			mid = (low+high)/2;
+		}
+	}
+
+	if(sID == roads[low].start.ID && eID == roads[low].end.ID){ // Found object
+		return low;
+	}
+
+	return findRoadIndex(roads,eID,sID);
+}
+
+/*
+ * Sorts roads using insertion sort first by starting node ID and then
+ * by ending node ID
+ */
+inline vector<road> sortRoads(vector<road> roads){
+	vector<road> sorted;
+
+	for(int i = 0; i < (int)roads.size(); i++){
+		road current = roads[i];
+		bool added = false;
+		for(int j = 0; j < (int)sorted.size(); j++){
+			if(current.start.ID < sorted[j].start.ID){
+				sorted.insert(sorted.begin() + j, current);
+				added = true;
+				break;
+			}
+			else if(current.start.ID == sorted[j].start.ID){
+				if(current.end.ID < sorted[j].end.ID){
+					sorted.insert(sorted.begin() + j, current);
+					added = true;
+					break;
+				}
+			}
+		}
+		if(!added){
+			sorted.push_back(current);
+		}
+	}
+	return sorted;
+
+}
+
 //FIXME: check this, not confident
 inline float DotPerp(vec2 start, vec2 end){
 	return start.x * end.y -  end.x * start.y;
 }
 
-// Gets the clockwiseMost adjacent vertex
-// Returns the ID of it
-inline vec2 getClockwiseMost(vec2 current, vector<vec2> adj){
-	vec2 dCurr = vec2(0,-1); //support line
-	vec2 vnext = adj[0]; // sets up first adjacent vertex
-	vec2 dnext = vnext -current;
-	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-
-	for(int i = 1; i < (int)adj.size(); i++){
-		vec2 dirAdj = adj[i] - current; // gets direction of adjacent vertex
-		if(vcurrIsConvex){
-			if(DotPerp(dCurr,dirAdj) < 0 || DotPerp(dnext,dirAdj) < 0){
-				vnext = adj[i];
-				dnext = dirAdj;
-				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-			}
-		}
-		else{
-			if(DotPerp(dCurr,dirAdj) < 0 && DotPerp(dnext,dirAdj) < 0){
-				vnext = adj[i];
-				dnext = dirAdj;
-				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-			}
-
+inline void removeFromHeap(vector<roadNode> * heap, int ID){
+	for(int i = 0; i < (int)heap->size(); i++){
+		if(ID == (*heap)[i].ID){
+			heap->erase(heap->begin() + i);
+			return;
 		}
 	}
-	return vnext;
 }
 
-// Gets the clockwiseMost adjacent vertex
-// Returns the ID of it
-inline vec2 getAntiClockwiseMost(roadNode vprev, roadNode current, vector<roadNode> adj){
-	vec2 dCurr = current.location - vprev.location; //support line
-	vec2 vnext = adj[0].location; // sets up first adjacent vertex
-
-	if(adj[0].ID == vprev.ID){
-		vnext = adj[1].location;
-	}
-
-	vec2 dnext = vnext -current.location;
-	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-
-	for(int i = 1; i < (int)adj.size(); i++){
-		if(adj[i].ID != vprev.ID){
-			vec2 dirAdj = adj[i].location - current.location; // gets direction of adjacent vertex
-			if(vcurrIsConvex){
-				if(DotPerp(dCurr,dirAdj) > 0 && DotPerp(dnext,dirAdj) > 0){
-					vnext = adj[i].location;
-					dnext = dirAdj;
-					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-				}
-			}
-			else{
-				if(DotPerp(dCurr,dirAdj) > 0 || DotPerp(dnext,dirAdj) > 0){
-					vnext = adj[i].location;
-					dnext = dirAdj;
-					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
-				}
-
-			}
+/**
+ * Checks if a vector of roadNodes contains a given node
+ */
+inline bool contains(vector<roadNode> visited, roadNode node){
+	for(roadNode n : visited){
+		if(n.ID == node.ID){
+			return true;
 		}
 	}
-	return vnext;
+	return false;
 }
+
+
 
 inline void testAntiClockwise(){
 	roadNode start = {vec2(100,100),0};
@@ -144,11 +173,11 @@ inline void testAntiClockwise(){
 	adj.push_back(b);
 	adj.push_back(c);
 	adj.push_back(d);
-
-	vec2 result = getAntiClockwiseMost(c,start,adj);
-
-	cout << "Result" << endl;
-	cout<< result.x << " " << result.y << endl;
+	//
+	//	roadNode result = getAntiClockwiseMost(c,start,adj);
+	//
+	//	cout << "Result" << endl;
+	//	cout<< result.x << " " << result.y << endl;
 
 }
 
