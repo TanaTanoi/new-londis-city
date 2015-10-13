@@ -11,12 +11,6 @@
 #include "comp308.hpp"
 #include "cycleUtil.hpp"
 
-struct road{
-	cycle::roadNode start;
-	cycle::roadNode end;
-	int ID;
-	// Will have a quad to represent for drawing
-};
 
 
 
@@ -24,7 +18,7 @@ class RoadNetwork{
 private:
 	std::map<int,std::vector<int>> adjacencyList; // stores road ID to other roadID's it connects to
 	std::vector<cycle::roadNode> allNodes; // has all nodes
-	std::vector<road> allRoads; // has all roads
+	std::vector<cycle::road> allRoads; // has all roads
 	int nodeID = 0;
 	int roadID = 0;
 
@@ -36,23 +30,27 @@ private:
 	float farRight;
 
 	int insideWorld(comp308::vec2);
-	int insideWorld(road);
-	road truncate(road);
+	int insideWorld(cycle::road);
+	cycle::road truncate(cycle::road);
 	void addIntersection(int,int);
 	cycle::roadNode addNode(comp308::vec2);
-	road addRoad(cycle::roadNode,cycle::roadNode);
-	void updateAdjacencyList(road, cycle::roadNode);
+	cycle::road addRoad(cycle::roadNode,cycle::roadNode);
+	void updateAdjacencyList(cycle::road, cycle::roadNode);
 	void calulateBoundary();
 	void createNewYorkGrid(util::section s);
-	void recDivideGrid(road,int,bool);
-
-
+	void recDivideGrid(cycle::road,int,bool);
+	std::vector<cycle::primitive> extractPrimitives();
+	void extractIsolatedVertex(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> *);
+	void extractFilament(int, int, std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> * , std::vector<cycle::road> * );
+	void extractPrimitive(std::vector<cycle::primitive> * , std::vector<cycle::roadNode> *, std::map<int,std::vector<int>> * );
+	cycle::roadNode getClockwiseMost(cycle::roadNode, std::vector<int>);
+	cycle::roadNode getAntiClockwiseMost(cycle::roadNode,cycle::roadNode, std::vector<int>);
 
 public:
 	RoadNetwork();
 	void renderRoads();
 	void createRoads(util::section);
-	void recDivide(road);
+	void recDivide(cycle::road);
 
 	// Testing
 		void testNetwork();
@@ -69,7 +67,7 @@ public:
 		return allNodes;
 	}
 
-	inline const std::vector<road>& getAllRoads() const {
+	inline const std::vector<cycle::road>& getAllRoads() const {
 		return allRoads;
 	}
 };

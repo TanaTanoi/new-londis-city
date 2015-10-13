@@ -16,7 +16,6 @@ using namespace comp308;
 using namespace std;
 
 RoadNetwork::RoadNetwork(){}
-
 /**
  * Checks whether a road will be fully inside a the world
  * which is represented by a section
@@ -123,11 +122,11 @@ void RoadNetwork::updateAdjacencyList(road r, roadNode n){
 	}
 
 	for(int i = 0; i < (int)adjacencyList[r.end.ID].size(); i++){
-			if(adjacencyList[r.end.ID][i] == r.start.ID){
-				adjacencyList[r.end.ID][i]= n.ID;
-				break;
-			}
+		if(adjacencyList[r.end.ID][i] == r.start.ID){
+			adjacencyList[r.end.ID][i]= n.ID;
+			break;
 		}
+	}
 
 	// adds start and end of road to n in adjacency list
 	adjacencyList[n.ID].push_back(r.start.ID);
@@ -267,6 +266,194 @@ void RoadNetwork::renderRoads(){
 	glEnd();
 }
 
+
+vector<primitive> RoadNetwork::extractPrimitives(){
+	vector<primitive> primitives;
+	vector<roadNode> heap = sortPoints(allNodes);
+	map<int,vector<int>> adjacencies = adjacencyList;
+	vector<road> roads = sortRoads(allRoads);
+
+	while((int)heap.size() > 0){
+		roadNode vertex = heap[0];
+		vector<int> adjs = adjacencies[vertex.ID];
+		int noAdj = (int)adjs.size();
+
+		if(noAdj == 0){
+			// extract isolated vertex
+			extractIsolatedVertex(&primitives, &heap, &adjacencies);
+		}
+
+		else if ( noAdj == 1){
+			// extract filament
+			extractFilament(vertex.ID, adjacencies[vertex.ID][0] ,&primitives, &heap, &adjacencies, &roads);
+		}
+
+		else{
+			// extract filament or cycle
+		}
+
+	}
+
+	return primitives;
+}
+
+void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs){
+	vector<roadNode> vertices;
+	vertices.push_back(heap->front()); // removes roadNode from heap
+	allNodes[vertices[0].ID].visited = true;
+	primitive p = {vertices,0}; // adds vertex to primitive and sets it as isolated vertex
+	adjs->erase(vertices[0].ID); // removes from adjacency list
+	primitives->push_back(p);
+}
+
+// Note: visiting a vertex should remove it from adjacency list
+
+void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
+	if(findRoad(startID,endID,(*roads)) ){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
+	if((int)(*adjs)[startID].size() >= 3){
+		//remove edge v0 to v1
+		startID = endID;
+		if((int)(*adjs)[startID].size() == 1){
+			endID = (*adjs)[startID][0];
+		}
+	}
+
+	while((int)(*adjs)[startID].size() == 1){
+		endID = (*adjs)[startID][0];
+
+		//  if cycle edge
+		// remove from heap
+		// remove edge
+		allNodes[startID].visited;
+		startID = endID;
+		//
+		//else{
+			break;
+		//}
+	}
+
+	if((int)(*adjs)[startID].size() == 0){
+		//remove from heap
+		allNodes[startID].visited;
+	}
+	//	}
+	//else
+	primitive p;
+	p.type = 1; // sets to filament
+
+	if((int)adjs[startID].size() >= 3){
+		p.vertices.push_back(allNodes[startID]);
+		//remove edge
+		startID = endID;
+		if((int)(*adjs)[startID].size() == 1){
+			endID = (*adjs)[startID][0];
+		}
+	}
+
+	while((int)(*adjs)[startID].size() == 1){
+		p.vertices.push_back(allNodes[startID]);
+		endID = (*adjs)[startID][0];
+		//remove from heap
+		//remove edge
+		allNodes[startID].visited;
+		startID = endID;
+	}
+
+	p.vertices.push_back(allNodes[startID]);
+	if((int)(*adjs)[startID].size() == 0){
+		//remove from heap
+		allNodes[startID].visited;
+	}
+	primitives->push_back(p);
+	//
+}
+
+void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs){
+	vector<roadNode> visited;
+	vector<roadNode> sequence;
+
+	roadNode start = (*heap)[0];
+	roadNode vnext = getClockwiseMost(start, (*adjs)[start.ID]);
+
+	sequence.push_back(start);
+
+	roadNode vprev = start;
+	roadNode vcurr = vnext;
+
+
+
+//	while(){
+//
+//	}
+
+
+}
+
 road RoadNetwork::findClosestRoads(vec3 position) {
 	return road();
+}
+
+// Gets the clockwiseMost adjacent vertex
+// Returns the ID of it
+roadNode RoadNetwork::getClockwiseMost(roadNode current, vector<int> adj){
+	vec2 dCurr = vec2(0,-1); //support line
+	roadNode vnext = allNodes[adj[0]]; // sets up first adjacent vertex
+	vec2 dnext = vnext.location -current.location;
+	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+
+	for(int i = 1; i < (int)adj.size(); i++){
+		vec2 dirAdj = allNodes[adj[i]].location - current.location; // gets direction of adjacent vertex
+		if(vcurrIsConvex){
+			if(DotPerp(dCurr,dirAdj) < 0 || DotPerp(dnext,dirAdj) < 0){
+				vnext = allNodes[adj[i]];
+				dnext = dirAdj;
+				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+			}
+		}
+		else{
+			if(DotPerp(dCurr,dirAdj) < 0 && DotPerp(dnext,dirAdj) < 0){
+				vnext = allNodes[adj[i]];
+				dnext = dirAdj;
+				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+			}
+
+		}
+	}
+	return vnext;
+}
+
+// Gets the clockwiseMost adjacent vertex
+// Returns the ID of it
+roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current, vector<int> adj){
+	vec2 dCurr = current.location - vprev.location; //support line
+	roadNode vnext = allNodes[adj[0]]; // sets up first adjacent vertex
+
+	if(adj[0] == vprev.ID){
+		vnext = allNodes[adj[1]];
+	}
+
+	vec2 dnext = vnext.location -current.location;
+	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+
+	for(int i = 1; i < (int)adj.size(); i++){
+		if(adj[i] != vprev.ID){
+			vec2 dirAdj = allNodes[adj[i]].location - current.location; // gets direction of adjacent vertex
+			if(vcurrIsConvex){
+				if(DotPerp(dCurr,dirAdj) > 0 && DotPerp(dnext,dirAdj) > 0){
+					vnext = allNodes[adj[i]];
+					dnext = dirAdj;
+					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				}
+			}
+			else{
+				if(DotPerp(dCurr,dirAdj) > 0 || DotPerp(dnext,dirAdj) > 0){
+					vnext = allNodes[adj[i]];
+					dnext = dirAdj;
+					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				}
+
+			}
+		}
+	}
+	return vnext;
 }
