@@ -26,8 +26,6 @@ double g_winHeight 	= 480;
 
 bool m_LeftButton = false;
 
-std::vector<comp308::vec2> heightmap_points;
-
 
 /*Skybox texture*/
 GLuint skyboxID = 0;

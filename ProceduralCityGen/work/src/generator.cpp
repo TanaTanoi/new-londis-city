@@ -7,11 +7,12 @@
 #include "utility.hpp"
 #include "section.hpp"
 #include "building.hpp"
+#include "spline.hpp"
 using namespace std;
 using namespace comp308;
 using namespace util;
 
-
+float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
@@ -160,6 +161,7 @@ vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
 	return combinePlans(shapeA, shapeB);
 }
 
+/*Checks if a vector is contained within the array*/
 bool containsVec(vector<vec2> array, vec2  toFind){
 	if(array.empty()){return false;}
 	for(vec2 v:array){
@@ -244,7 +246,6 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 			index = i;
 		}
 	}
-
 	vec2 currentPoint = shapeA[index];
 	//while we don't contain the next point in the trace (currentPoint)
 	while (!containsVec(newPlan,currentPoint)) {
@@ -328,21 +329,25 @@ vector<vec2> Generator::sectionToPoints(util::section sec){
 	vector<vec2> toReturn = vector<vec2>();
 	int n = sec.lines.size();
 	for (int i = 0; i < n;i++) {
-		toReturn.push_back(sec.lines[(i+2)%n].start/25.0f);
+		toReturn.push_back(sec.lines[(i+2)%n].start*SECTION_TO_POINTS_SCALE);
 	}
 	return toReturn;
 }
 
 
 /*Converts a vector of sections into a vector of building parameters*/
-vector<buildingParams> Generator::sectionsToParams(vector<section> sections) {
+vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vector<vec2> heightmap) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
 	vector<buildingParams> toReturn;
 	for (int i = 0; i < sections.size(); i++) {
 		buildingParams p;
 		p.boundingArea = sectionToPoints(sections[i]);
 		p.seed = rand();
-		p.b_type = (building_type)(p.seed % 2);		//TODO make this have an effect, possibly
+		p.b_type = (building_type)(p.seed % 2);//TODO make this have an effect, possibly
+		float ymap = Spline::calculateYValue(heightmap,abs(p.boundingArea[0].x));
+		cout<< ymap << endl;
+		p.height = (int)(((480-ymap)/480)*20+2);
+		cout<<" X " << p.boundingArea[0].x << " Height " << p.height<<endl;
 		srand(p.seed);
 		toReturn.push_back(p);
 	}
