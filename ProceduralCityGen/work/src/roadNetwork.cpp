@@ -159,7 +159,7 @@ void RoadNetwork::calulateBoundary(){
 }
 
 void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
-	cout << "Dividing grid" << endl;
+	//cout << "Dividing grid" << endl;
 
 	line l = {r.start.location,r.end.location};
 	vec2 perpBi = getBisector(l);
@@ -186,7 +186,6 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 		recDivideGrid(left, level+1,!halfLength);
 		recDivideGrid(right, level+1,!halfLength);
 	}
-
 }
 
 // Assumes square world
@@ -213,6 +212,8 @@ void RoadNetwork::createRoads(section world){
 	calulateBoundary();
 	testAntiClockwise();
 	createNewYorkGrid(outline);
+	//findMinimumCycles();
+	//cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways
 	// Now generate minor roads
@@ -266,6 +267,16 @@ void RoadNetwork::renderRoads(){
 	glEnd();
 }
 
+void RoadNetwork::findMinimumCycles(){
+	cout << "Finding min cycles" << endl;
+	vector<primitive> prims = extractPrimitives();
+	for(primitive p : prims){
+		if(p.type == 2){ // if cycle
+			cycles.push_back(p);
+		}
+	}
+}
+
 
 vector<primitive> RoadNetwork::extractPrimitives(){
 	vector<primitive> primitives;
@@ -273,7 +284,12 @@ vector<primitive> RoadNetwork::extractPrimitives(){
 	map<int,vector<int>> adjacencies = adjacencyList;
 	vector<road> roads = sortRoads(allRoads);
 
+	cout << "All nodes " << (int)allNodes.size() << endl;
+	cout << "Heap size" << (int)heap.size() << endl;
+
 	while((int)heap.size() > 0){
+
+
 		roadNode vertex = heap[0];
 		vector<int> adjs = adjacencies[vertex.ID];
 		int noAdj = (int)adjs.size();
@@ -290,6 +306,7 @@ vector<primitive> RoadNetwork::extractPrimitives(){
 
 		else{
 			// extract filament or cycle
+			extractPrimitive(&primitives, &heap, &adjacencies, &roads);
 		}
 
 	}
@@ -432,11 +449,11 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 		while((int)(*adjs)[start.ID].size() == 2){
 			if((*adjs)[start.ID].at(0) != v1.ID){
 				v1 = start;
-				start = (*adjs)[start.ID][0];
+				start = allNodes[(*adjs)[start.ID][0]];
 			}
 			else{
 				v1 = start;
-				start = (*adjs)[start.ID][1];
+				start = allNodes[(*adjs)[start.ID][1]];
 			}
 		}
 		extractFilament(start.ID, v1.ID, primitives, heap, adjs, roads);
