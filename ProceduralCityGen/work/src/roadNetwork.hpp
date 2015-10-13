@@ -57,7 +57,7 @@ public:
 
 	// Cam's methods
 
-	road findClosestRoads(vec3);
+	cycle::road findClosestRoads(vec3);
 
 	inline const std::map<int, std::vector<int> >& getAdjacencyList() const {
 		return adjacencyList;

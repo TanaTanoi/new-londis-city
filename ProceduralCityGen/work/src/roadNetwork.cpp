@@ -309,7 +309,7 @@ void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives, vector<r
 // Note: visiting a vertex should remove it from adjacency list
 
 void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
-	if(findRoad(startID,endID,(*roads)) ){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
+	//if(findRoad(startID,endID,(*roads)) ){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
 	if((int)(*adjs)[startID].size() >= 3){
 		//remove edge v0 to v1
 		startID = endID;
