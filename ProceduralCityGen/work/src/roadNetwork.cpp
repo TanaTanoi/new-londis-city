@@ -374,17 +374,17 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 	}
 }
 
-void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs){
+void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
 	vector<roadNode> visited;
 	vector<roadNode> sequence;
 
 	roadNode start = (*heap)[0]; // v0
-	roadNode vnext = getClockwiseMost(start, (*adjs)[start.ID]); // v1
+	roadNode v1 = getClockwiseMost(start, (*adjs)[start.ID]); // v1
 
 	sequence.push_back(start);
 
 	roadNode vprev = start;
-	roadNode vcurr = vnext;
+	roadNode vcurr = v1;
 
 
 
@@ -395,23 +395,58 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 		sequence.push_back(vcurr);
 		visited.push_back(vcurr);
 
-		vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);
+		roadNode vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);
 		vprev = vcurr;
 		vcurr = vnext;
 	}
 
 	if((int)(*adjs)[vcurr.ID].size() == 1){
-
+		//Filament found, may not actaully start at vprev, but it is a part of it
+		extractFilament(vprev.ID, (*adjs)[vprev.ID][0], primitives, heap, adjs, roads);
 	}
 
 	else if(vcurr.ID == start.ID){
+		// Minimal cycle found
+		primitive p = {sequence, 2};
 
+		// for each edge in the cycle
+		int j = (int)sequence.size() -1;
+		for(int i = 0; i < (int)sequence.size(); i++){
+			setCycleEdge(roads,i,j);
+		}
+
+		int toRemove = findRoadIndex((*roads),start.ID,v1.ID); //remove edge v0 to v1
+		roads->erase(roads->begin() + toRemove);//remove edge
+
+		if((int)(*adjs)[start.ID].size() == 1){
+			extractFilament(start.ID, (*adjs)[start.ID][0], primitives, heap, adjs, roads);
+		}
+
+		if((int)(*adjs)[v1.ID].size() == 1){
+			extractFilament(v1.ID, (*adjs)[v1.ID][0], primitives, heap, adjs, roads);
+		}
 	}
 
 	else{
 
+		while((int)(*adjs)[start.ID].size() == 2){
+			if((*adjs)[start.ID].at(0) != v1.ID){
+				v1 = start;
+				start = (*adjs)[start.ID][0];
+			}
+			else{
+				v1 = start;
+				start = (*adjs)[start.ID][1];
+			}
+		}
+		extractFilament(start.ID, v1.ID, primitives, heap, adjs, roads);
 	}
 
+}
+
+void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID){
+	int toSet = findRoadIndex((*roads),startID, endID);
+	(*roads)[toSet].isCycleEdge = true;
 }
 
 road RoadNetwork::findClosestRoads(vec3 position) {

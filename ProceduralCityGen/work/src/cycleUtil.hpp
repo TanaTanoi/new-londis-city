@@ -92,7 +92,12 @@ inline int findRoadIndex(vector<road> roads, int sID, int eID){
 			mid = (low+high)/2;
 		}
 	}
-	return low;
+
+	if(sID == roads[low].start.ID && eID == roads[low].end.ID){ // Found object
+		return low;
+	}
+
+	return findRoadIndex(roads,eID,sID);
 }
 
 /*
