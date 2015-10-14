@@ -180,8 +180,9 @@ int main(int argc, char **argv) {
 				glPopMatrix();
 			}
 		} else if (mode == 2) {
-			// Draw vehicles
-			//g_vehicleCtrl->renderVehicles();
+
+			// Render the vehicles
+			g_vehicleCtrl->tick();
 		}else if (mode == 4) {
 			//Spline map mode
 			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
@@ -191,8 +192,6 @@ int main(int argc, char **argv) {
 //			glTranslatef(p_pos.x, p_pos.y, 0);
 //			g_network->renderRoads();
 //			glPopMatrix();
-			// Render the vehicles
-			g_vehicleCtrl->tick();
 
 		} else if (mode == 5) {
 			//Spline map mode
