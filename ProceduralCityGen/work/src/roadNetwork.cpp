@@ -93,6 +93,7 @@ void RoadNetwork::addIntersection(int id1, int id2){
 roadNode RoadNetwork::addNode(vec2 point){
 	roadNode r = {point, nodeID++};
 	allNodes.push_back(r);
+//	cout<<" ADD NODE " << allNodes[allNodes.size()-1].location.x  << " " << allNodes[allNodes.size()-1].location.y<< endl;
 	adjacencyList[r.ID] =  vector<int>();
 	return r;
 }
@@ -102,7 +103,7 @@ roadNode RoadNetwork::addNode(vec2 point){
  */
 road RoadNetwork::addRoad(roadNode start,roadNode end){
 	road r = {start,end,roadID++};
-
+	cout<<" Adding road "<<endl;
 	allRoads.push_back(r);
 	adjacencyList[start.ID].push_back(end.ID);
 	adjacencyList[end.ID].push_back(start.ID);
@@ -164,6 +165,11 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
+bool floatEqual(float x, float y){
+	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
+	return (int)round(x*10.0f) == (int)round(y*10.0f);
+}
+
 void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 
 	line l = {r.start.location,r.end.location};
@@ -193,36 +199,42 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	for(int i = 0; i < n; i++){
 		line l =  {allRoads[i].start.location, allRoads[i].end.location,0};
 		if(!aIntersect && isPointOnLine(a,l)){
+			cout << "Point is on line " << "" << endl;
+			cout<<"ALL ROADS END "<< allRoads[i].end.location.x<<endl;
 			// check existing
-			if(a.x == allRoads[i].start.location.x && a.y == allRoads[i].start.location.y){
+			//			if((int)round(a.x == allRoads[i].start.location.x) && a.y == allRoads[i].start.location.y){
+			if(floatEqual(a.x,allRoads[i].start.location.x)&&floatEqual(a.y,allRoads[i].start.location.y)){
+				//cout << "Cuaght" << endl;
 				r1 = allRoads[i].start;
 				aIntersect = true;
 			}
-			else if(a.x == allRoads[i].end.location.x && a.y == allRoads[i].end.location.y){
+			//			else if(a.x == allRoads[i].end.location.x && a.y == allRoads[i].end.location.y){
+			else if(floatEqual(a.x,allRoads[i].end.location.x)&&floatEqual(a.y,allRoads[i].end.location.y)){
 				r1 = allRoads[i].end;
 				aIntersect = true;
 			}else{
 				n--;
 				r1 = addNode(a);
-				updateAdjacencyList(allRoads[i],r1);
 				cout << "Old road split "  << r1.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
+				updateAdjacencyList(allRoads[i],r1);
 				aIntersect = true;
 			}
 		}
 		else if(!bIntersect && isPointOnLine(b,l)){
 			// check existing
-			if(b.x == allRoads[i].start.location.x && b.y == allRoads[i].start.location.y){
+			if(floatEqual(b.x,allRoads[i].start.location.x)&&floatEqual(b.y,allRoads[i].start.location.y)){
 				r2 = allRoads[i].start;
 				bIntersect = true;
 			}
-			else if(b.x == allRoads[i].end.location.x && b.y == allRoads[i].end.location.y){
+			else if(floatEqual(b.x,allRoads[i].end.location.x)&&floatEqual(b.y,allRoads[i].end.location.y)){
 				r2 = allRoads[i].end;
 				bIntersect = true;
 			}else{
 				n--;
 				r2 = addNode(b);
-				updateAdjacencyList(allRoads[i],r2);
 				cout << "Old road split "  << r2.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
+				updateAdjacencyList(allRoads[i],r2);
+
 				bIntersect = true;
 			}
 		}
@@ -259,11 +271,12 @@ void RoadNetwork::createNewYorkGrid(section s){
 	vec2 perpBi = getBisector(l);
 	vec2 start = centrePointOfLine(l);
 	vec2 end = vec2(start.x, 100);
-
+	cout<<"END " << end.x << " " << end.y<<endl;
 	// Adds first road
 	addNode(start);
 	addNode(end);
 	addRoad(allNodes[0],allNodes[1]);
+	cout << "Node 1 " << allNodes[0].location.x << " " << allNodes[0].location.y << " node 2 " << allNodes[1].location.x << " "<< allNodes[1].location.y << endl;
 
 	cout<< "First line added " << endl;
 	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
@@ -332,8 +345,28 @@ void RoadNetwork::renderRoads(){
 	glEnd();
 
 	glColor3f(1.0f,0.0f,0.0f); // red roads
+	glLineWidth(2.0f);
 	glBegin(GL_LINES);
-	for(road r : allRoads){
+	int j = 0;
+//	for(road r : allRoads){
+//	for(int i = allRoads.size()-1;i>=0;i--){
+	for(int i = 0; i < allRoads.size();i++){
+		road r = allRoads[i];
+		float chance =  r.ID/(float)allRoads.size();j++;
+		srand(r.ID);
+//		if(chance<0.33f){
+//			glColor3f(chance*3.0f,0,0);
+//		}else if(chance <0.66f){
+//			glColor3f(0,(chance-0.33f)*3.0f,0);
+//		}else{
+//			glColor3f(0,0,(chance-0.66f)*3.0f);
+//		}
+		float red = (float)rand()/(RAND_MAX);
+		srand(rand());
+		float gr = (float)rand()/RAND_MAX;
+		srand(rand());
+		float br = (float)rand()/RAND_MAX;
+		glColor3f(red,gr,br);
 		glVertex2f(r.start.location.x, r.start.location.y);
 		glVertex2f(r.end.location.x, r.end.location.y);
 	}
@@ -343,11 +376,15 @@ void RoadNetwork::renderRoads(){
 	glPointSize(10);
 
 	glBegin(GL_POINTS);
-	for(roadNode n : allNodes){
-		if(n.ID > 11 && n.ID < 19){
+	/*(roadNode n : allNodes){
+//	for(int i = allNodes.size()-1;i>=0;i--){
+//		roadNode n = allNodes[i];
+		//if(n.ID > 10 &&  n.ID < 13){
+			//glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+
 			glVertex2f(n.location.x, n.location.y);
-		}
-	}
+		//}
+	}*/
 	glEnd();
 }
 
@@ -551,7 +588,14 @@ void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID){
 }
 
 road RoadNetwork::findClosestRoads(vec3 position) {
-	return road();
+	road min = allRoads[0];
+	vec2 pos = vec2(position.x,position.z);
+	for(int i = 1; i < allRoads.size();i++){
+		if(abs(length(min.start.location-pos))>abs(length(allRoads[i].start.location-pos))){
+			min = allRoads[i];
+		}
+	}
+	return min;
 }
 
 // Gets the clockwiseMost adjacent vertex

@@ -252,7 +252,7 @@ void init() {
 	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
 	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
 }
-
+float triggerDiff = 0.0f;
 void initLighting() {
 	float direction[] = { 0.0f, 0.0f, -1.0f, 0.0f };
 	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -263,19 +263,22 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-	//	float light_position[] = { 0.0f, 5.0f, 0.0f, 1.0f };
-	float light_position[] = { p_pos.x, p_pos.y, p_pos.z, 1.0f };
+
+
+	float light_ambient[] = { triggerDiff/2.0f, triggerDiff/2.0f, triggerDiff/2.0f, 1.0f };
+	float light_diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	float light_position[] = { p_pos.x, p_pos.y+2, p_pos.z, 1.0f };
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	//	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 0.3f);
-	//	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
-	//	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, (2.1f)-triggerDiff);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 200);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
-	glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffintensity);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
@@ -486,6 +489,7 @@ void joystickEventsPoll() {
 				(float) ((int) (axes[3] * 100)) / 100.0f);
 
 		float trigger = axes[2];
+		triggerDiff = axes[5]+1;
 		float threshold = 0.2f;	//stops drifting when the user isn't touching the controller
 		if (abs(c_RSpos.y) >= threshold) {
 			yaw += (c_RSpos.y - 0.0f) * 1.2f;
