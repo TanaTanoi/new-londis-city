@@ -425,7 +425,47 @@ int Building::basicHashcode(string input) {
 }
 
 int Building::generateBuildingsFromSections(string input, vector<util::section> sections) {
+	//Test code TODO REMOVE
+	/* if(true){
+		vector<vec2> floorA = Generator::generateFloorPlan(vec2(0,0),1.0f,6);
+		vector<vec2> floorB = Generator::generateFloorPlan(vec2(0,0),1.0f,6);
+		vector<vec2> floorC = Generator::combinePlans(floorA,floorB);
 
+		int newList = glGenLists(1);
+		glNewList(newList, GL_COMPILE);
+		glDisable(GL_TEXTURE_2D);
+		glUseProgram(0);
+
+		int n = floorA.size();
+		glBegin(GL_LINES);
+			for(int i =0;i<n;i++){
+				glColor3f(i/n,i/n,i/n);
+				glLineWidth(i);
+				glVertex3f(floorA[i].x,1.0f,floorA[i].y);
+				glVertex3f(floorA[(i+1)%n].x,1.0f,floorA[(i+1)%n].y);
+			}
+			glEnd();
+			n = floorB.size();
+			glBegin(GL_LINES);
+			for(int i =0;i<n;i++){
+				glColor3f(i/n,i/n,i/n);
+				glLineWidth(i);
+				glVertex3f(floorB[i].x,1.0f,floorB[i].y);
+				glVertex3f(floorB[(i+1)%n].x,1.0f,floorB[(i+1)%n].y);
+			}
+			glEnd();
+			n = floorC.size();
+			glBegin(GL_LINES);
+			for(int i =0;i<n;i++){
+				glColor3f(i/n,i/n,i/n);
+			glLineWidth(i);
+			glVertex3f(floorC[i].x,3.0f,floorC[i].y);
+			glVertex3f(floorC[(i+1)%n].x,3.0f,floorC[(i+1)%n].y);
+		}
+		glEnd();
+		glEndList();
+		return newList;
+	}*/
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
@@ -530,10 +570,14 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		}//else 40% chance to stay as given style
 	}else if(chance < 100){
 		//10% chance to be different shape (modern, single different shape)
-		if (chance < 97) {
-			//7% single different shape
-			floorPlan = floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
-		}else {
+		if (chance < 95) {
+			//5% single different shape
+			floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
+		}else if (chance < 97) {
+			//2% chance to be crazyish
+			floorPlan = Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4);
+			floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4));
+		}else{
 			//3% modern crazy style
 			glNewList(result->low, GL_COMPILE);
 			generateModernBuilding(parameters->boundingArea, center, minDist);
