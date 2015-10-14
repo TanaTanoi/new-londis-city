@@ -325,27 +325,27 @@ inline vec2 getLineForLength(vec2 startPoint, vec2 direction, float length){
 }
 
 inline vec2 centrePointOfLine(line l){
-//	float leng = abs(l.end.x - l.start.x);
-//	float centreX = 0.0f;
-//	float centreY = 0.0f;
-//	if(l.end.x == l.start.x){
-//		centreX = l.start.x;
-//		leng = abs(l.end.y - l.start.y);
-//		centreY = min(l.end.y, l.start.y) + 0.51*leng;//min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
-//	}
-//	else{
-//		centreX = min(l.end.x, l.start.x) + 0.51*leng;        //min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
-//		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
-//		float c = l.end.y - m*l.end.x;
-//		centreY = m*centreX + c;
-//	}
+	//	float leng = abs(l.end.x - l.start.x);
+	//	float centreX = 0.0f;
+	//	float centreY = 0.0f;
+	//	if(l.end.x == l.start.x){
+	//		centreX = l.start.x;
+	//		leng = abs(l.end.y - l.start.y);
+	//		centreY = min(l.end.y, l.start.y) + 0.51*leng;//min(l.end.y, l.start.y) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	//	}
+	//	else{
+	//		centreX = min(l.end.x, l.start.x) + 0.51*leng;        //min(l.end.x, l.start.x) + leng*(5.0f / 12.0f) + random * (leng*(1.0f / 6.0f));
+	//		float m = (l.end.y - l.start.y) / (l.end.x - l.start.x);
+	//		float c = l.end.y - m*l.end.x;
+	//		centreY = m*centreX + c;
+	//	}
 	vec2 dir = l.end - l.start;
 	float leng = abs(length(dir));
 	dir = normalize(dir);
 	vec2 toReturn =  l.start + dir*(leng/2.0f);
 	return toReturn;
 
-//	return vec2(centreX, centreY);
+	//	return vec2(centreX, centreY);
 }
 
 inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi, vec2 centrePoint, line longLine){
@@ -363,25 +363,14 @@ inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi, vec2 ce
 }
 
 inline bool isPointOnLine(vec2 point, line edge){
-	int error = 3;
 
-	if(edge.end.x - edge.start.x == 0){ // i.e. both are vertical as they share a slope
-		float minHeight = min(edge.start.y, edge.end.y);
-		float maxHeight = max(edge.start.y, edge.end.y);
-
-		if((point.y > minHeight && point.y < maxHeight) || (point.y > minHeight && point.y < maxHeight)){
-			cout <<"Vertical case " << edge.end.x << "  " << point.x << "  " << (point.x - edge.end.x == 0) << endl;
-			return (point.x - edge.end.x > error && point.x - edge.end.x < -error); // have same x intercept
-		}
-		return false;
-	}
-
-	float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
-	float c = edge.end.y - m*edge.end.x;
-	if((int)round(point.y) == (int)round(m*point.x + c)){
-		return true;
-	}
-	return false;
+	vec2 dir = edge.start - edge.end ;
+	vec2 comp_dir = point-edge.end;
+	if(length(comp_dir)==0){return true;}
+	if(length(comp_dir)>=length(dir)){return false;}
+	dir = normalize(dir);
+	comp_dir = normalize(comp_dir);
+	return (dir.x == comp_dir.x&&dir.y==comp_dir.y);
 }
 
 
