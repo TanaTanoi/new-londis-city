@@ -345,18 +345,28 @@ void RoadNetwork::renderRoads(){
 	glEnd();
 
 	glColor3f(1.0f,0.0f,0.0f); // red roads
+	glLineWidth(2.0f);
 	glBegin(GL_LINES);
-	int i = 0;
-	for(road r : allRoads){
-		float chance =  i/(float)allRoads.size();i++;
-		if(chance<0.33f){
-			glColor3f(chance*3.0f,0,0);
-		}else if(chance <0.66f){
-			glColor3f(0,(chance-0.33f)*3.0f,0);
-		}else{
-			glColor3f(0,0,(chance-0.66f)*3.0f);
-		}
-
+	int j = 0;
+//	for(road r : allRoads){
+//	for(int i = allRoads.size()-1;i>=0;i--){
+	for(int i = 0; i < allRoads.size();i++){
+		road r = allRoads[i];
+		float chance =  r.ID/(float)allRoads.size();j++;
+		srand(r.ID);
+//		if(chance<0.33f){
+//			glColor3f(chance*3.0f,0,0);
+//		}else if(chance <0.66f){
+//			glColor3f(0,(chance-0.33f)*3.0f,0);
+//		}else{
+//			glColor3f(0,0,(chance-0.66f)*3.0f);
+//		}
+		float red = (float)rand()/(RAND_MAX);
+		srand(rand());
+		float gr = (float)rand()/RAND_MAX;
+		srand(rand());
+		float br = (float)rand()/RAND_MAX;
+		glColor3f(red,gr,br);
 		glVertex2f(r.start.location.x, r.start.location.y);
 		glVertex2f(r.end.location.x, r.end.location.y);
 	}
@@ -366,7 +376,7 @@ void RoadNetwork::renderRoads(){
 	glPointSize(10);
 
 	glBegin(GL_POINTS);
-	for(roadNode n : allNodes){
+	/*(roadNode n : allNodes){
 //	for(int i = allNodes.size()-1;i>=0;i--){
 //		roadNode n = allNodes[i];
 		//if(n.ID > 10 &&  n.ID < 13){
@@ -374,7 +384,7 @@ void RoadNetwork::renderRoads(){
 
 			glVertex2f(n.location.x, n.location.y);
 		//}
-	}
+	}*/
 	glEnd();
 }
 
@@ -578,7 +588,14 @@ void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID){
 }
 
 road RoadNetwork::findClosestRoads(vec3 position) {
-	return road();
+	road min = allRoads[0];
+	vec2 pos = vec2(position.x,position.z);
+	for(int i = 1; i < allRoads.size();i++){
+		if(abs(length(min.start.location-pos))>abs(length(allRoads[i].start.location-pos))){
+			min = allRoads[i];
+		}
+	}
+	return min;
 }
 
 // Gets the clockwiseMost adjacent vertex
