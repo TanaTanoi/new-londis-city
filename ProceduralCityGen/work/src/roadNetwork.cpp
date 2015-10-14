@@ -102,39 +102,45 @@ roadNode RoadNetwork::addNode(vec2 point){
  */
 road RoadNetwork::addRoad(roadNode start,roadNode end){
 	road r = {start,end,roadID++};
+
 	allRoads.push_back(r);
+	adjacencyList[start.ID].push_back(end.ID);
+	adjacencyList[end.ID].push_back(start.ID);
 	return r;
 }
 
 /**
  * Note, this method assumes you know that the road is split by
- * the given node
+ * the given node. Also replaces that road in allRoads with the
+ * resulting two roads
  */
 void RoadNetwork::updateAdjacencyList(road r, roadNode n){
 	// remove r from allRoads
+	for(int i = 0; i < allRoads.size(); i++){
+		if(r.ID == allRoads[i].ID){
+			allRoads.erase(allRoads.begin() + i);
+			break;
+		}
+	}
 
 	// remove end from start and vice versa in adjacency list
 	for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
 		if(adjacencyList[r.start.ID][i] == r.end.ID){
-			adjacencyList[r.start.ID][i] = n.ID;
+			adjacencyList[r.start.ID].erase(adjacencyList[r.start.ID].begin() + i);
 			break;
 		}
 	}
 
 	for(int i = 0; i < (int)adjacencyList[r.end.ID].size(); i++){
 		if(adjacencyList[r.end.ID][i] == r.start.ID){
-			adjacencyList[r.end.ID][i]= n.ID;
+			adjacencyList[r.end.ID].erase(adjacencyList[r.end.ID].begin() + i);
 			break;
 		}
 	}
 
-	// adds start and end of road to n in adjacency list
-	adjacencyList[n.ID].push_back(r.start.ID);
-	adjacencyList[n.ID].push_back(r.end.ID);
-
 	// create two new roads start-n and n-end
-	road r1 = {r.start,n,roadID++};
-	road r2 = {n,r.end,roadID++};
+	addRoad(r.start,n);
+	addRoad(n,r.end);
 }
 
 /**
@@ -159,7 +165,6 @@ void RoadNetwork::calulateBoundary(){
 }
 
 void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
-	//cout << "Dividing grid" << endl;
 
 	line l = {r.start.location,r.end.location};
 	vec2 perpBi = getBisector(l);
@@ -176,14 +181,72 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 
 	vec2 a = getLineForLength(centrePoint,perpBi,length);
 	vec2 b = getLineForLength(centrePoint,-perpBi,length);
+	bool aIntersect = false;
+	bool bIntersect = false;
 
-	roadNode r1 = addNode(a);
-	roadNode r2 = addNode(b);
+	roadNode r1;
+	roadNode r2;
+
+	// need to check here if a and b intercept
+	// now checks if the end point intersects any existing roads
+	int n = allRoads.size();
+	for(int i = 0; i < n; i++){
+		line l =  {allRoads[i].start.location, allRoads[i].end.location,0};
+		if(!aIntersect && isPointOnLine(a,l)){
+			// check existing
+			if(a.x == allRoads[i].start.location.x && a.y == allRoads[i].start.location.y){
+				r1 = allRoads[i].start;
+				aIntersect = true;
+			}
+			else if(a.x == allRoads[i].end.location.x && a.y == allRoads[i].end.location.y){
+				r1 = allRoads[i].end;
+				aIntersect = true;
+			}else{
+				n--;
+				r1 = addNode(a);
+				updateAdjacencyList(allRoads[i],r1);
+				cout << "Old road split "  << r1.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
+				aIntersect = true;
+			}
+		}
+		else if(!bIntersect && isPointOnLine(b,l)){
+			// check existing
+			if(b.x == allRoads[i].start.location.x && b.y == allRoads[i].start.location.y){
+				r2 = allRoads[i].start;
+				bIntersect = true;
+			}
+			else if(b.x == allRoads[i].end.location.x && b.y == allRoads[i].end.location.y){
+				r2 = allRoads[i].end;
+				bIntersect = true;
+			}else{
+				n--;
+				r2 = addNode(b);
+				updateAdjacencyList(allRoads[i],r2);
+				cout << "Old road split "  << r2.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
+				bIntersect = true;
+			}
+		}
+	}
+
+	if(!aIntersect){
+		r1 = addNode(a);
+		cout << "Node created "  << r1.ID << endl;
+	}
+	if(!bIntersect){
+		r2 = addNode(b);
+		cout << "Node created "  << r2.ID << endl;
+	}
+
 	road left = addRoad(rn,r1);
 	road right = addRoad(rn,r2);
 
-	if(level < 6){
+	cout<< "First line added " << endl;
+	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
+
+	if(level < 2){
+		cout<< "First div on level " << level << endl;
 		recDivideGrid(left, level+1,!halfLength);
+		cout<< "Second div on level " << level << endl;
 		recDivideGrid(right, level+1,!halfLength);
 	}
 }
@@ -202,6 +265,9 @@ void RoadNetwork::createNewYorkGrid(section s){
 	addNode(end);
 	addRoad(allNodes[0],allNodes[1]);
 
+	cout<< "First line added " << endl;
+	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
+
 	// Now recursively subdivide
 	recDivideGrid(allRoads[0],0,true);
 
@@ -210,8 +276,24 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	testAntiClockwise();
 	createNewYorkGrid(outline);
+
+	cout << endl;
+	cout << "Adjacency List" << endl;
+	for(int i = 0; i < adjacencyList.size(); i++){
+		cout << " key " << i << ": ";
+		for(int j = 0; j < adjacencyList[i].size(); j++){
+			cout << " " << adjacencyList[i][j];
+		}
+		cout << endl;
+	}
+
+	cout << endl;
+	cout << "Road List" << endl;
+	for(int i = 0; i < allRoads.size(); i++){
+		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
+	}
+
 	//findMinimumCycles();
 	//cout << "Done !" << endl;
 	// Now take in population density
@@ -262,7 +344,9 @@ void RoadNetwork::renderRoads(){
 
 	glBegin(GL_POINTS);
 	for(roadNode n : allNodes){
-		glVertex2f(n.location.x, n.location.y);
+		if(n.ID > 11 && n.ID < 19){
+			glVertex2f(n.location.x, n.location.y);
+		}
 	}
 	glEnd();
 }

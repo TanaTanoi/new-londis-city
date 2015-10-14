@@ -356,5 +356,25 @@ inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi, vec2 ce
 	return intersectors;
 }
 
+inline bool isPointOnLine(vec2 point, line edge){
+
+	if(edge.end.x - edge.start.x == 0){ // i.e. both are vertical as they share a slope
+		float minHeight = min(edge.start.y, edge.end.y);
+		float maxHeight = max(edge.start.y, edge.end.y);
+
+		if((point.y > minHeight && point.y < maxHeight) || (point.y > minHeight && point.y < maxHeight)){
+			return (point.x - edge.end.x == 0); // have same x intercept
+		}
+		return false;
+	}
+
+	float m = (edge.end.y - edge.start.y) / (edge.end.x - edge.start.x);
+	float c = edge.end.y - m*edge.end.x;
+	if((int)round(point.y) == (int)round(m*point.x + c)){
+		return true;
+	}
+	return false;
+}
+
 
 }
