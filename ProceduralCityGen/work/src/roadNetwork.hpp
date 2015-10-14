@@ -51,6 +51,11 @@ private:
 	void removeAdjacencyLinks(int, std::map<int,std::vector<int>> * );
 	void setCycleEdge(std::vector<cycle::road> *, int, int);
 	void findMinimumCycles();
+	void removeEdge(std::vector<cycle::road>*,  std::map<int,std::vector<int>> * ,int);
+
+	void testIsolatedVertex();
+	void testFilamentVertex();
+	void testCycle();
 
 public:
 	RoadNetwork();
