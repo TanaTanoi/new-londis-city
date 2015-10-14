@@ -87,7 +87,6 @@ int main(int argc, char **argv) {
 	if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
 		init();
-		string one = "1";
 		if (argc >= 2 && std::string(argv[2]) == "1") {
 			cout << "CAM MODE" << endl;
 			cam_mode = 1;
@@ -95,7 +94,7 @@ int main(int argc, char **argv) {
 		}
 		//testList = building.generateBuildingFromString("testd");
 		g_sections = new SectionDivider();
-		testList = building.generateBuildingsFromSections("gfggghhhhtagagdg",
+		testList = building.generateBuildingsFromSections("dfsfd",
 				g_sections->testSection().sections);
 		mode = 0;
 		initLighting();
@@ -133,10 +132,7 @@ int main(int argc, char **argv) {
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 		//cout << "entered no loops" << endl;
 		mode = 5; //because I'm very lazy
-		building.heightmap_points.push_back(vec2(0,g_winHeight/2));
-		building.heightmap_points.push_back(vec2(0,g_winHeight/2));
-		building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
-		building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
+
 	}
 
 	glEnable(GL_SMOOTH);
@@ -252,6 +248,10 @@ void init() {
 	initSkybox("../work/res/textures/cubeMap.jpg");
 	skybox_shader = makeShaderProgram("../work/res/shaders/skybox_shader.vert",
 			"../work/res/shaders/skybox_shader.frag");
+	building.heightmap_points.push_back(vec2(0,g_winHeight/2));
+	building.heightmap_points.push_back(vec2(0,g_winHeight/2));
+	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
+	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
 }
 
 void initLighting() {
@@ -351,6 +351,22 @@ void drawGrid(double grid_size, double square_size) {
 	glEnd();
 }
 //action = state, 1 is down, 0 is release
+void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+		int mods) {
+	cout << "Key: " << key << endl;
+	if (key == 87 && action) {
+		p_pos += 0.05f * p_front * 1;
+	} else if (key == 65 && action) {
+		vec3 p_right = cross(p_up, p_front);
+		p_pos += 0.05f * p_right * 1;
+	} else if (key == 68 && action) {
+		vec3 p_right = cross(p_up, p_front);
+		p_pos -= 0.05f * p_right * 1;
+	} else if (key == 63 && action) {
+		p_pos -= 0.05f * p_front * 1;
+	}
+
+}
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
 	if (mode == 5&&action&&button == GLFW_MOUSE_BUTTON_1) {
@@ -381,22 +397,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-		int mods) {
-	cout << "Key: " << key << endl;
-	if (key == 87 && action) {
-		p_pos += 0.05f * p_front * 1;
-	} else if (key == 65 && action) {
-		vec3 p_right = cross(p_up, p_front);
-		p_pos += 0.05f * p_right * 1;
-	} else if (key == 68 && action) {
-		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f * p_right * 1;
-	} else if (key == 63 && action) {
-		p_pos -= 0.05f * p_front * 1;
-	}
-
-}
 bool firstM = true;
 void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	if (firstM) {
@@ -466,19 +466,28 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 
 }
-
+bool c_xbox_button_down = false;
 void joystickEventsPoll() {
-	int count;
-	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+	int axes_count;
+	int button_count;
+	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
+	const unsigned char* buttons = glfwGetJoystickButtons	(GLFW_JOYSTICK_1,&button_count);
 	//0,1-Left Stick 2 is trigger (postive left, negative, right) 3,4 is Right Stick y,x
-	if (count > 0) {
+	/* 0/1- Left Stick
+	 * 2  - Left Trigger
+	 * 3/4- Right Stick
+	 * 5  - RightTrigger
+	 * 6/7- D-pad
+	 * */
+	if (axes_count > 0) {
 
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
 		vec2 c_RSpos = vec2((float) ((int) (axes[4] * 100)) / 100.0f,
 				(float) ((int) (axes[3] * 100)) / 100.0f);
 
-		float threshold = 0.2f;	//stops drifting when the user isn't touching the controler
+		float trigger = axes[2];
+		float threshold = 0.2f;	//stops drifting when the user isn't touching the controller
 		if (abs(c_RSpos.y) >= threshold) {
 			yaw += (c_RSpos.y - 0.0f) * 1.2f;
 		}
@@ -504,13 +513,36 @@ void joystickEventsPoll() {
 			c_LSpos.x = 0;
 		}
 
-		p_pos -= 0.05f * p_front * c_LSpos.y * 1.4;
+		p_pos -= 0.05f * p_front * c_LSpos.y * (2+trigger);
 
 		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f * p_right * c_LSpos.x * 1.4;
+		p_pos -= 0.05f * p_right * c_LSpos.x * (2+trigger);
 
 	}
+	/* 0 - A
+	 * 1 - B
+	 * 2 - X
+	 * 3 - Y
+	 * 4 - LB
+	 * 5 - RB
+	 * 6 - Back
+	 * 7 - Start
+	 * 8 - Xbox button
+	 * 9 - Left Stick Press
+	 * 10 - Right Stick Press
+	 */
+	if(button_count>0){
+		if(buttons[8]==GLFW_PRESS&&!c_xbox_button_down){
 
+			c_xbox_button_down = true;
+			//If Xbox button pressed
+			testList = building.generateBuildingsFromSections("XBOX Button",
+							g_sections->testSection().sections);
+			cout<<"Regenerating city"<<endl;
+		}else if(buttons[8] == GLFW_RELEASE){
+			c_xbox_button_down = false;
+		}
+	}
 }
 
 void initSkybox(string filepath) {

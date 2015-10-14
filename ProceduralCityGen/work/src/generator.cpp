@@ -12,7 +12,9 @@ using namespace std;
 using namespace comp308;
 using namespace util;
 
-float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
+static const float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
+
+float Generator::SECTION_TO_POINT_SCALE(){return SECTION_TO_POINTS_SCALE;}
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
@@ -75,7 +77,6 @@ else if (c == '$') {
 }
 return "" + c;
 }
-
 
 /*Creates a random string with *itrs amount of iterations */
 string Generator::generateRandomBuildingString(int itrs) {
@@ -234,70 +235,55 @@ vector<vector<vec2>> Generator::subdivide(vector<vec2> points) {
 /*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
+	cout<<"START COMBINE"<<endl;
 	vector<vec2> newPlan = vector<vec2>();
 	int n[] = { shapeA.size(),shapeB.size() };
+	vector<vec2> shapes[] = {shapeA,shapeB};
 	//current shape we are tracing
 	int curShape = 0;
 	int index = 0;
 	//find point furthest away from the center of B
-	vec2 midB = centerPoint(shapeB);
+	vec2 midB = centerPoint(shapes[1]);
 	for(int i =0; i < n[0];i++){
-		if(abs(length(shapeA[index]-midB)) < abs(length(shapeA[i]-midB))){
+		if(abs(length(shapes[0][index]-midB)) < abs(length(shapes[0][i]-midB))){
 			index = i;
 		}
 	}
-	vec2 currentPoint = shapeA[index];
-	//while we don't contain the next point in the trace (currentPoint)
+	vec2 currentPoint = shapes[0][index];
+	//TODO current problem: Doesn't add the zero point of the second shape or sometimes first shape
 	while (!containsVec(newPlan,currentPoint)) {
+		//while we don't contain the next point in the trace (currentPoint)
 		//add the point
 		newPlan.push_back(currentPoint);
-		//cout<< " " << index<<":"<<curShape<<endl;
+		cout<< " " << index<<":"<<curShape<<endl;
 		//check this line against the other shape for intersections
 		bool hasIntersection = false;
-		for (int j = 0; j < n[!curShape]; j++) {//cycle through other shape
-			//if we are currently on the first shape
-			if (curShape == 0) {
-				//cout<<"On first shape, testing intersecting on other point "<< j << endl;
-				if (util::intersects(currentPoint, shapeA[(index + 1) % n[0]], shapeB[j], shapeB[(j + 1) % n[1]])) {
-//					cout<<"found intersection at " << j << endl;
-					//if we find an intersection, add it
-					newPlan.push_back(util::getIntersection(currentPoint, shapeA[(index + 1) % n[0]], shapeB[j], shapeB[(j + 1) % n[1]]));
-					//cout << " I1" << endl;
-					//and then add point on second shape
-					index = (j + 1) % n[1];
-					hasIntersection = true;
-					break;
-				}
-			}else {//if we are on the second shape
-				if (util::intersects(currentPoint, shapeB[(index + 1) % n[1]], shapeA[j], shapeA[(j + 1) % n[0]])) {
-					//if we find an intersection, add it
-					newPlan.push_back(util::getIntersection(currentPoint, shapeB[(index + 1) % n[1]], shapeA[j], shapeA[(j + 1) % n[0]]));
-					//cout<< " I2"<<endl;
-					//and then add point on second shape
-					index = (j + 1) % n[0];
-					hasIntersection = true;
-					break;
-				}
+		for (int j = 0; j < n[!curShape]; j++) {//for each line in the other shape
+			int o_index = (index+j-1)%n[!curShape];//this makes it find the first following intersection (hacky)
+			if(o_index<0)o_index =n[!curShape]-1;
+//			int o_index = index+j;
+			if (util::intersects(currentPoint, shapes[curShape][(index + 1) % n[0]], shapes[!curShape][o_index],
+					shapes[!curShape][(o_index + 1) % n[1]])) {
+									cout<<"found intersection at " << o_index << endl;
+				//if we find an intersection, add it
+				newPlan.push_back(util::getIntersection(currentPoint, shapes[curShape][(index + 1) % n[0]],
+						shapes[!curShape][o_index],
+						shapes[!curShape][(o_index + 1) % n[1]]));
+				//and then add point on second shape
+				index = (o_index+1);
+				if(index == n[!curShape])index =0;
+				hasIntersection = true;
+				break;
 			}
 		}
 		if (hasIntersection) {
-//			cout<<"WE had an intersection"<<endl;
-			//swap shape we are currently on
+			//swap shape we are currently on and get next point in the series
 			curShape = !curShape;
-			if(curShape ==0){
-				currentPoint = shapeA[index];
-			}else{
-				currentPoint = shapeB[index];
-			}
+			currentPoint = shapes[curShape][index];
 
 		}else {
-			if (curShape == 0) {
-				index = (index + 1) % n[curShape];
-				currentPoint = shapeA[index];
-			}else {
-				index = (index + 1) % n[curShape];
-				currentPoint = shapeB[index];
-			}
+			index = (index + 1) % n[curShape];
+			currentPoint = shapes[curShape][index];
 		}
 
 	}
