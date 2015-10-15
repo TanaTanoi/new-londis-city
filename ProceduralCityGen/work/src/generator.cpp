@@ -355,3 +355,13 @@ vector<vec2> Generator::getBoundingBox(vector<vec2> floor) {
 	return toReturn;
 
 }
+
+section Generator::pointsToSections(vector<vec2> points){
+	vector<line> lines = vector<line>();
+	int n = points.size();
+	for(int i =n-1; i >=0;i--){
+		line l = {points[i],points[(i-1)%n],i};
+		lines.push_back(l);
+	}
+	return {lines,0,0};
+}
