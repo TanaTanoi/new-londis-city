@@ -72,26 +72,34 @@ inline vector<roadNode> sortPoints(vector<roadNode> points){
 		}
 
 	}
-
 	return sorted;
 
 }
-
 inline int findRoadIndex(vector<road> roads, int sID, int eID){
-	int low = 0; int high = (int)roads.size(); int mid = (low+high)/2;
-	while(low < high){
-		if(sID == roads[mid].start.ID && eID == roads[mid].end.ID){ // Found object
+
+//	cout << "finding a road index" << endl;
+	int low = 0; int high = (int)roads.size()-1;
+	while(low <= high){
+		int mid = (low+high+1)/2;
+//		cout<<mid<<" MID " << (int)roads.size() <<endl;
+//		cout << "Looking for " << sID << " " <<eID << " Mid is  " <<  roads[mid].start.ID << " " << roads[mid].end.ID << endl;
+//		cout << "Mid is " << mid <<endl;
+
+		if((sID == roads[mid].start.ID) && (eID == roads[mid].end.ID)){ // Found object
+			//cout << "equal to" << endl;
 			return mid;
 		}
 		else if((sID == roads[mid].start.ID && eID < roads[mid].end.ID) || (sID < roads[mid].start.ID)){ // Less than
-			high = mid;
-			mid = (low+high)/2;
+//			cout<< "Less than" <<endl;
+			high = mid - 1;
 		}
 		else{ // greater than
+			//cout<< "Greater than" <<endl;
 			low = mid + 1;
-			mid = (low+high)/2;
 		}
 	}
+
+	//cout << "Did not find in loop" << endl;
 
 	if(sID == roads[low].start.ID && eID == roads[low].end.ID){ // Found object
 		return low;
@@ -128,6 +136,11 @@ inline vector<road> sortRoads(vector<road> roads){
 			sorted.push_back(current);
 		}
 	}
+	cout<<"Printing sorted :";
+	for(road r:sorted){
+		cout<<r.start.ID << "|"<<r.end.ID<< " ";
+	}
+	cout<<endl;
 	return sorted;
 
 }
@@ -150,8 +163,12 @@ inline void removeFromHeap(vector<roadNode> * heap, int ID){
  * Checks if a vector of roadNodes contains a given node
  */
 inline bool contains(vector<roadNode> visited, roadNode node){
-	for(roadNode n : visited){
-		if(n.ID == node.ID){
+	int n =  (int)visited.size();
+	cout << "In contains " <<n<<endl;
+	if(n==0){cout<<"is zero"<<endl;return false;}
+	for(int i = 0; i < n; i++){
+		cout << "There is no error here" <<endl;
+		if(visited[i].ID == node.ID){
 			return true;
 		}
 	}
