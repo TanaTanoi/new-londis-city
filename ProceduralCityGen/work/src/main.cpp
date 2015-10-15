@@ -165,7 +165,10 @@ int main(int argc, char **argv) {
 		init(); // sets up building generator
 		vector<lot> allLots = g_sections->getLots();
 		for(lot l: allLots){
-			l.buildings.high = building.generateBuildingsFromSections("boo", l.sections);
+			string input;
+			cout << "Enter an input seed: ";
+			cin >> input;
+			l.buildings.high = building.generateBuildingsFromSections(input, l.sections);
 			g_sections->addBuildingToLot(l);
 		}
 

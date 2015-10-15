@@ -466,6 +466,7 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 		glEndList();
 		return newList;
 	}*/
+
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
