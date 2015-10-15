@@ -363,6 +363,7 @@ section Generator::pointsToSections(vector<vec2> points){
 //		line l = {points[i],points[(i-1)%n],i};
 //		lines.push_back(l);
 //	}
+	points = shrinkPoints(points);
 	for(int i =0; i <n;i++){
 		line l = {points[i]*p_scale,points[(i+1)%n]*p_scale,i};
 		lines.push_back(l);

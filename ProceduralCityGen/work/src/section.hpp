@@ -16,8 +16,8 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 1500; // Does not work at 11000 FIXME
-	float minArea = 500;
+	float goalArea = 500; // Does not work at 11000 FIXME
+	float minArea = 200;
 	std::vector<lot> lots;
 	int sectionID = 0;
 	int lotID =0;

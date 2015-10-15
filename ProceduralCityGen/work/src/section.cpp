@@ -230,18 +230,19 @@ lot SectionDivider::testSection() {
 //		line b = {vec2(400,100),vec2(250,300),1};
 //		line c = {vec2(250,300),vec2(100,100),2};
 //
-//	vector<line > lines = vector<line >();
-//	lines.push_back(a);
-//	lines.push_back(b);
-//	lines.push_back(c);
-//	lines.push_back(d);
+	vector<line > lines = vector<line >();
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(d);
 
 
-	section s = Generator::createRandomSection();
+	section s;// = Generator::createRandomSection();
+	s.lines = lines;
 	s.area = getSectionSize(s);
 
 	lot l;
-	l.boundingBox = Generator::createRandomSection();
+	l.boundingBox = s;//Generator::createRandomSection();
 	l.ID = 0;
 	l.sections = vector<section>();
 
