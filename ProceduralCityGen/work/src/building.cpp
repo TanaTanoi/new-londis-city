@@ -34,6 +34,7 @@ GLuint tex_window[2][TOTAL_WINDOW_TEXTURES];
 GLuint tex_door[2][2];
 GLuint grass;
 GLuint road;
+GLuint conc;
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -71,6 +72,7 @@ void Building::initTexture() {
 	glGenTextures(1, tex_door[0]);
 	glGenTextures(1, &grass);
 	glGenTextures(1, &road);
+	glGenTextures(1, &conc);
 
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
@@ -91,7 +93,26 @@ void Building::initTexture() {
 	loadTexture(grass, "../work/res/textures/grass001.jpg");
 
 	loadTexture(road, "../work/res/textures/road01.jpg");
+	loadTexture(conc, "../work/res/textures/concrete.jpg");
 }
+/*Draws a thing of a given size*/
+void Building::drawGround(float size){
+	float floor = -0.01f;
+	glBindTexture(GL_TEXTURE_2D,conc);
+	glBegin(GL_QUADS);
+	//Floor
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(0,0);
+	glVertex3f(-size,floor,-size);
+	glTexCoord2f(0,size);
+	glVertex3f(-size,floor,size);
+	glTexCoord2f(size,size);
+	glVertex3f(size,floor,size);
+	glTexCoord2f(size,0);
+	glVertex3f(size,floor,-size);
+	glEnd();
+}
+
 
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
@@ -418,7 +439,6 @@ int Building::basicHashcode(string input) {
 	for (int i = 0; i < input.length(); i++) {
 		int c = input[i];
 		current += c;
-
 	}
 	cout << "Hash code for " << input << " is " << current << endl;
 	return current;
@@ -487,6 +507,28 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 
 return 0;
 }
+
+//Assume srand has been called
+int Building::generateBuildingsFromSections(vector<util::section> sections) {
+	vector<buildingLOD> buildings;
+	vector<buildingParams> params = Generator::sectionsToParams(sections,heightmap_points);
+	for (int i = 0; i < params.size(); i++) {
+		buildingLOD building;
+		generateBuilding(&params[i], &building);
+		buildings.push_back(building);
+	}
+	int newList = glGenLists(1);
+	glNewList(newList, GL_COMPILE);
+	glUseProgram(g_shader);
+	for (buildingLOD b : buildings) {
+		glCallList(b.low);
+	}
+	glEndList();
+	return newList;
+
+return 0;
+}
+
 
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);

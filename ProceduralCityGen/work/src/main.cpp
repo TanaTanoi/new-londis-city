@@ -24,7 +24,10 @@ RoadNetwork *g_network = nullptr;
 VehicleController *g_vehicleCtrl = nullptr;
 
 //0, bmode, 1, smode, 2 cmode, 3 rmode, 4 imode
+const int RENDER_MODE = 0;
+const int HEIGHTMAP_MODE = 1;
 int mode = 0;
+string user_seed;
 //Main program
 //
 int main(int argc, char **argv) {
@@ -68,10 +71,12 @@ int main(int argc, char **argv) {
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
+
+
 	/*Setting up other stuff*/
-	if (joystick) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
+//	if (joystick) {
+//		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//	}
 
 	/*Set up depths and perspective*/
 	glClearDepth(1.0f);
@@ -86,7 +91,22 @@ int main(int argc, char **argv) {
 	string CMODE = "C";
 	string IMODE = "I";
 
-	if (argc > 1 && argv[1] == BMODE) {
+	if(argc == 2){//take seed as input
+		//if only one argument, do regular mode
+		cout<<"Running height map mode"<<endl;
+		mode = HEIGHTMAP_MODE;
+		init();
+		user_seed = std::string(argv[1]);
+		cout<<"Using seed "<<user_seed<<endl;
+
+
+
+
+
+
+
+	}
+	else if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
 		init();
 		if (argc >= 2 && std::string(argv[2]) == "1") {
@@ -141,36 +161,10 @@ int main(int argc, char **argv) {
 			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 		}
 
-
+		init(); // sets up building generator
 		mode = 4; // sets integrated mode
 		//Creates road network
-		g_network = new RoadNetwork();
-		g_network->testNetwork();
-
-		// Finds lot outlines
-		vector<util::section> lotOutlines;
-		for(cycle::primitive prim: g_network->getCycles()){
-			vector<vec2> points;
-			for(cycle::roadNode rn : prim.vertices){
-				points.push_back(rn.location);
-			}
-			lotOutlines.push_back(Generator::pointsToSections(points));
-		}
-
-		// Divides sections
-		g_sections = new SectionDivider();
-		g_sections->divideAllLots(lotOutlines);
-
-		// Generate building display list
-		init(); // sets up building generator
-		vector<lot> allLots = g_sections->getLots();
-		for(lot l: allLots){
-			string input;
-			cout << "Enter an input seed: ";
-			cin >> input;
-			l.buildings.high = building.generateBuildingsFromSections(input, l.sections);
-			g_sections->addBuildingToLot(l);
-		}
+		generateBuildings();
 
 	}
 	else {
@@ -198,11 +192,44 @@ int main(int argc, char **argv) {
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		//TODO clean up all of this gross code when we integrate
-		if (mode == 0) {
+		if(mode == HEIGHTMAP_MODE){
+			//Spline map mode
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			glPointSize(10.0f);
+			glColor3f(1, 0, 0);
+			glBegin(GL_LINE_STRIP);
+			for (int i = 2; i < building.heightmap_points.size() - 1; i++) {
+				for (float time = 0.0f; time <= 1.0f; time += 0.1f) {
+					vec2 splinePoint = Spline::calculatePoint(
+							building.heightmap_points[i - 2],
+							building.heightmap_points[i - 1],
+							building.heightmap_points[i],
+							building.heightmap_points[i+1], time);
+					glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
+				}
+			}
+			glEnd();
+		}else if(mode == RENDER_MODE){
+			setupCamera();
+			initLighting();
+			glTranslatef(0, -2, 0);
+			for(lot l:g_sections->getLots()){
+				glCallList(l.buildings.high);
+			}
+			building.drawGround(100.0f);
+			drawSkycube(100.0f);	//the further away it is the better it looks
+
+		}else if (mode == 0) {
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
 			drawGrid(40, 1);
+			building.drawGround(100.0f);
 			glCallList(testList);
 			drawSkycube(100.0f);	//the further away it is the better it looks
 		} else if (mode == 1 || mode == 3) {
@@ -239,37 +266,12 @@ int main(int argc, char **argv) {
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
-			drawGrid(40, 1);
+//			drawGrid(40, 1);
 			for(lot l:g_sections->getLots()){
 				glCallList(l.buildings.high);
 			}
+			building.drawGround(100.0f);
 			drawSkycube(100.0f);	//the further away it is the better it looks
-		} else if (mode == 5) {
-			//Spline map mode
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			gluOrtho2D(0, g_winWidth, 0, g_winHeight);
-
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-
-			glEnable(GL_PROGRAM_POINT_SIZE);
-			glPointSize(10.0f);
-			glColor3f(1, 0, 0);
-			glBegin(GL_LINE_STRIP);
-			for (int i = 2; i < building.heightmap_points.size() - 2; i++) {
-				for (float time = 0.0f; time <= 1.0f; time += 0.1f) {
-					vec2 splinePoint = Spline::calculatePoint(
-							building.heightmap_points[i - 2],
-							building.heightmap_points[i - 1],
-							building.heightmap_points[i],
-							building.heightmap_points[i], time);
-					glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
-				}
-				//				glVertex2f(building.heightmap_points[i-1].x, g_winHeight-building.heightmap_points[i-1].y);
-				//				glVertex2f(building.heightmap_points[i].x, g_winHeight-building.heightmap_points[i].y);
-			}
-			glEnd();
 		}
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -285,6 +287,36 @@ int main(int argc, char **argv) {
 	glfwTerminate();
 
 }
+
+void generateBuildings(){
+	g_network = new RoadNetwork();
+	g_network->testNetwork();
+
+	// Finds lot outlines
+	vector<util::section> lotOutlines;
+	for(cycle::primitive prim: g_network->getCycles()){
+		vector<vec2> points;
+		for(cycle::roadNode rn : prim.vertices){
+			points.push_back(rn.location);
+		}
+		lotOutlines.push_back(Generator::pointsToSections(points));
+	}
+	// Divides sections
+	g_sections = new SectionDivider();
+	g_sections->divideAllLots(lotOutlines);
+
+	// Generate building display list
+	srand(building.basicHashcode(user_seed));
+	vector<lot> allLots = g_sections->getLots();
+	for(lot l: allLots){
+		srand(rand());
+		l.buildings.high = building.generateBuildingsFromSections(l.sections);
+		g_sections->addBuildingToLot(l);
+	}
+
+}
+
+
 /*Any code that needs to get run just before the main loop, put it here*/
 void init() {
 	/*Set up depths and perspective*/
@@ -409,7 +441,18 @@ void drawGrid(double grid_size, double square_size) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		int mods) {
 	cout << "Key: " << key << endl;
-	if (key == 87 && action) {
+
+	if(mode == HEIGHTMAP_MODE && key == 257){
+		cout<<"Entering render mode"<<endl;
+		mode = RENDER_MODE;
+		generateBuildings();
+		if(joystick){
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		cam_mode = 1;
+		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+	}
+	else if (key == 87 && action) {
 		p_pos += 0.05f * p_front * 1;
 	} else if (key == 65 && action) {
 		vec3 p_right = cross(p_up, p_front);
@@ -424,7 +467,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if (mode == 5 && action && button == GLFW_MOUSE_BUTTON_1) {
+	cout<<"MODE "<< mode<<endl;
+	if (mode == HEIGHTMAP_MODE && action && button == GLFW_MOUSE_BUTTON_1) {
+		cout<<"heightmap bup"<<endl;
 		if (building.heightmap_points.size() < 2) {
 			building.heightmap_points.push_back(m_pos);
 			return;
@@ -538,7 +583,6 @@ void joystickEventsPoll() {
 	 * 6/7- D-pad
 	 * */
 	if (axes_count > 0) {
-
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
 		vec2 c_RSpos = vec2((float) ((int) (axes[4] * 100)) / 100.0f,

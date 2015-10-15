@@ -64,7 +64,7 @@ Method declarations
 void setupCamera(void);
 void initLighting(void);
 void init(void);
-
+void generateBuildings(void);
 /*Rendering delcarations*/
 void drawGrid(double,double);
 int generateBuildingFromString(std::string);
