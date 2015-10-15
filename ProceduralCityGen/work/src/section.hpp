@@ -55,7 +55,7 @@ public:
 	lot testSection(); // for testing
 	void renderTest(); // for testing
 
-	inline std::vector<lot>& getLots() const {
+	inline const std::vector<lot>& getLots() const {
 		return lots;
 	}
 };

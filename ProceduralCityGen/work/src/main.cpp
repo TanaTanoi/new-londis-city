@@ -134,6 +134,14 @@ int main(int argc, char **argv) {
 		mode = 2;
 
 	}else if(argv[1] == IMODE){
+
+		if (argc >= 2 && std::string(argv[2]) == "1") {
+			cout << "CAM MODE" << endl;
+			cam_mode = 1;
+			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+		}
+
+
 		mode = 4; // sets integrated mode
 		//Creates road network
 		g_network = new RoadNetwork();
@@ -141,10 +149,10 @@ int main(int argc, char **argv) {
 
 		// Finds lot outlines
 		vector<util::section> lotOutlines;
-		for(vector<cycle::roadNode> cycle: g_network->getCycles()){
+		for(cycle::primitive prim: g_network->getCycles()){
 			vector<vec2> points;
-			for(vec2 v : cycle){
-				points.push_back(v);
+			for(cycle::roadNode rn : prim.vertices){
+				points.push_back(rn.location);
 			}
 			lotOutlines.push_back(Generator::pointsToSections(points));
 		}
@@ -157,8 +165,8 @@ int main(int argc, char **argv) {
 		init(); // sets up building generator
 		vector<lot> allLots = g_sections->getLots();
 		for(lot l: allLots){
-			building.generateBuildingsFromSections("Boo", l.sections);
-			g_sections->
+			l.buildings.high = building.generateBuildingsFromSections("boo", l.sections);
+			g_sections->addBuildingToLot(l);
 		}
 
 	}
@@ -225,15 +233,14 @@ int main(int argc, char **argv) {
 			g_vehicleCtrl->tick();
 			// g_vehicleCtrl->testRender();
 		} else if (mode == 4) {
-			//Spline map mode
-			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-
-			//			glPushMatrix();
-			//			glScalef(zoom, zoom, 0);
-			//			glTranslatef(p_pos.x, p_pos.y, 0);
-			//			g_network->renderRoads();
-			//			glPopMatrix();
-
+			setupCamera();
+			initLighting();
+			glTranslatef(0, -2, 0);
+			drawGrid(40, 1);
+			for(lot l:g_sections->getLots()){
+				glCallList(l.buildings.high);
+			}
+			drawSkycube(100.0f);	//the further away it is the better it looks
 		} else if (mode == 5) {
 			//Spline map mode
 			glMatrixMode(GL_PROJECTION);

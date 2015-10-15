@@ -255,7 +255,7 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	cout<< "First line added " << endl;
 	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
 
-	if(level < 4){
+	if(level < 3){
 		cout<< "First div on level " << level << endl;
 		recDivideGrid(left, level+1,!halfLength);
 		cout<< "Second div on level " << level << endl;
