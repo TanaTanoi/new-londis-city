@@ -1,4 +1,3 @@
-
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -112,6 +111,7 @@ int main(int argc, char **argv) {
 	} else if (argv[1] == CMODE) {
 		cout << "Car mode" << endl;
 
+		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
 		// Load the vehicle files and textures
 		g_vehicleCtrl = new VehicleController(
 				"../work/res/assets/vehicle_config.txt",
@@ -121,11 +121,14 @@ int main(int argc, char **argv) {
 
 			g_network = new RoadNetwork();
 			g_network->testNetwork();
+
 			// Parse the road network
 			g_vehicleCtrl->parseRoadNetwork(g_network);
-		}
 
+			init();
+		}
 		mode = 2;
+
 	} else {
 		init();
 		g_sections = new SectionDivider();
@@ -180,10 +183,15 @@ int main(int argc, char **argv) {
 				glPopMatrix();
 			}
 		} else if (mode == 2) {
-
+			setupCamera();
+			initLighting();
+			glTranslatef(0, -2, 0);
+			drawGrid(40, 1);
+			drawSkycube(100.0f);
 			// Render the vehicles
 			g_vehicleCtrl->tick();
-		}else if (mode == 4) {
+			// g_vehicleCtrl->testRender();
+		} else if (mode == 4) {
 			//Spline map mode
 			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -206,22 +214,25 @@ int main(int argc, char **argv) {
 			glPointSize(10.0f);
 			glColor3f(1, 0, 0);
 			glBegin(GL_LINE_STRIP);
-			for (int i = 2; i < building.heightmap_points.size()-2;i++) {
-				for(float time = 0.0f;time<=1.0f;time+=0.1f){
-					vec2 splinePoint = Spline::calculatePoint(building.heightmap_points[i-2],building.heightmap_points[i-1],
-															 building.heightmap_points[i],building.heightmap_points[i],time);
-					glVertex2f(splinePoint.x, g_winHeight-splinePoint.y);
+			for (int i = 2; i < building.heightmap_points.size() - 2; i++) {
+				for (float time = 0.0f; time <= 1.0f; time += 0.1f) {
+					vec2 splinePoint = Spline::calculatePoint(
+							building.heightmap_points[i - 2],
+							building.heightmap_points[i - 1],
+							building.heightmap_points[i],
+							building.heightmap_points[i], time);
+					glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
 				}
 //				glVertex2f(building.heightmap_points[i-1].x, g_winHeight-building.heightmap_points[i-1].y);
 //				glVertex2f(building.heightmap_points[i].x, g_winHeight-building.heightmap_points[i].y);
 			}
 			glEnd();
 		}
-			/* Swap front and back buffers */
-			glfwSwapBuffers(window);
-			/* Poll for and process events */
-			glfwPollEvents();
-			joystickEventsPoll();
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+		/* Poll for and process events */
+		glfwPollEvents();
+		joystickEventsPoll();
 
 	}
 	// Delete pointers
@@ -247,10 +258,10 @@ void init() {
 	initSkybox("../work/res/textures/cubeMap.jpg");
 	skybox_shader = makeShaderProgram("../work/res/shaders/skybox_shader.vert",
 			"../work/res/shaders/skybox_shader.frag");
-	building.heightmap_points.push_back(vec2(0,g_winHeight/2));
-	building.heightmap_points.push_back(vec2(0,g_winHeight/2));
-	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
-	building.heightmap_points.push_back(vec2(g_winWidth,g_winHeight/2));
+	building.heightmap_points.push_back(vec2(0, g_winHeight / 2));
+	building.heightmap_points.push_back(vec2(0, g_winHeight / 2));
+	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
+	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
 }
 float triggerDiff = 0.0f;
 void initLighting() {
@@ -263,17 +274,16 @@ void initLighting() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glEnable(GL_LIGHT0);
 
-
-
-	float light_ambient[] = { triggerDiff/2.0f, triggerDiff/2.0f, triggerDiff/2.0f, 1.0f };
+	float light_ambient[] = { triggerDiff / 2.0f, triggerDiff / 2.0f,
+			triggerDiff / 2.0f, 1.0f };
 	float light_diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	float light_position[] = { p_pos.x, p_pos.y+2, p_pos.z, 1.0f };
+	float light_position[] = { p_pos.x, p_pos.y + 2, p_pos.z, 1.0f };
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
 
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, (2.1f)-triggerDiff);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, (2.1f) - triggerDiff);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 200);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
 
@@ -371,18 +381,20 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if (mode == 5&&action&&button == GLFW_MOUSE_BUTTON_1) {
-		if(building.heightmap_points.size()<2){
+	if (mode == 5 && action && button == GLFW_MOUSE_BUTTON_1) {
+		if (building.heightmap_points.size() < 2) {
 			building.heightmap_points.push_back(m_pos);
 			return;
 		}
 		float x = building.heightmap_points[1].x;//set first point for comparison ([0] is 0,0)
 		int i = 2;
-		while(x<m_pos.x&&i<=building.heightmap_points.size()){
+		while (x < m_pos.x && i <= building.heightmap_points.size()) {
 			x = building.heightmap_points[i].x;
 			++i;
-		}i--;
-		building.heightmap_points.insert(building.heightmap_points.begin()+i,m_pos);
+		}
+		i--;
+		building.heightmap_points.insert(building.heightmap_points.begin() + i,
+				m_pos);
 		return;
 	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
@@ -473,7 +485,8 @@ void joystickEventsPoll() {
 	int axes_count;
 	int button_count;
 	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
-	const unsigned char* buttons = glfwGetJoystickButtons	(GLFW_JOYSTICK_1,&button_count);
+	const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
+			&button_count);
 	//0,1-Left Stick 2 is trigger (postive left, negative, right) 3,4 is Right Stick y,x
 	/* 0/1- Left Stick
 	 * 2  - Left Trigger
@@ -489,7 +502,7 @@ void joystickEventsPoll() {
 				(float) ((int) (axes[3] * 100)) / 100.0f);
 
 		float trigger = axes[2];
-		triggerDiff = axes[5]+1;
+		triggerDiff = axes[5] + 1;
 		float threshold = 0.2f;	//stops drifting when the user isn't touching the controller
 		if (abs(c_RSpos.y) >= threshold) {
 			yaw += (c_RSpos.y - 0.0f) * 1.2f;
@@ -516,10 +529,10 @@ void joystickEventsPoll() {
 			c_LSpos.x = 0;
 		}
 
-		p_pos -= 0.05f * p_front * c_LSpos.y * (2+trigger);
+		p_pos -= 0.05f * p_front * c_LSpos.y * (2 + trigger);
 
 		vec3 p_right = cross(p_up, p_front);
-		p_pos -= 0.05f * p_right * c_LSpos.x * (2+trigger);
+		p_pos -= 0.05f * p_right * c_LSpos.x * (2 + trigger);
 
 	}
 	/* 0 - A
@@ -534,15 +547,15 @@ void joystickEventsPoll() {
 	 * 9 - Left Stick Press
 	 * 10 - Right Stick Press
 	 */
-	if(button_count>0){
-		if(buttons[8]==GLFW_PRESS&&!c_xbox_button_down){
+	if (button_count > 0) {
+		if (buttons[8] == GLFW_PRESS && !c_xbox_button_down) {
 
 			c_xbox_button_down = true;
 			//If Xbox button pressed
 			testList = building.generateBuildingsFromSections("XBOX Button",
-							g_sections->testSection().sections);
-			cout<<"Regenerating city"<<endl;
-		}else if(buttons[8] == GLFW_RELEASE){
+					g_sections->testSection().sections);
+			cout << "Regenerating city" << endl;
+		} else if (buttons[8] == GLFW_RELEASE) {
 			c_xbox_button_down = false;
 		}
 	}
@@ -596,7 +609,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-			GL_TEXTURE_CUBE_MAP);
+	GL_TEXTURE_CUBE_MAP);
 
 }
 
