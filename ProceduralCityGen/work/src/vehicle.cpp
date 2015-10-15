@@ -22,7 +22,7 @@ using namespace comp308;
 
 Vehicle::Vehicle(string filename) {
 	init(filename);
-	m_pos = vec3();
+	// m_pos = vec3();
 	m_rot = vec3();
 	m_scale = vec3(0.1, 0.1, 0.1);
 }
@@ -30,17 +30,18 @@ Vehicle::Vehicle(string filename) {
 // Moves the starting position of the vehicle
 Vehicle::Vehicle(string filename, vec3 start_pos, vec3 start_rot, vec3 scale) {
 	init(filename);
-	m_pos = start_pos;
+	// m_pos = start_pos;
 	m_rot = start_rot;
 	m_scale = scale;
 }
 
 Vehicle::~Vehicle() {
-	if (m_spline)
-		delete m_spline;
+//	if (m_spline)
+//		delete m_spline;
 }
 
 void Vehicle::init(string filename) {
+	m_goal.location = vec2(-1);
 	m_filename = filename;
 	readOBJ(filename);
 	if (m_triangles.size() > 0) {
@@ -243,13 +244,33 @@ void Vehicle::createDisplayListPoly() {
 }
 
 void Vehicle::renderVehicle() {
-	glPushMatrix();
-	glScalef(m_scale.x, m_scale.y, m_scale.z);
-	glShadeModel(GL_SMOOTH);
+	// glPushMatrix();
+	// glShadeModel(GL_SMOOTH);
 	glCallList(m_displayListPoly);
-	glPopMatrix();
+	// glPopMatrix();
 }
 
 bool Vehicle::hasReachedGoal(vec3 *goal) {
-	return goal == &m_goal;
+	return false;
 }
+
+cycle::roadNode Vehicle::nextTarget() {
+	return m_path[m_pathIndex++];
+}
+
+cycle::roadNode Vehicle::getCurrentTarget() {
+	return m_path[m_pathIndex];
+}
+
+cycle::roadNode Vehicle::getPreviousTarget() {
+	if (m_pathIndex > 0)
+		return m_path[m_pathIndex - 1];
+
+	return m_path[m_pathIndex];
+}
+void Vehicle::setPath(std::vector<cycle::roadNode> path) {
+	cout << "Path size " << path.size() << endl;
+	m_path = path;
+	m_pathIndex = 0;
+}
+

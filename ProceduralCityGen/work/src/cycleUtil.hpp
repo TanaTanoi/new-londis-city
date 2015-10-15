@@ -20,8 +20,14 @@ namespace cycle{
 
 struct roadNode{
 	vec2 location;
-	int ID;
+	int ID = -1;
 	bool visited = false;
+
+	// A Star
+	bool isVisited_aStar = false;
+	bool hasFrom = false;
+	roadNode *from;
+	float cost;
 };
 
 struct road{

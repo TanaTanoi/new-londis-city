@@ -185,11 +185,20 @@ int main(int argc, char **argv) {
 		} else if (mode == 2) {
 			setupCamera();
 			initLighting();
-			glTranslatef(0, -2, 0);
+			glTranslatef(-20, -2, 20);
 			drawGrid(40, 1);
-			drawSkycube(100.0f);
 			// Render the vehicles
+			vector<cycle::road> roads = g_network->getAllRoads();
+			for (int i = 0; i < (int) roads.size(); ++i) {
+				building.generateRoad(
+						roads[i].start.location
+								* Generator::SECTION_TO_POINT_SCALE(),
+						roads[i].end.location
+								* Generator::SECTION_TO_POINT_SCALE(), 0.5f);
+			}
+
 			g_vehicleCtrl->tick();
+
 			// g_vehicleCtrl->testRender();
 		} else if (mode == 4) {
 			//Spline map mode
