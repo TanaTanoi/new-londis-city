@@ -255,7 +255,7 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	cout<< "First line added " << endl;
 	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
 
-	if(level < 2){
+	if(level < 4){
 		cout<< "First div on level " << level << endl;
 		recDivideGrid(left, level+1,!halfLength);
 		cout<< "Second div on level " << level << endl;
@@ -291,6 +291,7 @@ void RoadNetwork::createRoads(section world){
 	calulateBoundary();
 	createNewYorkGrid(outline);
 
+	//testIsolatedVertex();
 	//testFilamentVertex();
 	//testCycle();
 
@@ -372,8 +373,26 @@ void RoadNetwork::renderRoads(){
 		glColor3f(red,gr,br);
 		glVertex2f(r.start.location.x, r.start.location.y);
 		glVertex2f(r.end.location.x, r.end.location.y);
+
 	}
 	glEnd();
+	glColor3f(0.0,1.0,0.0);
+	for(primitive p :cycles){
+		float red = (float)rand()/(RAND_MAX);
+		srand(rand());
+		float gr = (float)rand()/RAND_MAX;
+		srand(rand());
+		float br = (float)rand()/RAND_MAX;
+		glColor3f(red,gr,br);
+		glBegin(GL_POLYGON);
+
+		for(roadNode v : p.vertices){
+			glVertex2f(v.location.x, v.location.y);
+		}
+		glEnd();
+	}
+
+
 
 	glColor3f(0.0,0.0,1.0); // blue intersections
 	glPointSize(10);
@@ -400,6 +419,8 @@ void RoadNetwork::findMinimumCycles(){
 			cycles.push_back(p);
 		}
 	}
+	cout<<"Primitives " << prims.size()<<endl;
+	cout<<"Cycles " << cycles.size()<<endl;
 }
 
 
@@ -585,7 +606,7 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 	roadNode vcurr = v1;
 
 	cout << "Start: " << start.ID;
-	cout << "v1: " << v1.ID;
+	cout << " v1: " << v1.ID;
 	cout<<endl;
 
 
@@ -614,6 +635,7 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 		cout << "Minimal cycle found" << endl;
 		// Minimal cycle found
 		primitive p = {sequence, 2};
+		primitives->push_back(p);
 
 		// for each edge in the cycle
 		int n = (int)sequence.size();
@@ -786,7 +808,7 @@ void RoadNetwork::testCycle(){
 
 	addRoad(a,b);
 	addRoad(b,c);
-//	addRoad(a,c);
+	//	addRoad(a,c);
 	addRoad(c,d);
 	addRoad(d,a);
 

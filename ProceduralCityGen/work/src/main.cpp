@@ -22,7 +22,7 @@ RoadNetwork *g_network = nullptr;
 // Controls the vehicles in the city
 VehicleController *g_vehicleCtrl = nullptr;
 
-//0, bmode, 1, smode, 2 cmode, 3 rmode
+//0, bmode, 1, smode, 2 cmode, 3 rmode, 4 imode
 int mode = 0;
 //Main program
 //
@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
 	string SMODE = "S";
 	string RMODE = "R";
 	string CMODE = "C";
+	string IMODE = "I";
 
 	if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
@@ -126,7 +127,13 @@ int main(int argc, char **argv) {
 		}
 
 		mode = 2;
-	} else {
+	}else if(argv[1] == IMODE){
+		g_network = new RoadNetwork();
+		g_network->testNetwork();
+		g_sections = new SectionDivider();
+		mode = 4;
+	}
+	else {
 		init();
 		g_sections = new SectionDivider();
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);

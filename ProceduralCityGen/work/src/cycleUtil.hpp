@@ -77,6 +77,17 @@ inline vector<roadNode> sortPoints(vector<roadNode> points){
 }
 inline int findRoadIndex(vector<road> roads, int sID, int eID){
 
+	for(int i = 0;i<roads.size();i++){
+		if(eID==roads[i].start.ID&&sID==roads[i].end.ID){
+			return i;
+		}
+		if(sID==roads[i].start.ID&&eID==roads[i].end.ID){
+			return i;
+		}
+
+	}
+	return 0;
+/*
 //	cout << "finding a road index" << endl;
 	int low = 0; int high = (int)roads.size()-1;
 	while(low <= high){
@@ -105,7 +116,7 @@ inline int findRoadIndex(vector<road> roads, int sID, int eID){
 		return low;
 	}
 
-	return findRoadIndex(roads,eID,sID);
+	return findRoadIndex(roads,eID,sID);*/
 }
 
 /*
