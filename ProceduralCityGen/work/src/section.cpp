@@ -33,6 +33,15 @@ line SectionDivider::findLongestEdge(section s) {
 	return longLine;
 }
 
+void SectionDivider::divideAllLots(vector<section> lotOutlines){
+	for(section s: lotOutlines){
+		s.area = getSectionSize(s);
+		lot l = {s,vector<section>(),lotID++};
+		lots.push_back(l);
+		divideLot(l);
+	}
+}
+
 /**
  * Divides the sections
  */
@@ -41,6 +50,10 @@ void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
 	lots[l.ID] = recDivideSection(l,l.boundingBox);
 	lots[l.ID] = removeUnusableSections(lots[l.ID]);
+}
+
+void SectionDivider::addBuildingToLot(lot l){
+	lots[l.ID] = l;
 }
 
 

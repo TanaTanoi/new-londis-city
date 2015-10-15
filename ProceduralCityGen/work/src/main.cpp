@@ -9,6 +9,8 @@
 #include "building.hpp"
 #include "generator.h"
 #include "section.hpp"
+#include "utility.hpp"
+#include "cycleUtil.hpp"
 #include "shaderLoader.hpp"
 #include "imageLoader.hpp"
 using namespace std;
@@ -120,6 +122,7 @@ int main(int argc, char **argv) {
 
 		if (argc > 2 && std::string(argv[2]) == "2") {
 
+			// Creates road network
 			g_network = new RoadNetwork();
 			g_network->testNetwork();
 
@@ -131,10 +134,33 @@ int main(int argc, char **argv) {
 		mode = 2;
 
 	}else if(argv[1] == IMODE){
+		mode = 4; // sets integrated mode
+		//Creates road network
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
+
+		// Finds lot outlines
+		vector<util::section> lotOutlines;
+		for(vector<cycle::roadNode> cycle: g_network->getCycles()){
+			vector<vec2> points;
+			for(vec2 v : cycle){
+				points.push_back(v);
+			}
+			lotOutlines.push_back(Generator::pointsToSections(points));
+		}
+
+		// Divides sections
 		g_sections = new SectionDivider();
-		mode = 4;
+		g_sections->divideAllLots(lotOutlines);
+
+		// Generate building display list
+		init(); // sets up building generator
+		vector<lot> allLots = g_sections->getLots();
+		for(lot l: allLots){
+			building.generateBuildingsFromSections("Boo", l.sections);
+			g_sections->
+		}
+
 	}
 	else {
 		init();
@@ -202,11 +228,11 @@ int main(int argc, char **argv) {
 			//Spline map mode
 			glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-//			glPushMatrix();
-//			glScalef(zoom, zoom, 0);
-//			glTranslatef(p_pos.x, p_pos.y, 0);
-//			g_network->renderRoads();
-//			glPopMatrix();
+			//			glPushMatrix();
+			//			glScalef(zoom, zoom, 0);
+			//			glTranslatef(p_pos.x, p_pos.y, 0);
+			//			g_network->renderRoads();
+			//			glPopMatrix();
 
 		} else if (mode == 5) {
 			//Spline map mode
@@ -230,8 +256,8 @@ int main(int argc, char **argv) {
 							building.heightmap_points[i], time);
 					glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
 				}
-//				glVertex2f(building.heightmap_points[i-1].x, g_winHeight-building.heightmap_points[i-1].y);
-//				glVertex2f(building.heightmap_points[i].x, g_winHeight-building.heightmap_points[i].y);
+				//				glVertex2f(building.heightmap_points[i-1].x, g_winHeight-building.heightmap_points[i-1].y);
+				//				glVertex2f(building.heightmap_points[i].x, g_winHeight-building.heightmap_points[i].y);
 			}
 			glEnd();
 		}
@@ -616,7 +642,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-	GL_TEXTURE_CUBE_MAP);
+			GL_TEXTURE_CUBE_MAP);
 
 }
 
