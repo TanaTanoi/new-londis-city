@@ -342,19 +342,12 @@ util::section Generator::shrinkSection(util::section sec){
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vector<vec2> heightmap) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
 	vector<buildingParams> toReturn;
-	float maxDist = 0.0f;
-	for(int i=0;i<sections.size();i++){
-		float compare_x = sectionToPoints(sections[i])[0].x;
-		if(maxDist<compare_x){
-			maxDist = compare_x;
-		}
-	}
 	for (int i = 0; i < sections.size(); i++) {
 		buildingParams p;
 		p.boundingArea = sectionToPoints(sections[i]);
 		p.seed = rand();
 		p.b_type = (building_type)(p.seed % 2);//TODO make this have an effect, possibly
-		float ymap = Spline::calculateYValue(heightmap,abs(( p.boundingArea[0].x/maxDist)*640));
+		float ymap = Spline::calculateYValue(heightmap,abs(p.boundingArea[0].x));
 		p.height = (int)(((480-ymap)/480)*5+2);
 		srand(p.seed);
 		toReturn.push_back(p);
