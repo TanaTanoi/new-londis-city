@@ -301,7 +301,7 @@ vec3 VehicleController::turnSimp(vec3 *pos, vec3 *prev, roadNode *v1,
 	// Check if the length is increasing
 	if (distance(*prev, targ2) < distance(*pos, targ2)) {
 		cerr << "      Holy shit holy shit" << endl;
-		// return vec3(0, acos(angle), 0);
+		// return vec3(0, 2 * comp308::pi() - abs(angle), 0);
 	}
 
 	if (angle < 1) {
@@ -396,12 +396,12 @@ void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 
 	// Render the vehicle
 	glPushMatrix();
-	// glRotatef(-rotate.y, 0, 1, 0);
+	// glRotatef(rotate.y, 0, 1, 0);
 	glTranslatef(translate.x, translate.y, translate.z);
 	cout << "Rotated at " << rotate.y << endl;
 
 	glScalef(scale.x, scale.y, scale.z);
-	// vehicle->renderVehicle();
+	vehicle->renderVehicle();
 	glPopMatrix();
 
 	// Render the vehicles' position as a point
@@ -419,7 +419,7 @@ void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 	glPushMatrix();
 	vec2 goal = vehicle->getGoal().location;
 	glTranslatef(0, -0.5, 0);
-	glPointSize(50);
+	glPointSize(15);
 	glColor3f(1.0, 0.0, 0.0);
 	glBegin(GL_POINTS);
 	glVertex3f(goal.x * Generator::SECTION_TO_POINT_SCALE(), 0,

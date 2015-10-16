@@ -1,1 +1,2 @@
-../work/res/assets/bunny.obj
+../work/res/assets/teapot.obj
+../work/res/assets/sphere.obj
