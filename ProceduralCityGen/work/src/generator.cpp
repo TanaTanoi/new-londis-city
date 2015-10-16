@@ -13,8 +13,8 @@ using namespace comp308;
 using namespace util;
 
 static const float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
-
 float Generator::SECTION_TO_POINT_SCALE(){return SECTION_TO_POINTS_SCALE;}
+//float Generator::NETWORK_TO_SECTION_SCALE(){return NETWORK_TO_SECTION_SCALE;}
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
@@ -315,11 +315,28 @@ vector<vec2> Generator::sectionToPoints(util::section sec){
 	vector<vec2> toReturn = vector<vec2>();
 	int n = sec.lines.size();
 	for (int i = 0; i < n;i++) {
+		//The mod 2 is to offset the front door by a certain amount.
 		toReturn.push_back(sec.lines[(i+2)%n].start*SECTION_TO_POINTS_SCALE);
 	}
 	return toReturn;
 }
 
+util::section Generator::shrinkSection(util::section sec){
+	vector<vec2> points = vector<vec2>();
+	int n = sec.lines.size();
+	for (int i = 0; i < n;i++) {
+		points.push_back(sec.lines[i].start);
+	}
+	vector<line> lines = vector<line>();
+	points = shrinkPoints(points);
+	n = points.size();
+	for(int i =0; i <n;i++){
+		line l = {points[i],points[(i+1)%n],i};
+		lines.push_back(l);
+	}
+
+	return {lines,0,0};
+}
 
 /*Converts a vector of sections into a vector of building parameters*/
 vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vector<vec2> heightmap) {
@@ -331,9 +348,7 @@ vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vect
 		p.seed = rand();
 		p.b_type = (building_type)(p.seed % 2);//TODO make this have an effect, possibly
 		float ymap = Spline::calculateYValue(heightmap,abs(p.boundingArea[0].x));
-		cout<< ymap << endl;
-		p.height = (int)(((480-ymap)/480)*20+2);
-		cout<<" X " << p.boundingArea[0].x << " Height " << p.height<<endl;
+		p.height = (int)(((480-ymap)/480)*5+2);
 		srand(p.seed);
 		toReturn.push_back(p);
 	}
@@ -354,4 +369,25 @@ vector<vec2> Generator::getBoundingBox(vector<vec2> floor) {
 	toReturn.push_back(max);
 	return toReturn;
 
+}
+float NETWORK_TO_SECTION_SCALE = 2.0f;
+section Generator::pointsToSections(vector<vec2> points){
+	vector<line> lines = vector<line>();
+	int n = points.size();
+
+
+//	vec2 mid = Generator::centerPoint(points);
+//	vector<vec2> smallPoints;
+//	float dist = 0.01f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.2f)+0.1f;
+//	for (vec2 v2 : points) {
+//		vec2 diff = (mid - v2)*dist;
+//		smallPoints.push_back(v2 + diff);
+//	}
+//	points = smallPoints;
+	points = shrinkPoints(points);
+	for(int i =0; i <n;i++){
+		line l = {points[i]*NETWORK_TO_SECTION_SCALE,points[(i+1)%n]*NETWORK_TO_SECTION_SCALE,i};
+		lines.push_back(l);
+	}
+	return {lines,0,0};
 }

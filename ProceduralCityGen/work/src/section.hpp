@@ -16,10 +16,11 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 1500; // Does not work at 11000 FIXME
-	float minArea = 500;
+	float goalArea = 800; // Does not work at 11000 FIXME
+	float minArea = 200;
 	std::vector<lot> lots;
 	int sectionID = 0;
+	int lotID =0;
 	//for testing
 	std::vector<util::section> sections;
 
@@ -33,6 +34,8 @@ private:
 	float getSectionSize(util::section);
 	lot removeUnusableSections(lot);
 	bool hasStreetAccess(util::section, lot);
+	void divideLot(lot);
+
 
 
 	void renderPoly();
@@ -47,7 +50,12 @@ public:
 
 	void cleanUp();
 	void renderSections();
-	void divideLot(lot);
+	void divideAllLots(std::vector<util::section>);
+	void addBuildingToLot(lot);
 	lot testSection(); // for testing
 	void renderTest(); // for testing
+
+	inline const std::vector<lot>& getLots() const {
+		return lots;
+	}
 };

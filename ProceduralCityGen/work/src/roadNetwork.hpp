@@ -84,6 +84,10 @@ public:
 	inline const std::vector<cycle::road>& getAllRoads() const {
 		return allRoads;
 	}
+
+	inline const std::vector<cycle::primitive>& getCycles() const {
+		return cycles;
+	}
 };
 
 #endif /* SRC_ROADNETWORK_HPP_ */

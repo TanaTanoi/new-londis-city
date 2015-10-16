@@ -33,6 +33,15 @@ line SectionDivider::findLongestEdge(section s) {
 	return longLine;
 }
 
+void SectionDivider::divideAllLots(vector<section> lotOutlines){
+	for(section s: lotOutlines){
+		s.area = getSectionSize(s);
+		lot l = {s,vector<section>(),lotID++};
+		lots.push_back(l);
+		divideLot(l);
+	}
+}
+
 /**
  * Divides the sections
  */
@@ -41,6 +50,10 @@ void SectionDivider::divideLot(lot l) {
 	cout << "Number of sections " << l.sections.size() << endl;
 	lots[l.ID] = recDivideSection(l,l.boundingBox);
 	lots[l.ID] = removeUnusableSections(lots[l.ID]);
+}
+
+void SectionDivider::addBuildingToLot(lot l){
+	lots[l.ID] = l;
 }
 
 
@@ -81,9 +94,12 @@ vector<section> SectionDivider::splitSection(section s) {
 	// to extend the bisector from. This will be within the middle sixth of the section
 
 	float random = ((float)rand() / (RAND_MAX));
+	float devScale = (- 1 + random*2)/6.0f;
 
 	vec2 centrePoint = centrePointOfLine(l);
-
+	vec2 dir = l.end-l.start;
+	dir = normalize(dir) * devScale;
+	centrePoint = centrePoint + dir;
 
 	// Now finds the first intersection point with another line within the section
 	vector<line> intersectors = linesIntersectingWithSection(s, perpBi, centrePoint, l);
@@ -217,18 +233,19 @@ lot SectionDivider::testSection() {
 //		line b = {vec2(400,100),vec2(250,300),1};
 //		line c = {vec2(250,300),vec2(100,100),2};
 //
-//	vector<line > lines = vector<line >();
-//	lines.push_back(a);
-//	lines.push_back(b);
-//	lines.push_back(c);
-//	lines.push_back(d);
+	vector<line > lines = vector<line >();
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(d);
 
 
-	section s = Generator::createRandomSection();
+	section s;// = Generator::createRandomSection();
+	s.lines = lines;
 	s.area = getSectionSize(s);
 
 	lot l;
-	l.boundingBox = Generator::createRandomSection();
+	l.boundingBox = s;//Generator::createRandomSection();
 	l.ID = 0;
 	l.sections = vector<section>();
 

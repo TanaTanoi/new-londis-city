@@ -66,6 +66,7 @@ public:
 	int generateBuildingFromString(std::string);								//Test method
 
 	int generateBuildingsFromSections(std::string, std::vector<util::section>);	//Test method
+	int generateBuildingsFromSections(std::vector<util::section>);
 
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);
@@ -73,9 +74,9 @@ public:
 	void generateDoor(comp308::vec2 a, comp308::vec2 b,float, comp308::vec3 normal);
 	void generateFlatPointRoof(std::vector<comp308::vec2>,float);
 	Building(void);
-
+	void drawGround(float);
 	void generateBuilding(buildingParams*, buildingLOD*);
-
+	void generateBlock(util::section,float);
 	void generateResdientialBuilding(std::vector<comp308::vec2>,int);
 	void generateModernBuilding(std::vector<comp308::vec2> points,comp308::vec2,float);
 

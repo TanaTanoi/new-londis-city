@@ -34,6 +34,7 @@ GLuint tex_window[2][TOTAL_WINDOW_TEXTURES];
 GLuint tex_door[2][2];
 GLuint grass;
 GLuint road;
+GLuint conc;
 void Building::initShader() {
 	//Gets stuck here, i.e. cout won't print
 	g_shader = makeShaderProgram("../work/res/shaders/shaderDemo.vert", "../work/res/shaders/shaderDemo.frag");
@@ -71,6 +72,7 @@ void Building::initTexture() {
 	glGenTextures(1, tex_door[0]);
 	glGenTextures(1, &grass);
 	glGenTextures(1, &road);
+	glGenTextures(1, &conc);
 
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
@@ -91,7 +93,26 @@ void Building::initTexture() {
 	loadTexture(grass, "../work/res/textures/grass001.jpg");
 
 	loadTexture(road, "../work/res/textures/road01.jpg");
+	loadTexture(conc, "../work/res/textures/concrete.jpg");
 }
+/*Draws a thing of a given size*/
+void Building::drawGround(float size){
+	float floor = -0.01f;
+	glBindTexture(GL_TEXTURE_2D,conc);
+	glBegin(GL_QUADS);
+	//Floor
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(0,0);
+	glVertex3f(-size,floor,-size);
+	glTexCoord2f(0,size);
+	glVertex3f(-size,floor,size);
+	glTexCoord2f(size,size);
+	glVertex3f(size,floor,size);
+	glTexCoord2f(size,0);
+	glVertex3f(size,floor,-size);
+	glEnd();
+}
+
 
 float Building::extendBuilding(std::vector<comp308::vec2> floor, float elevation) {
 	int n = floor.size();
@@ -418,7 +439,6 @@ int Building::basicHashcode(string input) {
 	for (int i = 0; i < input.length(); i++) {
 		int c = input[i];
 		current += c;
-
 	}
 	cout << "Hash code for " << input << " is " << current << endl;
 	return current;
@@ -466,6 +486,7 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 		glEndList();
 		return newList;
 	}*/
+
 	vector<buildingLOD> buildings;
 	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
 	srand(randStringInc);								//Reset srand
@@ -486,6 +507,28 @@ int Building::generateBuildingsFromSections(string input, vector<util::section> 
 
 return 0;
 }
+
+//Assume srand has been called
+int Building::generateBuildingsFromSections(vector<util::section> sections) {
+	vector<buildingLOD> buildings;
+	vector<buildingParams> params = Generator::sectionsToParams(sections,heightmap_points);
+	for (int i = 0; i < params.size(); i++) {
+		buildingLOD building;
+		generateBuilding(&params[i], &building);
+		buildings.push_back(building);
+	}
+	int newList = glGenLists(1);
+	glNewList(newList, GL_COMPILE);
+	glUseProgram(g_shader);
+	for (buildingLOD b : buildings) {
+		glCallList(b.low);
+	}
+	glEndList();
+	return newList;
+
+return 0;
+}
+
 
 int Building::generateBuildingFromString(string input) {
 	int toReturn = glGenLists(1);
@@ -573,7 +616,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		if (chance < 95) {
 			//5% single different shape
 			floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
-		}else if (chance < 97) {
+		}else if (chance < 100) {
 			//2% chance to be crazyish
 			floorPlan = Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4);
 			floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4));
@@ -593,7 +636,6 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
-//	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(parameters->height));
 	glEndList();
 
@@ -631,6 +673,68 @@ void Building::generateResdientialBuilding(vector<vec2> points,int height) {
 	}
 
 }
+
+void Building::generateBlock(util::section bounding, float elevation){
+	vector<vec2> floor = Generator::sectionToPoints(bounding);
+	int n = floor.size();
+	vec2 mid = Generator::centerPoint(floor);
+	vector<vec3> bot;
+	vector<vec3> top;
+	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
+	float height = 0.05f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+	height+=elevation;
+	for (vec2 v2 : floor) {
+
+		bot.push_back(vec3(v2.x, elevation, v2.y));
+		top.push_back(vec3(v2.x, height, v2.y));
+	}
+
+
+	for (int i = 0; i < n; i++) {
+		//->
+
+		vec3 topl = top[i];
+		vec3 topr = top[(i + 1) % n];
+		vec3 botr = bot[(i + 1) % n];
+		vec3 botl = bot[i];
+
+
+		vec3 normal = cross((botl - topr), (topl - topr));
+		if (length(normal) > 0) {
+			normal = normalize(normal);
+		}
+		float len = abs(length(botl-botr));	//length of the wall
+
+		len /=tex_wall_width;	//the proportion of the wall
+		//Use texture
+		glBindTexture(GL_TEXTURE_2D,conc);
+		glBegin(GL_QUADS);
+		glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
+		glTexCoord2f(len,0);
+		glVertex3f(topr.x, topr.y, topr.z);
+		glTexCoord2f(len,1);
+		glVertex3f(botr.x, botr.y, botr.z);
+		glTexCoord2f(0,1);
+		glVertex3f(botl.x, botl.y, botl.z);
+		glTexCoord2f(0,0);
+		glVertex3f(topl.x, topl.y, topl.z);
+		glEnd();
+	}
+	glBegin(GL_TRIANGLES);
+	/*Render a roof here, or at least a top*/
+	glColor3f(0,0,0);
+	glNormal3f(0, 1, 0);
+	vec3 mid3d = vec3(mid.x,height,mid.y);
+	for(int i = 0; i < n;i++){
+		vec3 p1 = top[i];
+		vec3 p2 = top[(i+1)%n];
+		glVertex3f(mid3d.x,mid3d.y,mid3d.z);
+		glVertex3f(p2.x,p2.y,p2.z);
+		glVertex3f(p1.x,p1.y,p1.z);
+	}
+	glEnd();
+}
+
 
 void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDist) {
 
@@ -685,7 +789,7 @@ void Building::generatePark(vector<vec2> floor) {
 		vec2 v = floor[i];
 		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
-		glVertex3f(v.x, 0, v.y);
+		glVertex3f(v.x, 0.001f, v.y);
 	}
 
 	glEnd();
@@ -761,13 +865,53 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 	vec2 right = vec2(right3D.x,right3D.z);
 	float leng = abs(length(dir));
 	leng/=tex_wall_width;
+
+	vec2 pointA = a;
+	vec2 pointB = b;
+
+	b-=normalize(dir)*(width);
+	a+=normalize(dir)*(width);
+	vector<vec2> endATri;
+	endATri.push_back(a+(right*width));
+	endATri.push_back(a-(right*width));
+	endATri.push_back(pointA);
+	vector<vec2> boundingBox = Generator::getBoundingBox(endATri);
+	float bb_width = abs(boundingBox[0].x - boundingBox[1].x);
+	float bb_height = abs(boundingBox[0].y - boundingBox[1].y);
+	glBindTexture(GL_TEXTURE_2D, road);
+	glBegin(GL_TRIANGLES);
+	for (int i = 0; i <3;i++){
+		vec2 v = endATri[i];
+		//tex coord is the length
+		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
+		glVertex3f(v.x, 0, v.y);
+	}
+	glEnd();
+	vector<vec2> endBTri;
+	endBTri.push_back(b-(right*width));
+	endBTri.push_back(b+(right*width));
+	endBTri.push_back(pointB);
+	boundingBox = Generator::getBoundingBox(endBTri);
+	bb_width = abs(boundingBox[0].x - boundingBox[1].x);
+	bb_height = abs(boundingBox[0].y - boundingBox[1].y);
+
+	glBegin(GL_TRIANGLES);
+	for (int i = 0; i <3;i++){
+		vec2 v = endBTri[i];
+		//tex coord is the length
+		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
+		glVertex3f(v.x, 0, v.y);
+	}
+
+	glEnd();
+
 	vector<vec2> roadPoints = vector<vec2>();
 	roadPoints.push_back(a+(right*width));
 	roadPoints.push_back(b+(right*width));
 	roadPoints.push_back(b-(right*width));
 	roadPoints.push_back(a-(right*width));
 
-	glBindTexture(GL_TEXTURE_2D, road);
+
 	glBegin(GL_QUADS);
 	glTexCoord2d(0,0);
 	glVertex3f(roadPoints[0].x,0,roadPoints[0].y);
