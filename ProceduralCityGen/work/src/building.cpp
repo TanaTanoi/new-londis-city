@@ -802,13 +802,56 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 	vec2 right = vec2(right3D.x,right3D.z);
 	float leng = abs(length(dir));
 	leng/=tex_wall_width;
+
+
+
+	vec2 pointA = a;
+	vec2 pointB = b;
+
+	b-=normalize(dir)*(width);
+	a+=normalize(dir)*(width);
+	vector<vec2> endATri;
+	endATri.push_back(a+(right*width));
+	endATri.push_back(a-(right*width));
+	endATri.push_back(pointA);
+	vector<vec2> boundingBox = Generator::getBoundingBox(endATri);
+	float bb_width = abs(boundingBox[0].x - boundingBox[1].x);
+	float bb_height = abs(boundingBox[0].y - boundingBox[1].y);
+	glBindTexture(GL_TEXTURE_2D, road);
+	glBegin(GL_TRIANGLES);
+	for (int i = 0; i <3;i++){
+		vec2 v = endATri[i];
+		//tex coord is the length
+		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
+		glVertex3f(v.x, 0, v.y);
+	}
+
+	glEnd();
+	vector<vec2> endBTri;
+	endBTri.push_back(b-(right*width));
+	endBTri.push_back(b+(right*width));
+	endBTri.push_back(pointB);
+	boundingBox = Generator::getBoundingBox(endBTri);
+	bb_width = abs(boundingBox[0].x - boundingBox[1].x);
+	bb_height = abs(boundingBox[0].y - boundingBox[1].y);
+
+	glBegin(GL_TRIANGLES);
+	for (int i = 0; i <3;i++){
+		vec2 v = endBTri[i];
+		//tex coord is the length
+		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
+		glVertex3f(v.x, 0, v.y);
+	}
+
+	glEnd();
+
 	vector<vec2> roadPoints = vector<vec2>();
 	roadPoints.push_back(a+(right*width));
 	roadPoints.push_back(b+(right*width));
 	roadPoints.push_back(b-(right*width));
 	roadPoints.push_back(a-(right*width));
 
-	glBindTexture(GL_TEXTURE_2D, road);
+
 	glBegin(GL_QUADS);
 	glTexCoord2d(0,0);
 	glVertex3f(roadPoints[0].x,0,roadPoints[0].y);

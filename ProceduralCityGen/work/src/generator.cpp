@@ -13,8 +13,8 @@ using namespace comp308;
 using namespace util;
 
 static const float SECTION_TO_POINTS_SCALE = 0.04f;//1/25 default 0.04
-
 float Generator::SECTION_TO_POINT_SCALE(){return SECTION_TO_POINTS_SCALE;}
+//float Generator::NETWORK_TO_SECTION_SCALE(){return NETWORK_TO_SECTION_SCALE;}
 /*Method that looks up the potential replacements/extensions for a given char*/
 string LSystemLookup(char c) {
 	srand(rand());
@@ -355,7 +355,7 @@ vector<vec2> Generator::getBoundingBox(vector<vec2> floor) {
 	return toReturn;
 
 }
-static const float p_scale = 2.0f;
+float NETWORK_TO_SECTION_SCALE = 2.0f;
 section Generator::pointsToSections(vector<vec2> points){
 	vector<line> lines = vector<line>();
 	int n = points.size();
@@ -365,7 +365,7 @@ section Generator::pointsToSections(vector<vec2> points){
 //	}
 	points = shrinkPoints(points);
 	for(int i =0; i <n;i++){
-		line l = {points[i]*p_scale,points[(i+1)%n]*p_scale,i};
+		line l = {points[i]*NETWORK_TO_SECTION_SCALE,points[(i+1)%n]*NETWORK_TO_SECTION_SCALE,i};
 		lines.push_back(l);
 	}
 	return {lines,0,0};

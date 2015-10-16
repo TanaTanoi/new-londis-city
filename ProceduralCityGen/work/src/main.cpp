@@ -98,19 +98,11 @@ int main(int argc, char **argv) {
 		init();
 		user_seed = std::string(argv[1]);
 		cout<<"Using seed "<<user_seed<<endl;
-
-
-
-
-
-
-
 	}
 	else if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
 		init();
 		if (argc >= 2 && std::string(argv[2]) == "1") {
-			cout << "CAM MODE" << endl;
 			cam_mode = 1;
 			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 		}
@@ -221,6 +213,11 @@ int main(int argc, char **argv) {
 			for(lot l:g_sections->getLots()){
 				glCallList(l.buildings.high);
 			}
+			float scale = 2.0f*Generator::SECTION_TO_POINT_SCALE();
+			for(cycle::road r:g_network->getAllRoads()){
+				building.generateRoad(r.start.location*scale,r.end.location*scale,0.2f);
+			}
+
 			building.drawGround(100.0f);
 			drawSkycube(100.0f);	//the further away it is the better it looks
 
@@ -315,7 +312,6 @@ void generateBuildings(){
 	}
 
 }
-
 
 /*Any code that needs to get run just before the main loop, put it here*/
 void init() {

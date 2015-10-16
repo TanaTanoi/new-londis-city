@@ -35,6 +35,7 @@ public:
 	static std::vector<comp308::vec2> getBoundingBox(std::vector<comp308::vec2> floor);
 	/*Conversion methods*/
 	static float SECTION_TO_POINT_SCALE(void);
+//	static float NETWORK_TO_SECTION_SCALE(void);
 	static std::vector<buildingParams> sectionsToParams(std::vector<util::section> sections,std::vector<comp308::vec2>);
 	static std::vector<comp308::vec2> sectionToPoints(util::section);
 	static util::section pointsToSections(std::vector<comp308::vec2>);
