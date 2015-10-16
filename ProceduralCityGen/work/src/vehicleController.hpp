@@ -8,8 +8,8 @@
 #ifndef SRC_VEHICLECONTROLLER_HPP_
 #define SRC_VEHICLECONTROLLER_HPP_
 
-
-
+#include <map>
+#include <vector>
 
 /**
  * Used to show if there are cars at the surrounding roads at an intersection.
@@ -18,7 +18,16 @@ struct intersection {
 	bool foward, port, starboard;
 };
 
+/**
+ * Used when a vehicle is turning.
+ */
+struct turn {
+	comp308::vec3 trans, rot;
+};
+
 class RoadNetwork;
+
+class AStarSearchAlgo;
 
 // Controller for vehicles
 class VehicleController {
@@ -30,6 +39,9 @@ private:
 
 	// Pointer to road network
 	RoadNetwork *m_network = nullptr;
+
+	// Pointer to AStar
+	AStarSearchAlgo *m_aStar = nullptr;
 
 	// Points that vehicles cannot occupy
 	std::vector<comp308::vec3> m_outOfBounds;
@@ -59,16 +71,19 @@ private:
 
 	intersection checkIntersections(comp308::vec3*);
 	comp308::vec3 findTarget(Vehicle*);
-	bool reachedTarget(Vehicle*, comp308::vec3);
-	void generateGoal(Vehicle*);
+	bool reachedTarget(Vehicle*, cycle::roadNode*);
+	cycle::roadNode generateGoal(Vehicle*);
 	bool reachedGoal(Vehicle*);
 
-	void interpolate_straight(Vehicle*, comp308::vec3*, comp308::vec3*);
-	void interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*, Direction);
+	comp308::vec3 interpolate_straight(Vehicle*, comp308::vec3*,
+			cycle::roadNode*);
+	turn interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*, Direction);
 
+	comp308::vec3 turnSimp(comp308::vec3*, comp308::vec3*, cycle::roadNode*, cycle::roadNode*);
 public:
 
-	VehicleController(std::string, std::string, std::vector<comp308::vec3>, comp308::vec3);
+	VehicleController(std::string, std::string, std::vector<comp308::vec3>,
+			comp308::vec3);
 	virtual ~VehicleController();
 
 	void parseRoadNetwork(RoadNetwork*);
@@ -76,11 +91,11 @@ public:
 	// Render all of the vehicles
 	void tick();
 
+	void testRender();
+
 	// Render a specific vehicle given a transformation and a texture
-	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3, int texture = -1);
+	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3,
+			int texture = -1);
 };
-
-
-
 
 #endif /* SRC_VEHICLECONTROLLER_HPP_ */

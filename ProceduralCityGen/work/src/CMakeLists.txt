@@ -18,6 +18,7 @@ SET(headers
 	"roadNetwork.hpp"
 	"spline.hpp"
 	"cycleUtil.hpp"
+	"aStarSearchAlgo.hpp"
 )
 
 
@@ -31,6 +32,7 @@ SET(sources
 	"vehicle.cpp"
 	"roadNetwork.cpp"
 	"spline.cpp"
+	"aStarSearchAlgo.cpp"
 )
 
 # Add executable target and link libraries

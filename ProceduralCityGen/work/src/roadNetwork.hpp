@@ -7,6 +7,9 @@
  *  Created on: 30/09/2015
  *      Author: craighhann
  */
+
+#include <functional>
+#include <queue>
 #include <map>
 #include <vector>
 #include "utility.hpp"

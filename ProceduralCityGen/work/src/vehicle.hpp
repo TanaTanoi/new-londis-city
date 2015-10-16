@@ -15,6 +15,7 @@
 #include <vector>
 #include "comp308.hpp"
 #include "spline.hpp"
+#include "cycleUtil.hpp"
 
 struct vertex {
 	int p = 0; // index for point in m_points
@@ -48,17 +49,20 @@ private:
 	GLuint m_displayListPoly = 0; // DisplayList for Polygon
 
 	// Current transformations
-	comp308::vec3 m_pos, m_rot, m_scale;
+	comp308::vec3 m_pos, m_pos_previous, m_rot, m_scale;
 
 	// Direction that the vehicle is facing
 	Direction m_direction = NORTH;
 
 	// Goal that the vehicle is heading to
-	comp308::vec3 m_goal = comp308::vec3(-1);
+	cycle::roadNode m_goal, m_target, m_startPos;
 
 	// Needed for vehicle to turn corners
 	Spline *m_spline = nullptr;
 
+	// Path that the vehicle takes
+	std::vector<cycle::roadNode> m_path;
+	int m_pathIndex = 0;
 
 	bool m_isMoving = false, m_isTurning = false;
 	float m_velocity = 0;
@@ -78,6 +82,14 @@ public:
 	bool hasReachedGoal(comp308::vec3 *goal);
 	void renderVehicle();
 
+	cycle::roadNode nextTarget();
+
+	cycle::roadNode getCurrentTarget();
+
+	cycle::roadNode getPreviousTarget();
+
+	void setPath(std::vector<cycle::roadNode>);
+
 	void setSpline(std::vector<comp308::vec3>);
 	// Getters and setters
 
@@ -95,18 +107,6 @@ public:
 
 	inline void setIsMoving(bool isMoving = false) {
 		m_isMoving = isMoving;
-	}
-
-	inline const comp308::vec3& getPos() const {
-		return m_pos;
-	}
-
-	inline void setPos(const comp308::vec3& pos) {
-		m_pos = pos;
-	}
-
-	inline void translatePos(const comp308::vec3& pos) {
-		m_pos += pos;
 	}
 
 	inline const comp308::vec3& getRot() const {
@@ -133,20 +133,48 @@ public:
 		m_velocity = velocity;
 	}
 
-	inline const comp308::vec3& getGoal() const {
-		return m_goal;
-	}
-
-	inline void setGoal(const comp308::vec3& goal) {
-		m_goal = goal;
-	}
-
 	inline const bool isTurning() const {
 		return m_isTurning;
 	}
 
 	inline void setTurning(bool isTurning = false) {
 		m_isTurning = isTurning;
+	}
+
+	inline const cycle::roadNode& getGoal() const {
+		return m_goal;
+	}
+
+	inline void setGoal(const cycle::roadNode& goal) {
+		m_goal = goal;
+	}
+
+	inline const cycle::roadNode& getStartPos() const {
+		return m_startPos;
+	}
+
+	inline void setStartPos(const cycle::roadNode& pos) {
+		m_startPos = pos;
+	}
+
+	inline const comp308::vec3& getPos() const {
+		return m_pos;
+	}
+
+	inline void setPos(const comp308::vec3& pos) {
+		m_pos = pos;
+	}
+
+	inline const std::vector<cycle::roadNode>& getPath() const {
+		return m_path;
+	}
+
+	inline const comp308::vec3& getPosPrevious() const {
+		return m_pos_previous;
+	}
+
+	inline void setPosPrevious(const comp308::vec3& posPrevious) {
+		m_pos_previous = posPrevious;
 	}
 };
 

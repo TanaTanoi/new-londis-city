@@ -856,6 +856,8 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 /*Renders a road between two points of a given width*/
 void Building::generateRoad(vec2 a, vec2 b,float width){
 	vec2 dir = (b-a);
+	a += normalize(dir) * 0.1;
+	b -= normalize(dir) * 0.1;
 	vec3 dir3D = vec3(dir.x,0,dir.y);
 	dir3D = normalize(dir3D);
 	vec3 right3D = cross(dir3D, vec3(0,1,0));

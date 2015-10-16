@@ -311,7 +311,7 @@ void RoadNetwork::createRoads(section world){
 		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
 	}
 
-	findMinimumCycles();
+//	findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways
@@ -694,7 +694,7 @@ road RoadNetwork::findClosestRoads(vec3 position) {
 	road min = allRoads[0];
 	vec2 pos = vec2(position.x,position.z);
 	for(int i = 1; i < allRoads.size();i++){
-		if(abs(length(min.start.location-pos))>abs(length(allRoads[i].start.location-pos))){
+		if(abs(length(min.end.location-pos))>abs(length(allRoads[i].end.location-pos))){
 			min = allRoads[i];
 		}
 	}
