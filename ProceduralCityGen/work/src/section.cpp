@@ -94,9 +94,12 @@ vector<section> SectionDivider::splitSection(section s) {
 	// to extend the bisector from. This will be within the middle sixth of the section
 
 	float random = ((float)rand() / (RAND_MAX));
+	float devScale = (- 1 + random*2)/6.0f;
 
 	vec2 centrePoint = centrePointOfLine(l);
-
+	vec2 dir = l.end-l.start;
+	dir = (normalize)dir * devScale;
+	centrePoint = centrePoint + dir;
 
 	// Now finds the first intersection point with another line within the section
 	vector<line> intersectors = linesIntersectingWithSection(s, perpBi, centrePoint, l);
