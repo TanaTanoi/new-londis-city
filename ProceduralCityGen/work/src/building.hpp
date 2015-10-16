@@ -76,7 +76,7 @@ public:
 	Building(void);
 	void drawGround(float);
 	void generateBuilding(buildingParams*, buildingLOD*);
-
+	void generateBlock(util::section,float);
 	void generateResdientialBuilding(std::vector<comp308::vec2>,int);
 	void generateModernBuilding(std::vector<comp308::vec2> points,comp308::vec2,float);
 

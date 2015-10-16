@@ -211,7 +211,11 @@ int main(int argc, char **argv) {
 			initLighting();
 			glTranslatef(0, -2, 0);
 			for(lot l:g_sections->getLots()){
+				glPushMatrix();
+				glTranslatef(0,0.05f,0);
 				glCallList(l.buildings.high);
+				glPopMatrix();
+				building.generateBlock(l.boundingBox,0.0f);
 			}
 			float scale = 2.0f*Generator::SECTION_TO_POINT_SCALE();
 			for(cycle::road r:g_network->getAllRoads()){

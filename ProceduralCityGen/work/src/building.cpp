@@ -616,7 +616,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		if (chance < 95) {
 			//5% single different shape
 			floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
-		}else if (chance < 97) {
+		}else if (chance < 100) {
 			//2% chance to be crazyish
 			floorPlan = Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4);
 			floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4));
@@ -636,7 +636,6 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 	}
 	result->low = glGenLists(1);
 	glNewList(result->low, GL_COMPILE);
-//	generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 4 + 3));//TODO fix this so the iterations are a function of height or other parameter
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(parameters->height));
 	glEndList();
 
@@ -674,6 +673,68 @@ void Building::generateResdientialBuilding(vector<vec2> points,int height) {
 	}
 
 }
+
+void Building::generateBlock(util::section bounding, float elevation){
+	vector<vec2> floor = Generator::sectionToPoints(bounding);
+	int n = floor.size();
+	vec2 mid = Generator::centerPoint(floor);
+	vector<vec3> bot;
+	vector<vec3> top;
+	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
+	float height = 0.05f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+	height+=elevation;
+	for (vec2 v2 : floor) {
+
+		bot.push_back(vec3(v2.x, elevation, v2.y));
+		top.push_back(vec3(v2.x, height, v2.y));
+	}
+
+
+	for (int i = 0; i < n; i++) {
+		//->
+
+		vec3 topl = top[i];
+		vec3 topr = top[(i + 1) % n];
+		vec3 botr = bot[(i + 1) % n];
+		vec3 botl = bot[i];
+
+
+		vec3 normal = cross((botl - topr), (topl - topr));
+		if (length(normal) > 0) {
+			normal = normalize(normal);
+		}
+		float len = abs(length(botl-botr));	//length of the wall
+
+		len /=tex_wall_width;	//the proportion of the wall
+		//Use texture
+		glBindTexture(GL_TEXTURE_2D,conc);
+		glBegin(GL_QUADS);
+		glNormal3f(normal.x, normal.y, normal.z);//baisc normal, probably the same as the other stuff
+		glTexCoord2f(len,0);
+		glVertex3f(topr.x, topr.y, topr.z);
+		glTexCoord2f(len,1);
+		glVertex3f(botr.x, botr.y, botr.z);
+		glTexCoord2f(0,1);
+		glVertex3f(botl.x, botl.y, botl.z);
+		glTexCoord2f(0,0);
+		glVertex3f(topl.x, topl.y, topl.z);
+		glEnd();
+	}
+	glBegin(GL_TRIANGLES);
+	/*Render a roof here, or at least a top*/
+	glColor3f(0,0,0);
+	glNormal3f(0, 1, 0);
+	vec3 mid3d = vec3(mid.x,height,mid.y);
+	for(int i = 0; i < n;i++){
+		vec3 p1 = top[i];
+		vec3 p2 = top[(i+1)%n];
+		glVertex3f(mid3d.x,mid3d.y,mid3d.z);
+		glVertex3f(p2.x,p2.y,p2.z);
+		glVertex3f(p1.x,p1.y,p1.z);
+	}
+	glEnd();
+}
+
 
 void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDist) {
 
@@ -728,7 +789,7 @@ void Building::generatePark(vector<vec2> floor) {
 		vec2 v = floor[i];
 		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
-		glVertex3f(v.x, 0, v.y);
+		glVertex3f(v.x, 0.001f, v.y);
 	}
 
 	glEnd();
@@ -803,8 +864,6 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 	float leng = abs(length(dir));
 	leng/=tex_wall_width;
 
-
-
 	vec2 pointA = a;
 	vec2 pointB = b;
 
@@ -825,7 +884,6 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
 		glVertex3f(v.x, 0, v.y);
 	}
-
 	glEnd();
 	vector<vec2> endBTri;
 	endBTri.push_back(b-(right*width));

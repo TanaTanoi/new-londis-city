@@ -98,7 +98,7 @@ vector<section> SectionDivider::splitSection(section s) {
 
 	vec2 centrePoint = centrePointOfLine(l);
 	vec2 dir = l.end-l.start;
-	dir = (normalize)dir * devScale;
+	dir = normalize(dir) * devScale;
 	centrePoint = centrePoint + dir;
 
 	// Now finds the first intersection point with another line within the section

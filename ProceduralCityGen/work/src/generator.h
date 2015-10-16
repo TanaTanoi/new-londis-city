@@ -40,4 +40,6 @@ public:
 	static std::vector<comp308::vec2> sectionToPoints(util::section);
 	static util::section pointsToSections(std::vector<comp308::vec2>);
 
+	static util::section shrinkSection(util::section);
+
 };
