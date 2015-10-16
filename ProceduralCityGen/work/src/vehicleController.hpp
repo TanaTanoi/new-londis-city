@@ -79,7 +79,7 @@ private:
 			cycle::roadNode*);
 	turn interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*, Direction);
 
-	comp308::vec3 turnSimp(cycle::roadNode*, cycle::roadNode*);
+	comp308::vec3 turnSimp(comp308::vec3*, comp308::vec3*, cycle::roadNode*, cycle::roadNode*);
 public:
 
 	VehicleController(std::string, std::string, std::vector<comp308::vec3>,

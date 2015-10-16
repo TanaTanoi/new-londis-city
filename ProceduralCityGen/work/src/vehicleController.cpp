@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <map>
 #include <vector>
+#include <ctime>
 //#include <unistd.h> ??
 
 #include "comp308.hpp"
@@ -37,6 +38,8 @@ const comp308::vec3 scale = vec3(0.1);
 // Amount of error when checking if a vehicle has reached the goal
 const float GIVE = 10;
 time_t previous_time;
+
+clock_t begin_time = clock();
 
 VehicleController::VehicleController(string vehicles, string textures,
 		vector<vec3> limits, vec3 bounds) {
@@ -83,6 +86,8 @@ void VehicleController::initVehicles() {
 		cout << "Starting position " << m_vehicles[i].getStartPos().location
 				<< endl;
 		m_vehicles[i].setPos(vec3(start.location.x, 0, start.location.y));
+		m_vehicles[i].setPosPrevious(
+				vec3(start.location.x, 0, start.location.y));
 		// cout << m_vehicles[i].getDirection() << endl;
 
 		// Rotate the vehicle towards the goal
@@ -192,8 +197,14 @@ void VehicleController::tick() {
 		glTranslatef(0, 0.1, 0);
 		glBegin(GL_POINTS);
 		glColor3f(1.0, 0.1, 0.0);
-		glVertex3f(target.location.x * Generator::SECTION_TO_POINT_SCALE(), 0,
-				target.location.y * Generator::SECTION_TO_POINT_SCALE());
+		roadNode t;
+
+		for (int j = 0; j < (int) m_vehicles[i].getPath().size(); ++j) {
+			t = m_vehicles[i].getPath()[j];
+			// cout << "target " << t.ID << ", " << t.location << endl;
+			glVertex3f(t.location.x * Generator::SECTION_TO_POINT_SCALE(), 0,
+					t.location.y * Generator::SECTION_TO_POINT_SCALE());
+		}
 		glEnd();
 		glPopMatrix();
 //
@@ -219,12 +230,16 @@ void VehicleController::tick() {
 				m_vehicles[i].getStartPos().location.y);
 
 		vec3 currentPos = m_vehicles[i].getPos();
-
-		new_pos = interpolate_straight(&m_vehicles[i], &currentPos, &target);
+		vec3 previousPos = m_vehicles[i].getPosPrevious();
 
 		roadNode prev = m_vehicles[i].getPreviousTarget();
+		roadNode cur = m_vehicles[i].getCurrentTarget();
 
-		rot = turnSimp (&prev, &target);
+		rot = turnSimp(&currentPos, &previousPos, &prev, &cur);
+
+		m_vehicles[i].setRot(rot);
+		new_pos = interpolate_straight(&m_vehicles[i], &currentPos, &target);
+
 //		// If the vehicle is turning
 //		if (m_vehicles[i].isTurning()) {
 //			cout << "Vehicle " << i << " turning" << endl;
@@ -246,7 +261,6 @@ void VehicleController::tick() {
 //
 //		// Finally render the vehicle
 		cout << "Rendering vehicle " << i << " at" << new_pos << endl;
-		cout << "Rotated at " << rot << endl;
 
 		// target = m_vehicles[i].getCurrentTarget();
 //		new_pos = vec3(target.location.x, 0, target.location.y);
@@ -259,19 +273,105 @@ void VehicleController::testRender() {
 	renderVehicle(&v, vec3(10), vec3(), vec3(5));
 }
 
-vec3 VehicleController::turnSimp(roadNode *previousTarget, roadNode *currentTarget) {
+vec3 VehicleController::turnSimp(vec3 *pos, vec3 *prev, roadNode *v1,
+		roadNode *v2) {
+
+	int mode = 0;
+
+	// Find which axis the thing is traveling on
+	if (pos->x == v2->location.x && pos->x == v1->location.x
+			&& pos->z > v1->location.y)
+		mode = 1;
+	if (pos->x != v2->location.x && pos->z == v2->location.y)
+		mode = 2;
+
+	// if (pos->z == v1->location.z && pos->z == v2->location.z && pos)
 
 	// Find the angle between the two vectors
-	vec3 targ1 = vec3(previousTarget->location.x, 0, previousTarget->location.y);
-	vec3 targ2 = vec3(currentTarget->location.x, 0, currentTarget->location.y);
+	vec3 targ1 = vec3(v1->location.x, 0, v1->location.y);
+	vec3 targ2 = vec3(v2->location.x, 0, v2->location.y);
 
-	float angle = atan2(targ1.y - targ2.y, targ1.x - targ2.x);
-	angle = acos(angle);
-	angle = degrees(angle);
+	cout << "targ1 " << targ1 << endl;
+	cout << "targ2 " << targ2 << endl;
 
-	cout << "Angle: " << angle << endl;
+	float angle;
 
+	angle = atan2(targ2.z - targ1.z, targ2.x - targ1.x);
+
+	// Check if the length is increasing
+	if (distance(*prev, targ2) < distance(*pos, targ2)) {
+		cerr << "      Holy shit holy shit" << endl;
+		// return vec3(0, acos(angle), 0);
+	}
+
+	if (angle < 1) {
+		cout << "Angle " << angle << endl;
+		return vec3(0, 2 * comp308::pi() + angle, 0);
+	}
 	return vec3(0, angle, 0);
+
+//	switch (mode) {
+//	case 0:
+//	default:
+//		cout << "Angle " << angle << endl;
+//		return vec3(0, angle, 0);
+//	case 1:
+//		cout << "Angle " << degrees(angle) << endl;
+//		cout << "MODE 1 " << degrees(angle) + 180 << endl;
+//		angle = -angle;
+//		return vec3(0, angle, 0);
+//	}
+
+	// if (angle > )
+
+//	if (targ2.z > targ1.z) {
+//		cout << "Alpha ";
+//		angle = atan2(targ2.z - targ1.z, targ2.x - targ1.x);
+//	} else if (targ1.z > targ2.z) {
+//		angle = atan2(targ2.z - targ1.z, targ1.x - targ2.x);
+//		cout << "Bravo ";
+//	} else if (targ2.x < targ1.x) {
+//		angle = atan2(targ1.z - targ2.z, targ2.x - targ1.x);
+//		cout << "Charlie ";
+//	} else if (targ2.x > targ1.x) {
+//		angle = atan2(targ2.z - targ1.z, targ2.x - targ1.x);
+//		cout << "Delta ";
+//	}
+//	angle = acos(angle);
+//	// angle = degrees(angle);
+//
+//	cout << "Angle: " << degrees(angle) << endl;
+//
+//	if (util::isNAN(angle))
+//		angle = 0;
+//
+//	return vec3(0, angle, 0);
+
+//	vec3 rot;
+//	if (angle >= 1.0)
+//		rot = vec3(0.0);
+//	else if (angle <= -1.0)
+//		rot = vec3(0, comp308::pi(), 0);
+//	else
+//		rot = vec3(0, acos(angle), 0); // 0..PI
+
+	cout << "Angle: " << degrees(angle) << endl;
+
+//	float len1 = sqrt(v1->location.x * v1->location.x + v1->location.y * v1->location.y);
+//	float len2 = sqrt(v2->location.x * v2->location.x + v2->location.y * v2->location.y);
+//
+//	float dot = v1->location.x * v2->location.x + v1->location.y * v2->location.y;
+//
+//	float a = dot / (len1 * len2);
+//
+//	cout << "angle: " << degrees(a) << endl;
+//
+//	if (a >= 1.0)
+//		return vec3(0.0);
+//	else if (a <= -1.0)
+//		return vec3(0, comp308::pi(), 0);
+//	else
+//		return vec3(0, acos(a), 0); // 0..PI
 }
 
 /**
@@ -281,22 +381,32 @@ void VehicleController::renderVehicle(Vehicle* vehicle, vec3 translate,
 		vec3 rotate, vec3 scale, int texture) {
 
 	// Set transformations
+	vehicle->setPosPrevious(vehicle->getPos());
 	vehicle->setPos(translate);
 	vehicle->setRot(rotate);
 
+	// translate.x =  translate.x - vehicle->getCurrentTarget().location.x;
+	// translate.z =  translate.z - vehicle->getCurrentTarget().location.y;
+
+	cout << "Rendering here: " << translate << endl;
+
+	// Add scale
 	translate.x *= Generator::SECTION_TO_POINT_SCALE();
 	translate.z *= Generator::SECTION_TO_POINT_SCALE();
 
 	// Render the vehicle
 	glPushMatrix();
+	// glRotatef(-rotate.y, 0, 1, 0);
 	glTranslatef(translate.x, translate.y, translate.z);
+	cout << "Rotated at " << rotate.y << endl;
+
 	glScalef(scale.x, scale.y, scale.z);
-	glRotatef(1, 0, rotate.y, 0);
 	// vehicle->renderVehicle();
 	glPopMatrix();
 
 	// Render the vehicles' position as a point
 	glPushMatrix();
+	// glRotatef(rotate.y, 0, 1, 0);
 	glTranslatef(0, 0.2, 0);
 	glPointSize(10);
 	glColor3f(1.0, 0.0, 0.0);
@@ -345,12 +455,18 @@ bool VehicleController::reachedGoal(Vehicle* vehicle) {
 		return true;
 
 	roadNode goal = vehicle->getGoal();
-	roadNode currentPos = vehicle->getStartPos();
+	vec2 currentPos = vec2(vehicle->getPos().x, vehicle->getPos().z);
 
 	util::checkZone check = util::checkZone(goal.location.x / 2.0,
 			goal.location.y / 2.0, GIVE);
 
-	return check.contains(&currentPos.location);
+	if (floor(currentPos.x) == goal.location.x
+			&& floor(currentPos.y) == goal.location.y) {
+		cout << "Aww gummon " << endl;
+		return true;
+	}
+
+	return check.contains(&currentPos);
 }
 
 /**
@@ -358,10 +474,24 @@ bool VehicleController::reachedGoal(Vehicle* vehicle) {
  */
 bool VehicleController::reachedTarget(Vehicle *vehicle, roadNode *target) {
 
-	vec2 currentPos = target->location;
+	// return vec2(vehicle->getPos().x, 0, vehicle->getPos().x) == target->location;
+	vec2 currentPos = vec2(vehicle->getPos().x, vehicle->getPos().z);
 
 	util::checkZone check = util::checkZone(target->location.x / 2.0,
 			target->location.y / 2.0, GIVE);
+
+	cout << "currentPos " << currentPos << endl;
+	cout << "target " << target->location << endl;
+	cout << "currentPos floor " << floor(currentPos.x) << ", "
+			<< floor(currentPos.y) << endl;
+	if (check.contains(&currentPos))
+		cout << "FUCK YOU" << endl;
+
+	if (floor(currentPos.x) == target->location.x
+			&& floor(currentPos.y) == target->location.y) {
+		cout << "Aww gummon " << endl;
+		return true;
+	}
 
 	return check.contains(&currentPos);
 }
@@ -570,29 +700,68 @@ vec3 VehicleController::interpolate_straight(Vehicle *vehicle, vec3 *from,
 
 	// XXX: For now i'll set it to be a constant speed
 	distance = 0.1;
-	cout << "Distance: " << distance << endl;
+	// cout << "Distance: " << distance << endl;
 
-	// Apply transformation
-	vec3 new_pos;
-	switch (vehicle->getDirection()) {
-	case NORTH:
-		new_pos = vec3(0, 0, distance);
-		break;
-	case SOUTH:
-		new_pos = vec3(0, 0, -distance);
-		break;
-	case EAST:
-		new_pos = vec3(distance, 0, 0);
-		break;
-	case WEST:
-		new_pos = vec3(-distance, 0, 0);
-		break;
-	default:
-		new_pos = vec3();
-		break;
-	}
+//	// Apply transformation
+//	vec3 new_pos;
+//	switch (vehicle->getDirection()) {
+//	case NORTH:
+//		new_pos = vec3(0, 0, distance);
+//		break;
+//	case SOUTH:
+//		new_pos = vec3(0, 0, -distance);
+//		break;
+//	case EAST:
+//		new_pos = vec3(distance, 0, 0);
+//		break;
+//	case WEST:
+//		new_pos = vec3(-distance, 0, 0);
+//		break;
+//	default:
+//		new_pos = vec3();
+//		break;
+//	}
 
-	return new_pos + *from;
+//	clock_t begin = clock();
+
+	// code_to_time();
+
+	clock_t end = clock();
+	float elapsed_secs = float(end - begin_time) / CLOCKS_PER_SEC;
+
+	cout << "time: " << elapsed_secs << endl;
+
+	const float speed = 1;
+	vec3 velocity, direction, position;
+
+	cout << " rot here: " << vehicle->getRot() << endl;
+
+	direction.x = cos(vehicle->getRot().y);
+	direction.z = sin(vehicle->getRot().y);
+
+	cout << "direction: " << direction << endl;
+
+	velocity.x = direction.x * speed;
+	velocity.z = direction.z * speed;
+
+	cout << " velocity: " << velocity << endl;
+
+	position = vec3(from->x, 0, from->z);
+
+	cout << " position: " << position << endl;
+
+	position.x += velocity.x * elapsed_secs;
+	position.z += velocity.z * elapsed_secs;
+
+	cout << " new pos" << position << endl;
+
+//	position.x += 2;
+//	position.z += 2;
+	position.x = (position.x != from->x) ? position.x + 0.5 : position.x;
+	position.z = (position.z != from->z) ? position.z + 0.5 : position.z;
+
+	begin_time = clock();
+	return position;
 }
 
 turn VehicleController::interpolate_curve(Vehicle *vehicle, vec3 *from,

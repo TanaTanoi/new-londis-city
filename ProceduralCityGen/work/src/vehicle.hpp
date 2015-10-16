@@ -49,7 +49,7 @@ private:
 	GLuint m_displayListPoly = 0; // DisplayList for Polygon
 
 	// Current transformations
-	comp308::vec3 m_pos, m_rot, m_scale;
+	comp308::vec3 m_pos, m_pos_previous, m_rot, m_scale;
 
 	// Direction that the vehicle is facing
 	Direction m_direction = NORTH;
@@ -163,6 +163,18 @@ public:
 
 	inline void setPos(const comp308::vec3& pos) {
 		m_pos = pos;
+	}
+
+	inline const std::vector<cycle::roadNode>& getPath() const {
+		return m_path;
+	}
+
+	inline const comp308::vec3& getPosPrevious() const {
+		return m_pos_previous;
+	}
+
+	inline void setPosPrevious(const comp308::vec3& posPrevious) {
+		m_pos_previous = posPrevious;
 	}
 };
 

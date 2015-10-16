@@ -255,6 +255,7 @@ bool Vehicle::hasReachedGoal(vec3 *goal) {
 }
 
 cycle::roadNode Vehicle::nextTarget() {
+	cout << "path index " << m_pathIndex << endl;
 	return m_path[m_pathIndex++];
 }
 
