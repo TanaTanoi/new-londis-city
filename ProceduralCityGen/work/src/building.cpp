@@ -529,48 +529,73 @@ int Building::generateBuildingsFromSections(vector<util::section> sections) {
 return 0;
 }
 
-
-int Building::generateBuildingFromString(string input) {
+/* Create a single building based on the given string and parameters
+ * This is used for show casing a single type of building.
+ * Types:
+ * 0 : 3 Tier
+ * 1 : Cut edges L-System
+ * 2 : N-Sided Shape L-System
+ * 3 : Combined Shape  L-System
+ * 4 : Standard L-System
+ * 5 : Combined Shape L-System
+ * 6 : Modern Style Building
+ * 7 : Park 
+ */
+int Building::generateBuildingFromString(string input, float size, int type) {
 	int toReturn = glGenLists(1);
+	vec2 center = vec2(0, 0);
+	vector<vec2> floorPlan = vector<vec2>();
+	floorPlan.push_back(vec2(-size, -size));
+	floorPlan.push_back(vec2(-size, size));
+	floorPlan.push_back(vec2(size, size));
+	floorPlan.push_back(vec2(size, -size));
 
-	/*Size of buildings and stuff for this thing*/
-	float size = 20.0f;
-	float disp = 1.5f;
-	float building_size = 1.0f;
-	vector<vec2> points;
-
-	vector<buildingLOD> buildings;
-	int randStringInc = Building::basicHashcode(input);	//Generate seed from input
-	srand(randStringInc);								//Reset srand
-	for (float i = -size; i <=size; i += disp) {
-		for (float j = -size; j <=size; j += disp) {
-			//create a bounding box-like area
-			points.clear();
-			points.push_back(vec2(i, j));
-			points.push_back(vec2(i + building_size, j));
-			points.push_back(vec2(i + building_size, j + building_size));
-			points.push_back(vec2(i, j + building_size));
-			buildingParams p;
-			p.boundingArea = points;
-			srand(randStringInc+=14);
-			p.seed = rand();
-			p.b_type = static_cast<building_type>(rand()%2);
-			buildingLOD result;
-			buildings.push_back(result);
-			generateBuilding(&p,&result);
-		}
+	int seed = basicHashcode(input);
+	srand(seed);
+	switch (type) {
+	case 0:
+		glNewList(toReturn, GL_COMPILE);
+		generateResdientialBuilding(floorPlan, rand()%6+2);
+		glEndList();
+		return toReturn;
+	case 1:
+		floorPlan = Generator::cutEdges(floorPlan);
+		glNewList(toReturn, GL_COMPILE);
+		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
+		glEndList();
+		return toReturn;
+	case 2:
+		floorPlan = Generator::generateFloorPlan(center, size, (rand() % 4) + 4);
+		glNewList(toReturn, GL_COMPILE);
+		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
+		glEndList();
+		return toReturn;
+	case 3:
+		floorPlan = Generator::generateFloorPlan(center, size*0.8, (rand() % 4) + 4);
+		floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, size*0.8, (rand() % 4) + 4));
+	case 4:
+		glNewList(toReturn, GL_COMPILE);
+		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand()%6+3));
+		glEndList();
+		return toReturn;
+	case 5:
+		glNewList(toReturn, GL_COMPILE);
+		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
+		glEndList();
+		return toReturn;
+	case 6:
+		glNewList(toReturn, GL_COMPILE);
+		generateModernBuilding(floorPlan, center, size);
+		glEndList();
+		return toReturn;
+	case 7:
+		glNewList(toReturn, GL_COMPILE);
+		generatePark(floorPlan);
+		glEndList();
+		return toReturn;
 	}
-	glNewList(toReturn, GL_COMPILE);
-	glUseProgram(g_shader);
-	cout << "Total buildings: " << buildings.size() << endl;
-	//Compile all buildings into one display list and return
-	for (buildingLOD b : buildings) {
-		glCallList(b.low);
-	}
-	glEndList();
 	return toReturn;
 }
-
 
 
 /*Takes a parameters struct and creates a building based on that.
@@ -592,8 +617,7 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 		generatePark(floorPlan);
 		glEndList();
 		return;
-	}
-	if (chance < 40) {
+	}else if (chance < 40) {
 		//40% for residential. Standard building type
 		result->low = glGenLists(1);
 		glNewList(result->low, GL_COMPILE);
