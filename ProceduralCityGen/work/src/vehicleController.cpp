@@ -103,10 +103,6 @@ void VehicleController::tick() {
 
 	for (int i = 0; i < (int) m_vehicles.size(); ++i) {
 
-		roadNode node = { vec2(), 0, true };
-		cout << node.ID << ", " << node.location << ", " << node.visited
-				<< endl;
-
 		// Generate a goal for the vehicle
 		if (reachedGoal(&m_vehicles[i])) {
 

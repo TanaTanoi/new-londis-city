@@ -12,6 +12,14 @@ using namespace std;
 using namespace cycle;
 using namespace comp308;
 
+//AStarSearchAlgo::AStarSearchAlgo(std::vector<cycle::roadNode> allNodes,
+//		std::map<int, std::vector<int> > adjacencyList) {
+//	for (int i = 0; i < (int)allNodes.size(); ++i) {
+//		roadNodeAStar node = roadNodeAStar(allNodes[i]);
+//		m_allNodes[i] = node;
+//	}
+//}
+
 vector<roadNode> AStarSearchAlgo::getPath(roadNode *target) {
 
 	m_path.clear();
@@ -63,7 +71,7 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 
 	for (int i = 0; i < (int) m_allNodes.size(); ++i) {
 		m_allNodes[i].from = NULL;
-		m_allNodes[i].hasFrom = false;
+		// m_allNodes[i].hasFrom = false;
 		m_allNodes[i].isVisited_aStar = false;
 	}
 
@@ -82,7 +90,7 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 
 		if (!m_allNodes[nodeID].isVisited_aStar) {
 			m_allNodes[nodeID].isVisited_aStar = true;
-			m_allNodes[nodeID].hasFrom = true;
+			// m_allNodes[nodeID].hasFrom = true;
 			m_allNodes[nodeID].from = dequeue.from;
 			m_allNodes[nodeID].cost = dequeue.costToHere;
 			m_visited.push_back(m_allNodes[nodeID]);

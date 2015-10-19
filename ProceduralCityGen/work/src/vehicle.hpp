@@ -57,8 +57,8 @@ private:
 	// Goal that the vehicle is heading to
 	cycle::roadNode m_goal, m_target, m_startPos;
 
-	// Needed for vehicle to turn corners
-	Spline *m_spline = nullptr;
+	// Position along the spine
+	float m_t;
 
 	// Path that the vehicle takes
 	std::vector<cycle::roadNode> m_path;
@@ -87,6 +87,22 @@ public:
 	cycle::roadNode getCurrentTarget();
 
 	cycle::roadNode getPreviousTarget();
+
+	inline void resetSplineTime() {
+		m_t = 0;
+	}
+
+	inline void incrementSplineTime() {
+		m_t += 0.01;
+	}
+
+	inline const float getSplineTime() const {
+		return m_t;
+	}
+
+	inline const float getPathIndex() const {
+		return m_pathIndex;
+	}
 
 	void setPath(std::vector<cycle::roadNode>);
 

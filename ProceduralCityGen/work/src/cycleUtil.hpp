@@ -19,7 +19,7 @@ namespace cycle {
 
 struct roadNode {
 
-	
+
 	vec2 location;
 	int ID = -1;
 	bool visited = false;

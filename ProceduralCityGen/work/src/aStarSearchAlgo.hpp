@@ -19,11 +19,40 @@ struct fringeNode {
 	cycle::roadNode *start, *from;
 	float costToHere, totalCostToGoal;
 
+//	/* Copy constructor */
+//	fringeNode(const fringeNode& other) :
+//			start(other.start), from(other.from), costToHere(other.costToHere), totalCostToGoal(
+//					other.totalCostToGoal) {}
+
+	/* Comparator */
 	bool operator<(const fringeNode& other) const {
 		return costToHere > other.costToHere;
 	}
 };
 
+/*
+ * Used for this algorithm, Hannah was complaining about putting these values in the original
+ * struct, don't know what she was complaining about but whatever.
+ */
+struct roadNodeAStar: cycle::roadNode {
+	bool isVisited_aStar = false;
+	roadNode *from;
+	float cost;
+//
+	// Copies values from parent
+	roadNodeAStar(const roadNode& parent) {
+
+		// From parent
+		location = parent.location;
+		ID = parent.ID;
+		visited = parent.visited;
+
+		// AStar stuff
+		isVisited_aStar = false;
+		from = NULL;
+		cost = 0;
+	}
+};
 
 class AStarSearchAlgo {
 private:
@@ -37,7 +66,11 @@ public:
 
 	AStarSearchAlgo(std::vector<cycle::roadNode> allNodes,
 			std::map<int, std::vector<int>> adjacencyList) :
-			m_allNodes(allNodes), m_adjacencyList(adjacencyList) {}
+			m_allNodes(allNodes), m_adjacencyList(adjacencyList) {
+	}
+
+//	AStarSearchAlgo(std::vector<cycle::roadNode> allNodes,
+//			std::map<int, std::vector<int>> adjacencyList);
 
 	std::vector<cycle::roadNode> getPath(cycle::roadNode*);
 
