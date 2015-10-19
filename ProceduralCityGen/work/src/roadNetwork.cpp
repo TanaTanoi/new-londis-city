@@ -41,13 +41,17 @@ void RoadNetwork::genRadialPoints() {
 	for (int i = radOut; i < maxHalfLength; i = i + radOut) {
 		for (int j = 0; j < circlePoints; j++) {
 			vec2 startCirc;
-			if (j == 0) {
+			if (j == 0) {				
 				startCirc = vec2(centrePoint.x, centrePoint.y + radOut);
-				points.push_back(startCirc);
+				if (insideWorld(startCirc)) {
+					points.push_back(startCirc);
+				}
 			}
 			else {				
 				vec2 p = rotate(centrePoint,startCirc, j/circlePoints*360);
-				points.push_back(p);
+				if (insideWorld(p)) {
+					points.push_back(p);
+				}
 			}
 		}
 	}
