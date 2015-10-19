@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
 	/*Running some checks*/
 
-
+	options = options&0;
 
 
 	/*Read command line arguments and augment options. This only sets options, it doesn't run any code*/
@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
 				mode = SHOWCASE_MODE;
 				showcase_mode_type = std::atoi(argv[i+1]);
 				showcase_mode_size = std::atoi(argv[i+2])/10.0f;
-
 				i=i+2;
 			}
 		}else if(argument.compare("car")==0){
@@ -70,7 +69,7 @@ int main(int argc, char **argv) {
 			mode = CAR_MODE;
 		}else if(argument.compare("network")==0){
 			if(i+3>=argc){
-				cout<<"Network mode requires three parameters, [type], [size], and [section bool]"<<endl;
+				cout<<"Network mode requires three parameters, [type], [size], and [cycle bool]"<<endl;
 				return -1;
 			}else if(i != 1){
 				cout<<"Network mode is a mode, not a parameter, It must be the first argument"<<endl;
@@ -82,6 +81,7 @@ int main(int argc, char **argv) {
 				network_mode_cycles = std::atoi(argv[i+3]);
 				i=i+3;
 			}
+			mode = NETWORK_MODE;
 		}else if(argument.compare("-seed")==0){
 			if(i+1>=argc){//if we don't have an additional argument
 				cout<<"Seed requires a parameter (e.g. '-seed COMP308')"<<endl;
@@ -93,10 +93,13 @@ int main(int argc, char **argv) {
 			}
 		}else if(argument.compare("-heightmap")==0){
 			//if the user wants a heightmap to pop up
+			cout<<"Enabling heightmap"<<endl;
 			options = options |op_heightmap;
+
 		}else if(argument.compare("-fullscreen")==0){
 			//enable fullscreen by default TODO implement this
 			options = options| op_fullscreen;
+
 		}else if(argument.compare("-joystick")==0){
 			//enable joystick if it is present
 			if(glfwJoystickPresent(GLFW_JOYSTICK_1)){
@@ -104,15 +107,19 @@ int main(int argc, char **argv) {
 			}else{
 				cout<<"No joystick present; disabling but not aborting"<<endl;
 			}
+
 		}else if(argument.compare("-modelview")==0){
 			//enable model view style, as opposed to default FPS TODO implement this
-			options = options | op_modelview;
+			options = op_modelview;
+			p_dir = normalize(-p_pos);
+
 		}else{
 			cout<<"Unrecognized argument |" << argv[i]<< "| aborting"<<endl;
 			return -1;
 		}
 	}
-
+	cout<<"Options "<<(options&op_heightmap)<<(options&op_modelview)<<(options&op_joystick)<<endl;
+	cout<<"Options "<< (int)options<<endl;
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
@@ -138,7 +145,6 @@ int main(int argc, char **argv) {
 
 	/*Setup callback functions*/
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
-	glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
 	glfwSetScrollCallback(window, mouseScrollCallback);
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
@@ -152,12 +158,10 @@ int main(int argc, char **argv) {
 	srand(user_seed);
 
 	if(mode == FULL_MODE){
-		//TODO copy default mode stuff here
 		initBuildingGenerator();
 		initLighting();
-
 		if(!(options&op_heightmap)){
-			cout<<"Options, heightmap"<<endl;
+			cout<<"No heightmap, generating buildings now"<<endl;
 			//if we don't want a height map, just generate the buildings
 			generateBuildings();
 		}
@@ -237,7 +241,7 @@ void renderLoop(){
 						building.heightmap_points[i - 2],
 						building.heightmap_points[i - 1],
 						building.heightmap_points[i],
-						building.heightmap_points[i+1], time);
+						building.heightmap_points[i+1],time);
 				glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
 			}
 		}
@@ -247,13 +251,11 @@ void renderLoop(){
 		initLighting();
 		glTranslatef(0, -2, 0);
 		/*Draw buildings*/
-
 		for(lot l:g_sections->getLots()){
 			glPushMatrix();
 			glTranslatef(0,0.05f,0);
 			glCallList(l.buildings.high);
 			glPopMatrix();
-
 			building.generateBlock(l.boundingBox,0.0f);
 		}
 
@@ -267,11 +269,22 @@ void renderLoop(){
 		drawSkycube(100.0f);	//the further away it is the better it looks
 
 	}else if(mode ==SHOWCASE_MODE){
+
 		setupCamera();
 		initLighting();
-		drawGrid(10,10);
+		glTranslatef(0, -1, 0);
+
+		glPushMatrix();
+		glRotatef(showcase_mode_angle,0,1,0);
 		glCallList(single_list);
-		//TODO fill this out with camera and things
+		glPopMatrix();
+		if(showcase_mode_angle>0){
+			showcase_mode_angle++;
+			showcase_mode_angle%=360;
+		}
+		building.drawGround(10.0f);
+		drawSkycube(100.0f);
+
 	} else if (mode == NETWORK_MODE) {
 		glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
 		glViewport(0, 0, g_winWidth, g_winHeight); //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
@@ -335,6 +348,7 @@ void generateBuildings(){
 	cout<<"Generating network.."<<endl;
 	g_network = new RoadNetwork();
 	g_network->testNetwork();
+	cout<<"All cycles "<<g_network->getCycles().size()<<endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
 	for(cycle::primitive prim: g_network->getCycles()){
@@ -344,6 +358,7 @@ void generateBuildings(){
 		}
 		lotOutlines.push_back(Generator::pointsToSections(points));
 	}
+	cout<<"Lot outlines :" << lotOutlines.size()<<endl;
 	cout<<"Dividing Sections.."<<endl;
 	// Divides sections
 	g_sections = new SectionDivider();
@@ -357,7 +372,7 @@ void generateBuildings(){
 		l.buildings.high = building.generateBuildingsFromSections(l.sections);
 		g_sections->addBuildingToLot(l);
 	}
-	cout<<"Done!"<<endl;
+	cout<<"Done! "<<g_sections->getLots().size()<<" lots created"<<endl;
 }
 
 /*Inits the building class, loads the shaders, and sets up the heightmap*/
@@ -382,9 +397,9 @@ void initBuildingGenerator() {
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
 }
-float triggerDiff = 0.0f;
+
 void initLighting() {
-	float direction[] = { 0.0f, 0.0f, -1.0f, 0.0f };
+	float direction[] = { 0.0f, -0.5f, -0.5f, 0.0f };
 	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	float specular[] = { 1, 1, 1, 1.0f };
@@ -448,7 +463,6 @@ void setupCamera() {
 		//if using FPS control
 		lookAt(p_pos, p_pos + p_front, p_up);
 	}
-
 }
 
 /**
@@ -483,15 +497,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 
 	if((options&op_heightmap) && key == 257){
 		cout<<"Entering render mode"<<endl;
-		options = options && !op_heightmap;//disable heightmap
-		mode = FULL_MODE;
+		options = options&!op_heightmap;//disable heightmap
 		generateBuildings();
 		if(options&op_joystick){
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
-	}
-	else if (key == 87 && action) {
+	}else if(mode == SHOWCASE_MODE && key == 257&&action){
+		showcase_mode_angle = 1;
+	}else if (key == 87 && action) {
 		p_pos += 0.05f * p_front * 1;
 	} else if (key == 65 && action) {
 		vec3 p_right = cross(p_up, p_front);
@@ -506,8 +520,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	cout<<"MODE "<< mode<<endl;
-	if ((options&&op_heightmap) && action && button == GLFW_MOUSE_BUTTON_1) {
+	if ((options&op_heightmap) && action && button == GLFW_MOUSE_BUTTON_1) {
 		if (building.heightmap_points.size() < 2) {
 			building.heightmap_points.push_back(m_pos);
 			return;
@@ -565,8 +578,7 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	m_pos = vec2(xpos, ypos);
 }
 
-void mouseMotionCallbackModelView(GLFWwindow* window, double xpos,
-		double ypos) {
+void mouseMotionCallbackModelView(GLFWwindow* window, double xpos,double ypos) {
 	if (firstM) {
 		m_pos = vec2(xpos, ypos);
 		firstM = false;

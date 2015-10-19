@@ -545,22 +545,21 @@ int Building::generateSingleBuilding(int type,float size) {
 	floorPlan.push_back(vec2(size, size));
 	floorPlan.push_back(vec2(-size, size));
 	floorPlan.push_back(vec2(-size, -size));
-
+	glNewList(toReturn, GL_COMPILE);
+	glUseProgram(g_shader);
 	switch (type) {
 	case 0:
-		glNewList(toReturn, GL_COMPILE);
+
 		generateResdientialBuilding(floorPlan, rand()%6+2);
 		glEndList();
 		return toReturn;
 	case 1:
 		floorPlan = Generator::cutEdges(floorPlan);
-		glNewList(toReturn, GL_COMPILE);
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
 		glEndList();
 		return toReturn;
 	case 2:
 		floorPlan = Generator::generateFloorPlan(center, size, (rand() % 4) + 4);
-		glNewList(toReturn, GL_COMPILE);
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
 		glEndList();
 		return toReturn;
@@ -568,22 +567,18 @@ int Building::generateSingleBuilding(int type,float size) {
 		floorPlan = Generator::generateFloorPlan(center, size*0.8, (rand() % 4) + 4);
 		floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, size*0.8, (rand() % 4) + 4));
 	case 4:
-		glNewList(toReturn, GL_COMPILE);
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand()%6+3));
 		glEndList();
 		return toReturn;
 	case 5:
-		glNewList(toReturn, GL_COMPILE);
 		generateFromString(floorPlan, Generator::generateRandomBuildingString(rand() % 6 + 3));
 		glEndList();
 		return toReturn;
 	case 6:
-		glNewList(toReturn, GL_COMPILE);
 		generateModernBuilding(floorPlan, center, size);
 		glEndList();
 		return toReturn;
 	case 7:
-		glNewList(toReturn, GL_COMPILE);
 		generatePark(floorPlan);
 		glEndList();
 		return toReturn;

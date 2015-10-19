@@ -311,7 +311,7 @@ void RoadNetwork::createRoads(section world){
 		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
 	}
 
-//	findMinimumCycles();
+	findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways

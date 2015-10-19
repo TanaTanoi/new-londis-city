@@ -33,9 +33,9 @@ enum Options{
 	op_fullscreen =	0x01,
 	op_heightmap  =	0x02,
 	op_joystick   =	0x04,
-	op_modelview  = 0x08
+	op_modelview  = 0x08,
 };
-unsigned char options;
+unsigned char options = 0;
 
 /*What mode the program is in*/
 int mode = 0;
@@ -48,7 +48,7 @@ const int SECTION_MODE = 5;
 /*Showcase mode options*/
 int showcase_mode_type = 0;
 float showcase_mode_size = 1.0f;
-
+int showcase_mode_angle = 0;
 /* Car mode options*/
 int car_mode_number = 10;
 
@@ -68,7 +68,7 @@ GLuint skybox_shader = 0;
 comp308::vec2 m_pos = comp308::vec2(0, 0);
 float pitch = 0;
 float yaw = -90.0f;
-comp308::vec3 p_pos = comp308::vec3(0,1,2);
+comp308::vec3 p_pos = comp308::vec3(0,4,2);
 comp308::vec3 p_front = comp308::vec3(0, 0, -1);
 comp308::vec3 p_up= comp308::vec3(0, 1, 0);
 comp308::vec3 p_tar = comp308::vec3(0, 1, 0);
@@ -79,6 +79,9 @@ Values between -1 and 1*/
 comp308::vec2 c_LSpos = comp308::vec2(0, 0);
 comp308::vec2 c_RSpos = comp308::vec2(0, 0);
 float zoom = 1;
+
+float triggerDiff = 2.0f;
+
 
 comp308::vec2 rotation = comp308::vec2(0,0);
 
