@@ -35,6 +35,12 @@ private:
 	float farLeft;
 	float farRight;
 
+	// Voronoi point generation
+	std::vector<comp308::vec2> points;
+	int gridSpace = 20;
+	int radOut = 15;
+	int circlePoints = 6;
+
 	int insideWorld(comp308::vec2);
 	int insideWorld(cycle::road);
 	cycle::road truncate(cycle::road);
@@ -55,6 +61,9 @@ private:
 	void setCycleEdge(std::vector<cycle::road> *, int, int);
 	void findMinimumCycles();
 	void removeEdge(std::vector<cycle::road>*,  std::map<int,std::vector<int>> * ,int);
+
+	void genGridPoints();
+	void genRadialPoints();
 
 	void testIsolatedVertex();
 	void testFilamentVertex();
