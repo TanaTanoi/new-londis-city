@@ -18,6 +18,8 @@ using namespace std;
 namespace cycle {
 
 struct roadNode {
+
+	
 	vec2 location;
 	int ID = -1;
 	bool visited = false;
@@ -26,6 +28,14 @@ struct roadNode {
 	bool isVisited_aStar = false;
 	roadNode *from = NULL;
 	float cost = -1;
+
+	roadNode(vec2 loc, int id) {
+		location = loc;
+		ID = id;
+	}
+	roadNode() {
+
+	}
 };
 
 struct road {
@@ -33,6 +43,12 @@ struct road {
 	cycle::roadNode end;
 	int ID;
 	bool isCycleEdge = false;
+
+	road(cycle::roadNode s, cycle::roadNode e, int id) {
+		start = s;
+		end = e;
+		ID = id;
+	}
 	// Will have a quad to represent for drawing
 };
 
