@@ -93,40 +93,43 @@ int main(int argc, char **argv) {
 			}
 		}else if(argument.compare("-heightmap")==0){
 			//if the user wants a heightmap to pop up
-			cout<<"Enabling heightmap"<<endl;
+			cout<<"Heightmap Enabled"<<endl;
 			options = options |op_heightmap;
 
 		}else if(argument.compare("-fullscreen")==0){
-			//enable fullscreen by default TODO implement this
+			//enable fullscreen 
 			options = options| op_fullscreen;
-
+			cout << "Fullscreen Enabled" << endl;
+	
 		}else if(argument.compare("-joystick")==0){
 			//enable joystick if it is present
 			if(glfwJoystickPresent(GLFW_JOYSTICK_1)){
 				options = options| op_joystick;
 			}else{
-				cout<<"No joystick present; disabling but not aborting"<<endl;
+				cout<<"No joystick present;"<<endl;
 			}
 
-		}else if(argument.compare("-modelview")==0){
-			//enable model view style, as opposed to default FPS TODO implement this
+		}else if (argument.compare("-modelview") == 0) {
 			options = op_modelview;
-			p_dir = normalize(-p_pos);
-
+			p_dir = normalize(-p_pos);//Set spot light position to look at center point
 		}else{
-			cout<<"Unrecognized argument |" << argv[i]<< "| aborting"<<endl;
+			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
+			cout << "Refer to README for information on command line arguments" << endl;
 			return -1;
 		}
 	}
-	cout<<"Options "<<(options&op_heightmap)<<(options&op_modelview)<<(options&op_joystick)<<endl;
-	cout<<"Options "<< (int)options<<endl;
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(g_winWidth, g_winHeight,
+	if (options&op_fullscreen) {
+		window = glfwCreateWindow(g_winWidth, g_winHeight,
+			"Procedural City Generator", glfwGetPrimaryMonitor(), nullptr);
+	}else{
+		window = glfwCreateWindow(g_winWidth, g_winHeight,
 			"Procedural City Generator", nullptr, nullptr);
+	}
 	if (!window) {
 		glfwTerminate();
 		return -1;
@@ -338,7 +341,8 @@ void renderLoop(){
 	glfwSwapBuffers(window);
 	/* Poll for and process events */
 	glfwPollEvents();
-	joystickEventsPoll();
+	if(options&op_joystick)
+		joystickEventsPoll();
 }
 
 /*Generates the roads and finds the cycles, creates lots,
