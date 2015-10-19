@@ -165,10 +165,6 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
-bool floatEqual(float x, float y){
-	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
-	return (int)round(x*10.0f) == (int)round(y*10.0f);
-}
 
 void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 

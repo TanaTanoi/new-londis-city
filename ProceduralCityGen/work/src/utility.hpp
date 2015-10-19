@@ -379,6 +379,16 @@ inline vec2 centrePointOfLine(line l){
 	return toReturn;
 }
 
+
+bool floatEqual(float x, float y){
+	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
+	return (int)round(x*10.0f) == (int)round(y*10.0f);
+}
+
+bool vecEqual(vec2 a, vec2 b){
+	return floatEqual(a.x, b.x) && floatEqual(a.y, b.y);
+}
+
 inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi,
 		vec2 centrePoint, line longLine) {
 	// Now finds the first intersection point with another line within the section
