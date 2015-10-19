@@ -26,11 +26,43 @@ double g_winHeight 	= 480;
 
 bool m_LeftButton = false;
 
+GLFWwindow* window;
+
+/*These control the flags of the program*/
+enum Options{
+	op_fullscreen =	0x01,
+	op_heightmap  =	0x02,
+	op_joystick   =	0x04,
+	op_modelview  = 0x08
+};
+unsigned char options;
+
+/*What mode the program is in*/
+int mode = 0;
+/*Different mode constants*/
+const int FULL_MODE = 0;
+const int SHOWCASE_MODE = 2;
+const int CAR_MODE = 3;
+const int NETWORK_MODE = 4;
+const int SECTION_MODE = 5;
+/*Showcase mode options*/
+int showcase_mode_type = 0;
+float showcase_mode_size = 1.0f;
+
+/* Car mode options*/
+int car_mode_number = 10;
+
+/*Network mode options*/
+int network_mode_type = 0;
+int network_mode_size = 100;
+int network_mode_cycles = 0;
 
 /*Skybox texture*/
 GLuint skyboxID = 0;
 /*Skybox shader*/
 GLuint skybox_shader = 0;
+
+
 
 /*Mouse position*/
 comp308::vec2 m_pos = comp308::vec2(0, 0);
@@ -50,10 +82,6 @@ float zoom = 1;
 
 comp308::vec2 rotation = comp308::vec2(0,0);
 
-/*If a joystick is present*/
-int joystick;
-int cam_mode = 0;//0 for model view, 1 for FPS
-
 Building building;
 Generator generator;
 
@@ -63,8 +91,9 @@ Method declarations
 /*Initalization declarations*/
 void setupCamera(void);
 void initLighting(void);
-void init(void);
+void initBuildingGenerator(void);
 void generateBuildings(void);
+void renderLoop(void);
 /*Rendering delcarations*/
 void drawGrid(double,double);
 int generateBuildingFromString(std::string);

@@ -63,7 +63,7 @@ public:
 
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
-	int generateBuildingFromString(std::string,float,int);	
+	int generateSingleBuilding(int,float);
 
 	int generateBuildingsFromSections(std::string, std::vector<util::section>);	//Test method
 	int generateBuildingsFromSections(std::vector<util::section>);
