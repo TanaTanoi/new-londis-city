@@ -210,7 +210,7 @@ void Building::renderWindows(vector<vec2> floor, float elevation) {
 void Building::generateFromString(std::vector<comp308::vec2> floor,string input) {
 	/*Generate first floor REPLACE ME ONCE TEXTURES ARE IN AND WE CAN HAVE AN ACTUAL FLOOR*/
 	//float height = extendBuilding(floor, 0.0f);
-	float height = 0.0f;
+	float height = FOUNDATION_SIZE;
 	for (int i = 0; i < input.length(); i++) {
 		switch (input[i]) {
 		case 'S':
@@ -236,7 +236,7 @@ void Building::generateFromString(std::vector<comp308::vec2> floor,string input)
 		case '$':
 			vec3 normal = vec3(floor[1].x, 0, floor[1].y) - vec3(floor[0].x, 0, floor[0].y);
 			normal = cross(normal, vec3(0, 1, 0));
-			generateDoor(floor[0], floor[1],0.0f, -normal);
+			generateDoor(floor[0], floor[1],FOUNDATION_SIZE, -normal);
 			height = extendBuilding(floor, height);
 		}
 
@@ -663,7 +663,7 @@ void Building::generateResdientialBuilding(vector<vec2> points,int height) {
 
 	srand(rand());
 	int n = rand() % height + 5;		//between 5 and 15
-	float cur_elev = 0.0f;
+	float cur_elev = FOUNDATION_SIZE;
 	//extend main tier random amount of times
 	for(int i = 0; i < n ;i++){
 		if (cur_tex_wall != SKYSCRAPER&&i>0)
@@ -671,14 +671,14 @@ void Building::generateResdientialBuilding(vector<vec2> points,int height) {
 		cur_elev = extendBuilding(tiers[2], cur_elev);
 	}
 	n = rand() % (n-((int)(n *0.75) -1)) + (int)(n *0.75);//between 3/4 and n (inclusive)
-	cur_elev = 0.0f;
+	cur_elev = FOUNDATION_SIZE;
 	for (int i = 0; i < n; i++) {
 		if (cur_tex_wall != SKYSCRAPER)
 			renderWindows(tiers[0], cur_elev);
 		cur_elev = extendBuilding(tiers[0], cur_elev);
 	}
 	n = rand() % (n - ((int)(n *0.75) - 1)) + (int)(n *0.75);//between 3n/4 and n (inclusive)
-	cur_elev = 0.0f;
+	cur_elev = FOUNDATION_SIZE;
 	for (int i = 0; i < n; i++) {
 		if (cur_tex_wall != SKYSCRAPER&&i>0)
 			renderWindows(tiers[1], cur_elev);
@@ -694,7 +694,7 @@ void Building::generateBlock(util::section bounding, float elevation){
 	vector<vec3> bot;
 	vector<vec3> top;
 	/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
-	float height = 0.05f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+	float height = FOUNDATION_SIZE;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 	height+=elevation;
 	for (vec2 v2 : floor) {
 
@@ -774,7 +774,7 @@ void Building::generateModernBuilding(vector<vec2> points,vec2 mid, float minDis
 	}
 	//the end of levels now contains the ground floor
 
-	float elevation = 0.0f;
+	float elevation = FOUNDATION_SIZE;
 	for (int i = levels.size() - 1; i >= 0;) {
 		srand(rand());
 		if (cur_tex_wall != SKYSCRAPER)
@@ -802,7 +802,7 @@ void Building::generatePark(vector<vec2> floor) {
 		vec2 v = floor[i];
 		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
-		glVertex3f(v.x, 0.001f, v.y);
+		glVertex3f(v.x, FOUNDATION_SIZE+0.001f, v.y);
 	}
 
 	glEnd();
@@ -826,7 +826,6 @@ void Building::generatePark(vector<vec2> floor) {
 void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 	float height = 0.08f;
 	float wall_width = 0.05f;
-
 	//the vectors on the inner part of the wall. This prevents glitching textures
 	vec2 inner_a = (mid-a)*wall_width + a;
 	vec2 inner_b = (mid - b)*wall_width + b;
@@ -838,9 +837,9 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 
 	//outer facing wall of fence
 	glTexCoord2f(len, yLen);
-	glVertex3f(b.x, 0, b.y);
+	glVertex3f(b.x, FOUNDATION_SIZE, b.y);
 	glTexCoord2f(0, yLen);
-	glVertex3f(a.x, 0, a.y);
+	glVertex3f(a.x, FOUNDATION_SIZE, a.y);
 	glTexCoord2f(0, 0);
 	glVertex3f(a.x, height, a.y);
 	glTexCoord2f(len, 0);
@@ -848,9 +847,9 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 
 	//inner facing wall of fence
 	glTexCoord2f(len, yLen);
-	glVertex3f(inner_a.x, 0, inner_a.y);
+	glVertex3f(inner_a.x, FOUNDATION_SIZE, inner_a.y);
 	glTexCoord2f(0, yLen);
-	glVertex3f(inner_b.x, 0, inner_b.y);
+	glVertex3f(inner_b.x, FOUNDATION_SIZE, inner_b.y);
 	glTexCoord2f(0, 0);
 	glVertex3f(inner_b.x, height, inner_b.y);
 	glTexCoord2f(len, 0);
