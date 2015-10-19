@@ -33,9 +33,7 @@ struct roadNode {
 		location = loc;
 		ID = id;
 	}
-	roadNode() {
-
-	}
+	roadNode() {}
 };
 
 struct road {
@@ -49,6 +47,8 @@ struct road {
 		end = e;
 		ID = id;
 	}
+
+	road(){}
 	// Will have a quad to represent for drawing
 };
 
