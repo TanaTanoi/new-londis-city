@@ -96,6 +96,15 @@ public:
 	}
 };
 
+inline vec2 rotate(vec2 centrePoint, vec2 toRotate, float deg) {
+	double angleInRadians = radians(deg);
+	double cosTheta = cos(angleInRadians);
+	double sinTheta = sin(angleInRadians);
+	float x = (cosTheta * (toRotate.x - centrePoint.x) - sinTheta * (toRotate.y - centrePoint.y) + centrePoint.x);
+	float y = (sinTheta * (toRotate.x - centrePoint.x) + cosTheta * (toRotate.y - centrePoint.y) + centrePoint.y);
+	return vec2(x,y);
+}
+
 /*Returns a vec2 where r.x = gradient and r.y = y-offset*/
 inline vec2 getEquation(vec2 a, vec2 b) {
 	vec2 equation;

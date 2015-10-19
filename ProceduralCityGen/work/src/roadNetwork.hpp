@@ -39,6 +39,7 @@ private:
 	std::vector<comp308::vec2> points;
 	int gridSpace = 20;
 	int radOut = 15;
+	int circlePoints = 6;
 
 	int insideWorld(comp308::vec2);
 	int insideWorld(cycle::road);
@@ -62,6 +63,7 @@ private:
 	void removeEdge(std::vector<cycle::road>*,  std::map<int,std::vector<int>> * ,int);
 
 	void genGridPoints();
+	void genRadialPoints();
 
 	void testIsolatedVertex();
 	void testFilamentVertex();

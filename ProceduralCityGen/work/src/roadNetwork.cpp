@@ -34,6 +34,25 @@ void RoadNetwork::genGridPoints() {
 	}
 }
 
+void RoadNetwork::genRadialPoints() {
+	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;	
+	vec2 centrePoint = vec2((farRight-farLeft)/2, (maxHeight-minHeight)/2);
+	points.push_back(centrePoint);
+	for (int i = radOut; i < maxHalfLength; i = i + radOut) {
+		for (int j = 0; j < circlePoints; j++) {
+			vec2 startCirc;
+			if (j == 0) {
+				startCirc = vec2(centrePoint.x, centrePoint.y + radOut);
+				points.push_back(startCirc);
+			}
+			else {				
+				vec2 p = rotate(centrePoint,startCirc, j/circlePoints*360);
+				points.push_back(p);
+			}
+		}
+	}
+}
+
 
 int RoadNetwork::insideWorld(road r ){
 	line road = {r.start.location, r.end.location};
