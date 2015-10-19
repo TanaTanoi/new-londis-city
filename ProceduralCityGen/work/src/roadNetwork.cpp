@@ -22,6 +22,19 @@ RoadNetwork::RoadNetwork(){}
  *
  * Returns 0 for inside, 1 for intersecting and 2 for completely outside
  */
+
+void RoadNetwork::genGridPoints() {
+	for (int i = farLeft + gridSpace; i < farRight; i = i + gridSpace) {
+		for (int j = minHeight + gridSpace; j < maxHeight; j = j + gridSpace) {
+			vec2 point = vec2(i,j);
+			if (insideWorld(point)) {
+				points.push_back(point);
+			}
+		}
+	}
+}
+
+
 int RoadNetwork::insideWorld(road r ){
 	line road = {r.start.location, r.end.location};
 
