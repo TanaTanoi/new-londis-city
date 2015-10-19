@@ -26,9 +26,7 @@ private:
 
 public:
 
-	Spline(std::vector<comp308::vec3> keyframes) : m_keyframes(keyframes){}
 	virtual ~Spline();
-	void renderSpline();
 	static comp308::vec2 calculatePoint(comp308::vec2,comp308::vec2,comp308::vec2,comp308::vec2,float);
 	static float calculateYValue(std::vector<comp308::vec2> points,float x_dist);
 };

@@ -28,6 +28,9 @@ const int RENDER_MODE = 0;
 const int HEIGHTMAP_MODE = 1;
 int mode = 0;
 string user_seed;
+
+bool play = true;
+
 //Main program
 //
 int main(int argc, char **argv) {
@@ -72,12 +75,10 @@ int main(int argc, char **argv) {
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
 	glfwSetKeyCallback(window, keyCallback);
 
-
 	/*Setting up other stuff*/
 //	if (joystick) {
 //		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 //	}
-
 	/*Set up depths and perspective*/
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -91,15 +92,14 @@ int main(int argc, char **argv) {
 	string CMODE = "C";
 	string IMODE = "I";
 
-	if(argc == 2){//take seed as input
+	if (argc == 2) { //take seed as input
 		//if only one argument, do regular mode
-		cout<<"Running height map mode"<<endl;
+		cout << "Running height map mode" << endl;
 		mode = HEIGHTMAP_MODE;
 		init();
 		user_seed = std::string(argv[1]);
-		cout<<"Using seed "<<user_seed<<endl;
-	}
-	else if (argc > 1 && argv[1] == BMODE) {
+		cout << "Using seed " << user_seed << endl;
+	} else if (argc > 1 && argv[1] == BMODE) {
 		cout << "Building mode" << endl;
 		init();
 		if (argc >= 2 && std::string(argv[2]) == "1") {
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 		}
 		mode = 2;
 
-	}else if(argv[1] == IMODE){
+	} else if (argv[1] == IMODE) {
 
 		if (argc >= 2 && std::string(argv[2]) == "1") {
 			cout << "CAM MODE" << endl;
@@ -158,8 +158,7 @@ int main(int argc, char **argv) {
 		//Creates road network
 		generateBuildings();
 
-	}
-	else {
+	} else {
 		init();
 		g_sections = new SectionDivider();
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
@@ -184,7 +183,7 @@ int main(int argc, char **argv) {
 		glMatrixMode(GL_MODELVIEW);
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		//TODO clean up all of this gross code when we integrate
-		if(mode == HEIGHTMAP_MODE){
+		if (mode == HEIGHTMAP_MODE) {
 			//Spline map mode
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -201,31 +200,32 @@ int main(int argc, char **argv) {
 							building.heightmap_points[i - 2],
 							building.heightmap_points[i - 1],
 							building.heightmap_points[i],
-							building.heightmap_points[i+1], time);
+							building.heightmap_points[i + 1], time);
 					glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
 				}
 			}
 			glEnd();
-		}else if(mode == RENDER_MODE){
+		} else if (mode == RENDER_MODE) {
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
-			for(lot l:g_sections->getLots()){
+			for (lot l : g_sections->getLots()) {
 				glPushMatrix();
-				glTranslatef(0,0.05f,0);
+				glTranslatef(0, 0.05f, 0);
 				glCallList(l.buildings.high);
 				glPopMatrix();
-				building.generateBlock(l.boundingBox,0.0f);
+				building.generateBlock(l.boundingBox, 0.0f);
 			}
-			float scale = 2.0f*Generator::SECTION_TO_POINT_SCALE();
-			for(cycle::road r:g_network->getAllRoads()){
-				building.generateRoad(r.start.location*scale,r.end.location*scale,0.2f);
+			float scale = 2.0f * Generator::SECTION_TO_POINT_SCALE();
+			for (cycle::road r : g_network->getAllRoads()) {
+				building.generateRoad(r.start.location * scale,
+						r.end.location * scale, 0.2f);
 			}
 
 			building.drawGround(100.0f);
 			drawSkycube(100.0f);	//the further away it is the better it looks
 
-		}else if (mode == 0) {
+		} else if (mode == 0) {
 			setupCamera();
 			initLighting();
 			glTranslatef(0, -2, 0);
@@ -255,21 +255,41 @@ int main(int argc, char **argv) {
 				glPopMatrix();
 			}
 		} else if (mode == 2) {
+
 			setupCamera();
 			initLighting();
 			glTranslatef(-20, -2, 20);
 			drawGrid(40, 1);
-			// Render the vehicles
-			vector<cycle::road> roads = g_network->getAllRoads();
-			for (int i = 0; i < (int) roads.size(); ++i) {
-				building.generateRoad(
-						roads[i].start.location
-								* Generator::SECTION_TO_POINT_SCALE(),
-						roads[i].end.location
-								* Generator::SECTION_TO_POINT_SCALE(), 0.5f);
-			}
 
-			g_vehicleCtrl->tick();
+			glUseProgram(0);
+			// Draw axis
+			glBegin(GL_LINES);
+			glColor3f(1, 0, 0);
+			glVertex3f(-100, 0, 0);
+			glVertex3f(100, 0, 0);
+
+			glColor3f(0, 1, 0);
+			glVertex3f(0, -100, 0);
+			glVertex3f(0, 100, 0);
+
+			glColor3f(0, 0, 1);
+			glVertex3f(0, 0, -100);
+			glVertex3f(0, 0, 100);
+
+			glEnd();
+
+			// Render the vehicles
+//			vector<cycle::road> roads = g_network->getAllRoads();
+//			for (int i = 0; i < (int) roads.size(); ++i) {
+//				building.generateRoad(
+//						roads[i].start.location
+//								* Generator::SECTION_TO_POINT_SCALE(),
+//						roads[i].end.location
+//								* Generator::SECTION_TO_POINT_SCALE(), 0.5f);
+//			}
+
+			if (play)
+				g_vehicleCtrl->tick();
 
 			// g_vehicleCtrl->testRender();
 		} else if (mode == 4) {
@@ -277,7 +297,7 @@ int main(int argc, char **argv) {
 			initLighting();
 			glTranslatef(0, -2, 0);
 //			drawGrid(40, 1);
-			for(lot l:g_sections->getLots()){
+			for (lot l : g_sections->getLots()) {
 				glCallList(l.buildings.high);
 			}
 			building.drawGround(100.0f);
@@ -298,15 +318,15 @@ int main(int argc, char **argv) {
 
 }
 
-void generateBuildings(){
+void generateBuildings() {
 	g_network = new RoadNetwork();
 	g_network->testNetwork();
 
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
-	for(cycle::primitive prim: g_network->getCycles()){
+	for (cycle::primitive prim : g_network->getCycles()) {
 		vector<vec2> points;
-		for(cycle::roadNode rn : prim.vertices){
+		for (cycle::roadNode rn : prim.vertices) {
 			points.push_back(rn.location);
 		}
 		lotOutlines.push_back(Generator::pointsToSections(points));
@@ -318,7 +338,7 @@ void generateBuildings(){
 	// Generate building display list
 	srand(building.basicHashcode(user_seed));
 	vector<lot> allLots = g_sections->getLots();
-	for(lot l: allLots){
+	for (lot l : allLots) {
 		srand(rand());
 		l.buildings.high = building.generateBuildingsFromSections(l.sections);
 		g_sections->addBuildingToLot(l);
@@ -451,17 +471,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		int mods) {
 	cout << "Key: " << key << endl;
 
-	if(mode == HEIGHTMAP_MODE && key == 257){
-		cout<<"Entering render mode"<<endl;
+	if (mode == HEIGHTMAP_MODE && key == 257) {
+		cout << "Entering render mode" << endl;
 		mode = RENDER_MODE;
 		generateBuildings();
-		if(joystick){
+		if (joystick) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 		cam_mode = 1;
 		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
-	}
-	else if (key == 87 && action) {
+	} else if (key == 87 && action) {
 		p_pos += 0.05f * p_front * 1;
 	} else if (key == 65 && action) {
 		vec3 p_right = cross(p_up, p_front);
@@ -472,13 +491,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 	} else if (key == 63 && action) {
 		p_pos -= 0.05f * p_front * 1;
 	}
+	// Pause vehicles
+	else if (key == 32) {
+		play = !play;
+	}
 
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	cout<<"MODE "<< mode<<endl;
+	cout << "MODE " << mode << endl;
 	if (mode == HEIGHTMAP_MODE && action && button == GLFW_MOUSE_BUTTON_1) {
-		cout<<"heightmap bup"<<endl;
+		cout << "heightmap bup" << endl;
 		if (building.heightmap_points.size() < 2) {
 			building.heightmap_points.push_back(m_pos);
 			return;
@@ -705,7 +728,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-			GL_TEXTURE_CUBE_MAP);
+	GL_TEXTURE_CUBE_MAP);
 
 }
 
