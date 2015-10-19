@@ -29,6 +29,8 @@ class RoadNetwork;
 
 class AStarSearchAlgo;
 
+class Spline;
+
 // Controller for vehicles
 class VehicleController {
 
@@ -42,6 +44,9 @@ private:
 
 	// Pointer to AStar
 	AStarSearchAlgo *m_aStar = nullptr;
+
+	// Pointer to spline
+	Spline *m_spline = nullptr;
 
 	// Points that vehicles cannot occupy
 	std::vector<comp308::vec3> m_outOfBounds;
@@ -77,7 +82,11 @@ private:
 
 	comp308::vec3 interpolate_straight(Vehicle*, comp308::vec3*,
 			cycle::roadNode*);
+	comp308::vec3 interpolate_straight(Vehicle*, comp308::vec3*);
 	turn interpolate_curve(Vehicle*, comp308::vec3*, comp308::vec3*, Direction);
+
+	comp308::vec3 interpolate(Vehicle *v, cycle::roadNode*, cycle::roadNode*, cycle::roadNode*);
+	comp308::vec3 interpolate(Vehicle *v, int);
 
 	comp308::vec3 turnSimp(comp308::vec3*, comp308::vec3*, cycle::roadNode*, cycle::roadNode*);
 public:
@@ -94,7 +103,7 @@ public:
 	void testRender();
 
 	// Render a specific vehicle given a transformation and a texture
-	void renderVehicle(Vehicle*, comp308::vec3, comp308::vec3, comp308::vec3,
+	void renderVehicle(Vehicle*, comp308::vec3*, comp308::vec3*, comp308::vec3*,
 			int texture = -1);
 };
 

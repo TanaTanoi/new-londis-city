@@ -156,10 +156,6 @@ void Vehicle::readOBJ(string filename) {
 		createNormals();
 }
 
-void Vehicle::setSpline(vector<vec3> keyframes) {
-	m_spline = new Spline(keyframes);
-}
-
 void Vehicle::createNormals() {
 
 	// Initialize the normals vector

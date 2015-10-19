@@ -34,9 +34,10 @@ struct buildingLOD {
 
 
 const float BLOCK_SIZE = 0.3f;
+const float FOUNDATION_SIZE = 0.05f;
 const float WINDOW_WIDTH = 0.1f;
 const float EXTRUDE_THRESHOLD = 0.1f;//default 0.3
-const int TOTAL_WALL_TEXTURES = 3;
+const int TOTAL_WALL_TEXTURES = 4;
 const int TOTAL_WINDOW_TEXTURES = 5;
 
 class Building {
@@ -63,7 +64,7 @@ public:
 
 	int generateRandomBuildings(void);
 	static int basicHashcode(std::string);
-	int generateBuildingFromString(std::string,float,int);	
+	int generateSingleBuilding(int,float);
 
 	int generateBuildingsFromSections(std::string, std::vector<util::section>);	//Test method
 	int generateBuildingsFromSections(std::vector<util::section>);
