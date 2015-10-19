@@ -389,12 +389,12 @@ inline vec2 centrePointOfLine(line l){
 }
 
 
-bool floatEqual(float x, float y){
+inline bool floatEqual(float x, float y){
 	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
 	return (int)round(x*10.0f) == (int)round(y*10.0f);
 }
 
-bool vecEqual(vec2 a, vec2 b){
+inline bool vecEqual(vec2 a, vec2 b){
 	return floatEqual(a.x, b.x) && floatEqual(a.y, b.y);
 }
 
