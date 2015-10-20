@@ -35,21 +35,27 @@ void RoadNetwork::genGridPoints() {
 }
 
 void RoadNetwork::genRadialPoints() {
-	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;	
-	vec2 centrePoint = vec2((farRight-farLeft)/2, (maxHeight-minHeight)/2);
+	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;
+	vec2 centrePoint = vec2(farLeft + (farRight-farLeft)/2, minHeight + (maxHeight-minHeight)/2);
+	cout << "Circle Points " << circlePoints << endl;
 	points.push_back(centrePoint);
 	for (int i = radOut; i < maxHalfLength; i = i + radOut) {
+		cout << "Max half length: " << maxHalfLength << " Rad out : " << i << endl;
 		for (int j = 0; j < circlePoints; j++) {
+			cout << "J is " << j << endl;
 			vec2 startCirc;
-			if (j == 0) {				
-				startCirc = vec2(centrePoint.x, centrePoint.y + radOut);
+			if (j == 0) {
+				startCirc = vec2(centrePoint.x, centrePoint.y + i);
 				if (insideWorld(startCirc)) {
+					cout << "Start is inside world"<< endl;
 					points.push_back(startCirc);
 				}
 			}
-			else {				
-				vec2 p = rotate(centrePoint,startCirc, j/circlePoints*360);
+			else {
+				vec2 p = rotate(centrePoint,startCirc, ((float)j/(float)circlePoints)*360);
+				cout << "new vector " << j << " is " << p.x << "  " << p.y << endl;
 				if (insideWorld(p)) {
+					cout << "Non start "  << j << " is inside world" << endl;
 					points.push_back(p);
 				}
 			}
@@ -321,7 +327,8 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	createNewYorkGrid(outline);
+	//createNewYorkGrid(outline);
+	genRadialPoints();
 
 	//testIsolatedVertex();
 	//testFilamentVertex();
@@ -343,7 +350,7 @@ void RoadNetwork::createRoads(section world){
 		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
 	}
 
-	findMinimumCycles();
+	//findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways
@@ -372,6 +379,13 @@ void RoadNetwork::testNetwork(){
 }
 
 void RoadNetwork::renderRoads(){
+	glColor3f(0.5,0.0,0.5);
+	glBegin(GL_POINTS);
+	for(vec2 dot : points){
+		glVertex2f(dot.x,dot.y);
+	}
+	glEnd();
+
 	glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
 	glBegin(GL_LINES);
 	for(line l : outline.lines){
@@ -380,49 +394,49 @@ void RoadNetwork::renderRoads(){
 	}
 	glEnd();
 
-	glColor3f(1.0f,0.0f,0.0f); // red roads
-	glLineWidth(2.0f);
-	glBegin(GL_LINES);
-	int j = 0;
-	//	for(road r : allRoads){
-	//	for(int i = allRoads.size()-1;i>=0;i--){
-	for(int i = 0; i < allRoads.size();i++){
-		road r = allRoads[i];
-		float chance =  r.ID/(float)allRoads.size();j++;
-		srand(r.ID);
-		//		if(chance<0.33f){
-		//			glColor3f(chance*3.0f,0,0);
-		//		}else if(chance <0.66f){
-		//			glColor3f(0,(chance-0.33f)*3.0f,0);
-		//		}else{
-		//			glColor3f(0,0,(chance-0.66f)*3.0f);
-		//		}
-		float red = (float)rand()/(RAND_MAX);
-		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
-		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
-		glVertex2f(r.start.location.x, r.start.location.y);
-		glVertex2f(r.end.location.x, r.end.location.y);
-
-	}
-	glEnd();
-	glColor3f(0.0,1.0,0.0);
-	for(primitive p :cycles){
-		float red = (float)rand()/(RAND_MAX);
-		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
-		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
-		glBegin(GL_POLYGON);
-
-		for(roadNode v : p.vertices){
-			glVertex2f(v.location.x, v.location.y);
-		}
-		glEnd();
-	}
+//	glColor3f(1.0f,0.0f,0.0f); // red roads
+//	glLineWidth(2.0f);
+//	glBegin(GL_LINES);
+//	int j = 0;
+//	//	for(road r : allRoads){
+//	//	for(int i = allRoads.size()-1;i>=0;i--){
+//	for(int i = 0; i < allRoads.size();i++){
+//		road r = allRoads[i];
+//		float chance =  r.ID/(float)allRoads.size();j++;
+//		srand(r.ID);
+//		//		if(chance<0.33f){
+//		//			glColor3f(chance*3.0f,0,0);
+//		//		}else if(chance <0.66f){
+//		//			glColor3f(0,(chance-0.33f)*3.0f,0);
+//		//		}else{
+//		//			glColor3f(0,0,(chance-0.66f)*3.0f);
+//		//		}
+//		float red = (float)rand()/(RAND_MAX);
+//		srand(rand());
+//		float gr = (float)rand()/RAND_MAX;
+//		srand(rand());
+//		float br = (float)rand()/RAND_MAX;
+//		glColor3f(red,gr,br);
+//		glVertex2f(r.start.location.x, r.start.location.y);
+//		glVertex2f(r.end.location.x, r.end.location.y);
+//
+//	}
+//	glEnd();
+//	glColor3f(0.0,1.0,0.0);
+//	for(primitive p :cycles){
+//		float red = (float)rand()/(RAND_MAX);
+//		srand(rand());
+//		float gr = (float)rand()/RAND_MAX;
+//		srand(rand());
+//		float br = (float)rand()/RAND_MAX;
+//		glColor3f(red,gr,br);
+//		glBegin(GL_POLYGON);
+//
+//		for(roadNode v : p.vertices){
+//			glVertex2f(v.location.x, v.location.y);
+//		}
+//		glEnd();
+//	}
 
 
 
