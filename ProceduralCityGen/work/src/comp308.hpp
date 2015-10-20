@@ -1026,6 +1026,7 @@ inline vec3 cross(const vec3 &lhs, const vec3 &rhs) {
 
 // returns unit vector
 inline vec3 normalize(const vec3 &v) {
+	if(length(v)==0)return v;
 	return v / length(v);
 }
 

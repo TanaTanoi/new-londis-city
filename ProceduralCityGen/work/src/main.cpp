@@ -87,12 +87,12 @@ int main(int argc, char **argv) {
 			mode = NETWORK_MODE;
 		}else if(argument.compare("-seed")==0){
 			if(i+1>=argc){//if we don't have an additional argument
-				cout<<"Seed requires a parameter (e.g. '-seed COMP308')"<<endl;
+				cout<<"Seed requires a parameter (example usage. '-seed COMP308')"<<endl;
 				return -1;
 			}else{
 				user_seed = Building::basicHashcode(std::string(argv[i+1]));
 				cout<<"Using seed "<< argv[i+1]<<endl;
-				i++;
+				i+=1;
 			}
 		}else if(argument.compare("-heightmap")==0){
 			//if the user wants a heightmap to pop up
@@ -106,14 +106,10 @@ int main(int argc, char **argv) {
 
 		}else if(argument.compare("-joystick")==0){
 			//enable joystick if it is present
-			if(glfwJoystickPresent(GLFW_JOYSTICK_1)){
 				options = options| op_joystick;
-			}else{
-				cout<<"No joystick present;"<<endl;
-			}
 
 		}else if (argument.compare("-modelview") == 0) {
-			options = op_modelview;
+			options = options|op_modelview;
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
 		}else{
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
@@ -373,9 +369,26 @@ void generateBuildings(){
 	// Generate building display list
 	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
+
+	vec2 min = vec2(10000,10000);
+	vec2 max = vec2(0,0);
+	vec2 zero = vec2(0,0);
+	for(lot l: allLots){
+
+		vector<vec2> bounds = Generator::getBoundingBox(Generator::sectionToPoints(l.boundingBox));
+		if(distance(bounds[0],zero)<distance(min,zero)){
+			min = bounds[0];
+		}
+		if(distance(bounds[1],zero)>distance(max,zero)){
+			max = bounds[1];
+		}
+	}
+	float range = distance(max,min);
+
+
 	for(lot l: allLots){
 		srand(rand());
-		l.buildings.high = building.generateBuildingsFromSections(l.sections);
+		l.buildings.high = building.generateBuildingsFromSections(l.sections,range,min);
 		g_sections->addBuildingToLot(l);
 	}
 	cout<<"Done! "<<g_sections->getLots().size()<<" lots created"<<endl;
@@ -500,15 +513,20 @@ void drawGrid(double grid_size, double square_size) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		int mods) {
 	cout << "Key: " << key << endl;
+	if((options&op_heightmap) && key == 257&&action){
 
-	if((options&op_heightmap) && key == 257){
-		cout<<"Entering render mode"<<endl;
-		options = options&!op_heightmap;//disable heightmap
 		generateBuildings();
+		options = options^op_heightmap;//disable heightmap
+		cout<<"Disabling heightmap, entering render mode "<<(options&op_modelview)<<endl;
 		if(options&op_joystick){
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
-		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+		if((options&op_modelview)){
+			glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
+			cout<<"Setting modelview "<<endl;
+		}else{
+			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+		}
 	}else if(mode == SHOWCASE_MODE && key == 257&&action){
 		showcase_mode_angle = 1;
 	}else if (key == 87 && action) {
@@ -544,7 +562,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
-	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {
+	} /*else if (button == GLFW_MOUSE_BUTTON_2 && action) {
 		string input;
 		cout << "Enter an input seed: ";
 		cin >> input;
@@ -553,7 +571,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 				g_sections->testSection().sections);
 		mode = 0;
 		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
-	}
+	}*/
 }
 
 bool firstM = true;
@@ -691,7 +709,7 @@ void joystickEventsPoll() {
 	 * 10 - Right Stick Press
 	 */
 	if (button_count > 0) {
-		if (buttons[8] == GLFW_PRESS && !c_xbox_button_down) {
+		/*if (buttons[8] == GLFW_PRESS && !c_xbox_button_down) {
 
 			c_xbox_button_down = true;
 			//If Xbox button pressed
@@ -700,7 +718,7 @@ void joystickEventsPoll() {
 			cout << "Regenerating city" << endl;
 		} else if (buttons[8] == GLFW_RELEASE) {
 			c_xbox_button_down = false;
-		}
+		}*/
 	}
 }
 
