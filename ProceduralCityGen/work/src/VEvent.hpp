@@ -24,7 +24,7 @@ class VEvent
 {
 public:
 	comp308::vec2 point;
-	bool pe;
+	bool pe = false;
 	double y;
 	int archIndex;
 	int ID;
@@ -55,7 +55,7 @@ public:
 
 
 	struct CompareEvent	{
-		bool operator()(VEvent l, VEvent r) { return (l.y < r.y); }
+		bool operator()(VEvent l, VEvent r) { return (l.y > r.y); }
 	};
 };
 

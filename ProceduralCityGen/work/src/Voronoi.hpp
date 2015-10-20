@@ -28,8 +28,8 @@ namespace vor
 		Useful data containers for Vertices (places) and Edges of Voronoi diagram
  */
 
-typedef std::list<comp308::vec2> vertices;
-typedef std::list<VEdge> edges;
+typedef std::vector<comp308::vec2> vertices;
+typedef std::vector<VEdge> edges;
 
 /*
 		Class for generating the Voronoi diagram

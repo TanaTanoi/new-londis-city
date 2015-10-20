@@ -19,7 +19,7 @@ private:
 
 public:
 
-	bool isLeaf = false; // whether the node is internal or a leaf
+	bool isLeaf; // whether the node is internal or a leaf
 	VEvent cEvent; //an arch of parabola or an intersection between two archs (which defines an edge).
 	VEdge edge; // edge
 	int parent; // parent node in tree
@@ -30,6 +30,7 @@ public:
 	comp308::vec2 site;// focus point of parabola
 
 	Parabola(comp308::vec2 rn, int id){
+		isLeaf = true;
 		site = rn;
 		ID = id;
 		parent = -1;
@@ -37,11 +38,16 @@ public:
 		left = -1;} // note an ID of - 1 means null
 
 	Parabola(){
-		parent = -1;
+		isLeaf = false;
+	site = vec2();
+	ID = -1;
+	parent = -1;
 	right = -1;
 	left = -1;}
 
-	Parabola(int id){ID = id;		parent = -1;
+	Parabola(int id){
+		isLeaf = false;
+		ID = id;		parent = -1;
 	right = -1;
 	left = -1;}
 

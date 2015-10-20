@@ -15,8 +15,7 @@
 #include "utility.hpp"
 #include "comp308.hpp"
 #include "cycleUtil.hpp"
-
-
+#include "Voronoi.hpp"
 
 
 class RoadNetwork{
@@ -37,9 +36,10 @@ private:
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;
-	int gridSpace = 20;
+	int gridSpace = 90;
 	int radOut = 15;
 	int circlePoints = 6;
+	vor::Voronoi voro;
 
 	int insideWorld(comp308::vec2);
 	int insideWorld(cycle::road);
@@ -64,6 +64,7 @@ private:
 
 	void genGridPoints();
 	void genRadialPoints();
+	void createVoronoiRoads();
 
 	void testIsolatedVertex();
 	void testFilamentVertex();

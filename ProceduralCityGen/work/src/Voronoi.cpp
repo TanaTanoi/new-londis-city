@@ -34,23 +34,32 @@ edges Voronoi::GetEdges(vertices v, int w, int h){
 	edgeList.clear(); // clears all edges
 	points.clear(); // clears all points
 
+	cout <<"___________ Adding Points _____________" << endl;
 	for(vertices::iterator i = places.begin(); i!=places.end(); ++i){
 		vec2 rn = *i;
 		VEvent newEvent = VEvent( rn, true, eventID++);
+		cout << "Pushing ID " << newEvent.ID << "  "<< rn.x << " " << rn.y << endl;
 		queue.push(newEvent);
 	}
+
+	cout << "Pushed all vertices" << endl;
 
 	VEvent e;
 	while(!queue.empty()){
 		e = queue.top();
 		queue.pop();
 		ly = e.point.y;
-		if(deleted.find(e) != deleted.end()) {	deleted.erase(e); continue;}
-		if(e.pe) InsertParabola(e.point);
-		else RemoveParabola(e);
+		cout << "Popped event" << e.ID << " at y: " << ly << endl;
+		if(deleted.find(e) != deleted.end()) {cout << "Deleted erased" << endl;	deleted.erase(e); continue;}
+		if(e.pe){cout <<"Inserting Parabola" << endl; InsertParabola(e.point);}
+		else{cout << "Removing Parabola" << endl; RemoveParabola(e);}
 	}
 
+	cout << "Processed all events" << endl;
+
 	FinishEdge(parabolas[rootID]);
+
+	cout << "Finished edge" << endl;
 
 	for(edges::iterator i = edgeList.begin(); i != edgeList.end(); ++i)	{
 		if( (*i).neighbourID == -1){
@@ -63,9 +72,12 @@ edges Voronoi::GetEdges(vertices v, int w, int h){
 }
 
 void Voronoi::InsertParabola(vec2 p){
-	if((int)parabolas.size() == 0 || count == 0){parabolas.push_back(Parabola(p,parabolaID++)); return;}
+	if((int)parabolas.size() == 0){parabolas.push_back(Parabola(p,parabolaID++)); return;}
+	cout << "Not root" << endl;
 	Parabola root = parabolas[rootID];
+	cout << "got root " << endl;
 	if(root.isLeaf && root.site.y - p.y < 1) {
+		cout <<"root is a leaf" << endl;
 		vec2 fp = root.site;
 		root.isLeaf = false;
 
@@ -88,10 +100,13 @@ void Voronoi::InsertParabola(vec2 p){
 		return;
 	}
 	Parabola par = GetParabolaByX(p.x);
-
-	if(par.cEvent.ID == -1)	{
+	cout << "Par is " << par.ID<<endl;
+	cout << "cEvent " << par.cEvent.ID << endl;
+	if(par.cEvent.ID != -1)	{
+		cout <<"Proccesed this event " << endl;
+ 		par.cEvent.ID = -1;
 		deleted.insert(par.cEvent);
-		par.cEvent.ID = -1;
+		parabolas[par.ID] = par;
 	}
 
 	roadNode start;
@@ -121,7 +136,7 @@ void Voronoi::InsertParabola(vec2 p){
 	par.left = blank.ID;
 
 	parabolas[par.left].left = p0.ID;
-	parabolas[par.left].right = p2.ID;
+	parabolas[par.left].right = p1.ID;
 
 	parabolas[par.ID] = par; // copies changes across
 
@@ -138,8 +153,8 @@ void Voronoi::RemoveParabola(VEvent e){
 	Parabola p0 = GetLeftChild(xl);
 	Parabola p2 = GetRightChild(xr);
 
-	if(p0.cEvent.ID != -1){ deleted.insert(p0.cEvent); parabolas[p0.ID].cEvent.ID = -1; }
-	if(p2.cEvent.ID != -1){ deleted.insert(p2.cEvent); parabolas[p2.ID].cEvent.ID = -1; }
+	if(p0.cEvent.ID != -1){ deleted.insert(p0.cEvent); parabolas[p0.ID].cEvent.ID = -1;}
+	if(p2.cEvent.ID != -1){ deleted.insert(p2.cEvent); parabolas[p2.ID].cEvent.ID = -1;}
 
 	roadNode p;
 	p.location = vec2(e.point.x, GetY(p1.site, e.point.x));
@@ -157,7 +172,10 @@ void Voronoi::RemoveParabola(VEvent e){
 		if(par.ID == xl.ID) higher = xl;
 		if(par.ID == xr.ID) higher = xr;
 	}
-	higher.edge = VEdge(p, p0.site, p2.site, edgeID++);
+	if(higher.ID >= 0){
+		higher.edge = VEdge(p, p0.site, p2.site, edgeID++);
+	}
+
 	edgeList.push_back(higher.edge);
 
 	Parabola gparent = parabolas[parabolas[p1.parent].parent];
@@ -188,20 +206,26 @@ void Voronoi::RemoveParabola(VEvent e){
 }
 
 void Voronoi::FinishEdge(Parabola n){
-	if(n.isLeaf) {int ID  = n.ID; n.ID = -1; parabolas[ID] = n; return;} // what do I do here?
+	if(n.isLeaf) {cout << "N is a leaf" << endl; int ID  = n.ID; n.ID = -1; parabolas[ID] = n; return;} // what do I do here?
+	cout << "N is not a leaf" << endl;
 	double mx;
 	//struct primitive{
-		if(n.edge.direction.x > 0.0){ mx = max(width, double(n.edge.edge.start.location.x) + 10 );}
-		else{ mx = min(0.0, double(n.edge.edge.start.location.x) - 10);}
+	if(n.edge.direction.x > 0.0){ mx = max(width, double(n.edge.edge.start.location.x) + 10 );}
+	else{ mx = min(0.0, double(n.edge.edge.start.location.x) - 10);}
 
-		roadNode end;
-		end.location = vec2(mx, mx * n.edge.f + n.edge.g);
-		n.edge.edge.end.location = end.location;
-		points.push_back(end);
-
-		FinishEdge(parabolas[n.left]);
-		FinishEdge(parabolas[n.right]);
-		parabolas[n.ID].ID = -1;
+	roadNode end;
+	end.location = vec2(mx, mx * n.edge.f + n.edge.g);
+	cout<<"MX "<<mx << "mx * n.edge.f + n.edge.g " << mx * n.edge.f + n.edge.g <<endl;
+	n.edge.edge.end.location = end.location;
+	points.push_back(end);
+	parabolas[n.ID] = n;
+	Parabola thingy = parabolas[n.ID];
+	cout<<"p end " << thingy.edge.edge.end.location.x <<  " "<<thingy.edge.edge.end.location.y << endl;
+	if(n.left == -1){cout << "Left is neg 1 " << endl;}
+	FinishEdge(parabolas[n.left]);
+	if(n.right == -1){cout << "Right is neg 1 " << endl;}
+	FinishEdge(parabolas[n.right]);
+	parabolas[n.ID].ID = -1;
 	//}
 }
 
@@ -234,14 +258,17 @@ double	Voronoi::GetXOfEdge(Parabola par, double y){
 	if(p.y < r.y ) ry =  max(x1, x2);
 	else ry = min(x1, x2);
 
+	cout << "Returning x of edge" << endl;
+
 	return ry;
 }
 
 Parabola Voronoi::GetParabolaByX(double xx){
-	Parabola par = parabolas[0];
+	Parabola par = parabolas[rootID];
 	double x = 0.0;
 
 	while(!par.isLeaf){
+		cout <<"I'm stucj healp" << endl;
 		x = GetXOfEdge(par, ly);
 		if(x>xx) par = parabolas[par.left];
 		else par = parabolas[par.right];
@@ -259,11 +286,16 @@ double Voronoi::GetY(vec2 p, double x){
 }
 
 void Voronoi::CheckCircle(Parabola b){
+	cout << "Checking circle " << endl;
 	Parabola lp = GetLeftParent(b);
 	Parabola rp = GetRightParent(b);
 
+	cout << "Check circle has parent parabolas " << endl;
+
 	Parabola a  = GetLeftChild (lp);
 	Parabola c  = GetRightChild(rp);
+
+	cout << "Check circle has child parabolas " << endl;
 
 	if(a.ID == -1 || c.ID == -1 || vecEqual(a.site, c.site)) return;
 	roadNode s;
@@ -281,10 +313,13 @@ void Voronoi::CheckCircle(Parabola b){
 	VEvent e = VEvent(s.location, false,eventID++);
 	roadNode newNode = {e.point, nodeID++};
 	points.push_back(newNode);
+	e.archIndex = b.ID;
 	b.cEvent = e;
 	parabolas[b.ID] = b; // relays changes into parabolas
-	e.archIndex = b.ID;
+
 	queue.push(e);
+
+	cout << "checked circle" << endl;
 }
 
 roadNode Voronoi::GetEdgeIntersection(road a, road b){
@@ -309,20 +344,22 @@ Parabola Voronoi::GetRight(Parabola p){
 }
 
 Parabola Voronoi::GetLeftParent(Parabola p){
+	if(p.parent == -1){return Parabola();}
 	Parabola par = parabolas[p.parent];
 	Parabola pLast = p;
 	while(par.left == pLast.ID){
-		if(par.parent == -1){return parabolas[par.parent];}
+		if(par.parent == -1){return Parabola();}
 		pLast = par;
 		par = parabolas[par.parent];
 	}
 	return par;
 }
 Parabola Voronoi::GetRightParent(Parabola p){
+	if(p.parent == -1){return Parabola();}
 	Parabola par = parabolas[p.parent];
 	Parabola pLast = p;
 	while(par.right == pLast.ID){
-		if(par.parent == -1){return parabolas[par.parent];}
+		if(par.parent == -1){return Parabola();}
 		pLast = par;
 		par = parabolas[par.parent];
 	}
@@ -331,8 +368,11 @@ Parabola Voronoi::GetRightParent(Parabola p){
 
 Parabola Voronoi::GetLeftChild(Parabola p){
 	if(p.ID == -1){return p;}
+	if(p.left == -1){return Parabola();}
 	Parabola par = parabolas[p.left];
 	while(!par.isLeaf){
+		if(par.right == -1){return Parabola();}
+		cout << "eternal loop" << endl;
 		par = parabolas[par.right];
 	}
 	return par;
@@ -340,8 +380,10 @@ Parabola Voronoi::GetLeftChild(Parabola p){
 
 Parabola Voronoi::GetRightChild(Parabola p){
 	if(p.ID == -1){return p;}
+	if(p.right == -1){return Parabola();}
 	Parabola par = parabolas[p.right];
 	while(!par.isLeaf){
+		if(par.left == -1){return Parabola();}
 		par = parabolas[par.left];
 	}
 	return par;

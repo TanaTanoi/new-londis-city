@@ -9,11 +9,14 @@
 #include "comp308.hpp"
 #include "utility.hpp"
 #include "cycleUtil.hpp"
+#include "Voronoi.hpp"
+#include "VEdge.hpp"
 
 using namespace util;
 using namespace cycle;
 using namespace comp308;
 using namespace std;
+using namespace vor;
 
 RoadNetwork::RoadNetwork(){}
 /**
@@ -328,27 +331,27 @@ void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
 	//createNewYorkGrid(outline);
-	genRadialPoints();
-
+	//genRadialPoints();
+	createVoronoiRoads();
 	//testIsolatedVertex();
 	//testFilamentVertex();
 	//testCycle();
 
-	cout << endl;
-	cout << "Adjacency List" << endl;
-	for(int i = 0; i < adjacencyList.size(); i++){
-		cout << " key " << i << ": ";
-		for(int j = 0; j < adjacencyList[i].size(); j++){
-			cout << " " << adjacencyList[i][j];
-		}
-		cout << endl;
-	}
-
-	cout << endl;
-	cout << "Road List" << endl;
-	for(int i = 0; i < allRoads.size(); i++){
-		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
-	}
+//	cout << endl;
+//	cout << "Adjacency List" << endl;
+//	for(int i = 0; i < adjacencyList.size(); i++){
+//		cout << " key " << i << ": ";
+//		for(int j = 0; j < adjacencyList[i].size(); j++){
+//			cout << " " << adjacencyList[i][j];
+//		}
+//		cout << endl;
+//	}
+//
+//	cout << endl;
+//	cout << "Road List" << endl;
+//	for(int i = 0; i < allRoads.size(); i++){
+//		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
+//	}
 
 	//findMinimumCycles();
 	cout << "Done !" << endl;
@@ -375,10 +378,37 @@ void RoadNetwork::testNetwork(){
 	s.lines = lines;
 
 	createRoads(s);
+}
 
+void RoadNetwork::createVoronoiRoads(){
+	//genGridPoints();
+	vec2 a = vec2(200,300);
+	vec2 b = vec2(300,200);
+	vec2 c = vec2(200,200);
+	vec2 d = vec2(350,150);
+	vec2 e = vec2(300,100);
+	points.push_back(a);
+	points.push_back(b);
+	points.push_back(d);
+	points.push_back(c);
+	points.push_back(e);
+	points.push_back(e-a);
+	points.push_back(e-c);
+
+	cout<< "Points generated" << endl;
+	voro = Voronoi();
+	vor::edges edgeList = voro.GetEdges(points, 600, 600);
+
+	cout << "edgeList size " << edgeList.size() << endl;
+	for(VEdge e : edgeList){
+		allRoads.push_back(e.edge);
+		cout <<" road " << e.edge.start.location.x <<" , " << e.edge.start.location.y << "    " << e.edge.end.location.x << " , " << e.edge.end.location.y << endl;
+	}
 }
 
 void RoadNetwork::renderRoads(){
+	//cout <<"rendering roads" << endl;
+
 	glColor3f(0.5,0.0,0.5);
 	glBegin(GL_POINTS);
 	for(vec2 dot : points){
@@ -394,34 +424,33 @@ void RoadNetwork::renderRoads(){
 	}
 	glEnd();
 
-//	glColor3f(1.0f,0.0f,0.0f); // red roads
-//	glLineWidth(2.0f);
-//	glBegin(GL_LINES);
-//	int j = 0;
+	glColor3f(1.0f,0.0f,0.0f); // red roads
+	glLineWidth(2.0f);
+	glBegin(GL_LINES);
+	int j = 0;
 //	//	for(road r : allRoads){
 //	//	for(int i = allRoads.size()-1;i>=0;i--){
-//	for(int i = 0; i < allRoads.size();i++){
-//		road r = allRoads[i];
-//		float chance =  r.ID/(float)allRoads.size();j++;
-//		srand(r.ID);
-//		//		if(chance<0.33f){
-//		//			glColor3f(chance*3.0f,0,0);
-//		//		}else if(chance <0.66f){
-//		//			glColor3f(0,(chance-0.33f)*3.0f,0);
-//		//		}else{
-//		//			glColor3f(0,0,(chance-0.66f)*3.0f);
-//		//		}
-//		float red = (float)rand()/(RAND_MAX);
-//		srand(rand());
-//		float gr = (float)rand()/RAND_MAX;
-//		srand(rand());
-//		float br = (float)rand()/RAND_MAX;
-//		glColor3f(red,gr,br);
-//		glVertex2f(r.start.location.x, r.start.location.y);
-//		glVertex2f(r.end.location.x, r.end.location.y);
-//
-//	}
-//	glEnd();
+	for(int i = 0; i < allRoads.size();i++){
+		road r = allRoads[i];
+		float chance =  r.ID/(float)allRoads.size();j++;
+		srand(r.ID);
+		//		if(chance<0.33f){
+		//			glColor3f(chance*3.0f,0,0);
+		//		}else if(chance <0.66f){
+		//			glColor3f(0,(chance-0.33f)*3.0f,0);
+		//		}else{
+		//			glColor3f(0,0,(chance-0.66f)*3.0f);
+		//		}
+		float red = (float)rand()/(RAND_MAX);
+		srand(rand());
+		float gr = (float)rand()/RAND_MAX;
+		srand(rand());
+		float br = (float)rand()/RAND_MAX;
+		glColor3f(red,gr,br);
+		glVertex2f(r.start.location.x, r.start.location.y);
+		glVertex2f(r.end.location.x, r.end.location.y);
+	}
+	glEnd();
 //	glColor3f(0.0,1.0,0.0);
 //	for(primitive p :cycles){
 //		float red = (float)rand()/(RAND_MAX);
