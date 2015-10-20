@@ -9,11 +9,14 @@
 #include "comp308.hpp"
 #include "utility.hpp"
 #include "cycleUtil.hpp"
+#include "Voronoi.hpp"
+#include "VEdge.hpp"
 
 using namespace util;
 using namespace cycle;
 using namespace comp308;
 using namespace std;
+using namespace vor;
 
 RoadNetwork::RoadNetwork(){}
 /**
@@ -34,22 +37,79 @@ void RoadNetwork::genGridPoints() {
 	}
 }
 
+void RoadNetwork::genBranchRoads(vec2 start) {
+	roadNode rn = addNode(start); // adds to adj list
+
+	for (int i = 0; i < 4; i++) {
+		int count = (int)allNodes.size();
+		for (int i = 0; i < count; i++) {
+			branch(allNodes[i]);
+		}
+	}
+	
+}
+
+void RoadNetwork::branch(roadNode n) {
+	// Gets length of new road
+	float random = ((float)rand() / (RAND_MAX));
+	float length = minLength + random*(maxLength - minLength);
+	random = ((float)rand() / (RAND_MAX));
+	// Gets angle of new road
+	float angle = minAngle + random* (maxAngle - minAngle);
+	float radAngle = radians(angle);
+	//Creates new road
+	vec2 dir = normalize(vec2((float)cos(radAngle), (float)sin(radAngle)));
+	vec2 road = dir*length;
+	vec2 endPoint = n.location + road;
+	// Adds new road
+	roadNode end = addNode(endPoint);
+	canBranch.insert(end); // adds new node to branch set
+	addRoad(n,end);
+
+	updateBranchList(n);
+	
+}
+
+void RoadNetwork::updateBranchList(roadNode n) {
+	float random = ((float)rand() / (RAND_MAX));
+	int noAdj = (int)adjacencyList[n.ID].size();
+	
+	if (noAdj == 1) {
+		if (random < 0.1) { canBranch.erase(n); } // 10% chance of being removed
+	}
+	else if (noAdj == 2) {
+		if (random < 0.35) { canBranch.erase(n); } // 35% chance of being removed
+	}
+	else if (noAdj == 3) {
+		if (random < 0.7) { canBranch.erase(n); } // 70% chance of being removed
+	}
+	else {
+		canBranch.erase(n); //remove from canBranch
+	}
+}
+
 void RoadNetwork::genRadialPoints() {
-	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;	
-	vec2 centrePoint = vec2((farRight-farLeft)/2, (maxHeight-minHeight)/2);
+	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;
+	vec2 centrePoint = vec2(farLeft + (farRight-farLeft)/2, minHeight + (maxHeight-minHeight)/2);
+	cout << "Circle Points " << circlePoints << endl;
 	points.push_back(centrePoint);
 	for (int i = radOut; i < maxHalfLength; i = i + radOut) {
+		cout << "Max half length: " << maxHalfLength << " Rad out : " << i << endl;
 		for (int j = 0; j < circlePoints; j++) {
+			cout << "J is " << j << endl;
 			vec2 startCirc;
-			if (j == 0) {				
-				startCirc = vec2(centrePoint.x, centrePoint.y + radOut);
+			if (j == 0) {
+				startCirc = vec2(centrePoint.x, centrePoint.y + i);
 				if (insideWorld(startCirc)) {
+					cout << "Start is inside world"<< endl;
 					points.push_back(startCirc);
 				}
 			}
-			else {				
-				vec2 p = rotate(centrePoint,startCirc, j/circlePoints*360);
+			else {
+				vec2 p = rotate(centrePoint,startCirc, ((float)j/(float)circlePoints)*360);
+				cout << "new vector " << j << " is " << p.x << "  " << p.y << endl;
 				if (insideWorld(p)) {
+					cout << "Non start "  << j << " is inside world" << endl;
 					points.push_back(p);
 				}
 			}
@@ -201,10 +261,6 @@ void RoadNetwork::calulateBoundary(){
 	}
 }
 
-bool floatEqual(float x, float y){
-	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
-	return (int)round(x*10.0f) == (int)round(y*10.0f);
-}
 
 void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 
@@ -325,29 +381,31 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	createNewYorkGrid(outline);
-
+	genBranchRoads(vec2(250,250));
+	//createNewYorkGrid(outline);
+	//genRadialPoints();
+	//createVoronoiRoads();
 	//testIsolatedVertex();
 	//testFilamentVertex();
 	//testCycle();
 
-	cout << endl;
-	cout << "Adjacency List" << endl;
-	for(int i = 0; i < adjacencyList.size(); i++){
-		cout << " key " << i << ": ";
-		for(int j = 0; j < adjacencyList[i].size(); j++){
-			cout << " " << adjacencyList[i][j];
-		}
-		cout << endl;
-	}
+//	cout << endl;
+//	cout << "Adjacency List" << endl;
+//	for(int i = 0; i < adjacencyList.size(); i++){
+//		cout << " key " << i << ": ";
+//		for(int j = 0; j < adjacencyList[i].size(); j++){
+//			cout << " " << adjacencyList[i][j];
+//		}
+//		cout << endl;
+//	}
+//
+//	cout << endl;
+//	cout << "Road List" << endl;
+//	for(int i = 0; i < allRoads.size(); i++){
+//		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
+//	}
 
-	cout << endl;
-	cout << "Road List" << endl;
-	for(int i = 0; i < allRoads.size(); i++){
-		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
-	}
-
-	findMinimumCycles();
+	//findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways
@@ -372,24 +430,58 @@ void RoadNetwork::testNetwork(){
 	s.lines = lines;
 
 	createRoads(s);
+}
 
+void RoadNetwork::createVoronoiRoads(){
+	//genGridPoints();
+	vec2 a = vec2(200,300);
+	vec2 b = vec2(300,200);
+	vec2 c = vec2(200,200);
+	vec2 d = vec2(350,150);
+	vec2 e = vec2(300,100);
+	points.push_back(a);
+	points.push_back(b);
+	points.push_back(d);
+	points.push_back(c);
+	points.push_back(e);
+	points.push_back(e-a);
+	points.push_back(e-c);
+
+	cout<< "Points generated" << endl;
+	voro = Voronoi();
+	vor::edges edgeList = voro.GetEdges(points, 600, 600);
+
+	cout << "edgeList size " << edgeList.size() << endl;
+	for(VEdge e : edgeList){
+		allRoads.push_back(e.edge);
+		cout <<" road " << e.edge.start.location.x <<" , " << e.edge.start.location.y << "    " << e.edge.end.location.x << " , " << e.edge.end.location.y << endl;
+	}
 }
 
 void RoadNetwork::renderRoads(){
-	glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
-	glBegin(GL_LINES);
-	for(line l : outline.lines){
-		glVertex2f(l.start.x, l.start.y);
-		glVertex2f(l.end.x, l.end.y);
-	}
-	glEnd();
+	//cout <<"rendering roads" << endl;
 
-	glColor3f(1.0f,0.0f,0.0f); // red roads
-	glLineWidth(2.0f);
+	//glColor3f(0.5,0.0,0.5);
+	//glBegin(GL_POINTS);
+	//for(vec2 dot : points){
+	//	glVertex2f(dot.x,dot.y);
+	//}
+	//glEnd();
+
+	//glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
+	//glBegin(GL_LINES);
+	//for(line l : outline.lines){
+	//	glVertex2f(l.start.x, l.start.y);
+	//	glVertex2f(l.end.x, l.end.y);
+	//}
+	//glEnd();
+
+	//glColor3f(1.0f,0.0f,0.0f); // red roads
+	//glLineWidth(2.0f);
 	glBegin(GL_LINES);
 	int j = 0;
-	//	for(road r : allRoads){
-	//	for(int i = allRoads.size()-1;i>=0;i--){
+//	//	for(road r : allRoads){
+//	//	for(int i = allRoads.size()-1;i>=0;i--){
 	for(int i = 0; i < allRoads.size();i++){
 		road r = allRoads[i];
 		float chance =  r.ID/(float)allRoads.size();j++;
@@ -409,24 +501,23 @@ void RoadNetwork::renderRoads(){
 		glColor3f(red,gr,br);
 		glVertex2f(r.start.location.x, r.start.location.y);
 		glVertex2f(r.end.location.x, r.end.location.y);
-
 	}
 	glEnd();
-	glColor3f(0.0,1.0,0.0);
-	for(primitive p :cycles){
-		float red = (float)rand()/(RAND_MAX);
-		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
-		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
-		glBegin(GL_POLYGON);
-
-		for(roadNode v : p.vertices){
-			glVertex2f(v.location.x, v.location.y);
-		}
-		glEnd();
-	}
+//	glColor3f(0.0,1.0,0.0);
+//	for(primitive p :cycles){
+//		float red = (float)rand()/(RAND_MAX);
+//		srand(rand());
+//		float gr = (float)rand()/RAND_MAX;
+//		srand(rand());
+//		float br = (float)rand()/RAND_MAX;
+//		glColor3f(red,gr,br);
+//		glBegin(GL_POLYGON);
+//
+//		for(roadNode v : p.vertices){
+//			glVertex2f(v.location.x, v.location.y);
+//		}
+//		glEnd();
+//	}
 
 
 
@@ -434,15 +525,15 @@ void RoadNetwork::renderRoads(){
 	glPointSize(10);
 
 	glBegin(GL_POINTS);
-	/*(roadNode n : allNodes){
-//	for(int i = allNodes.size()-1;i>=0;i--){
-//		roadNode n = allNodes[i];
+	//for(roadNode n : allNodes){
+	for(int i = allNodes.size()-1;i>=0;i--){
+		roadNode n = allNodes[i];
 		//if(n.ID > 10 &&  n.ID < 13){
-			//glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+			glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
 
 			glVertex2f(n.location.x, n.location.y);
-		//}
-	}*/
+//	 }
+	}
 	glEnd();
 }
 

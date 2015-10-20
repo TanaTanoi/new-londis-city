@@ -33,9 +33,16 @@ struct roadNode {
 		location = loc;
 		ID = id;
 	}
-	roadNode() {
+	roadNode() {}
 
+	bool operator<(const roadNode &rhs) const {
+		return ID < rhs.ID;
 	}
+
+	bool operator==(const roadNode &rhs) const {
+		return ID == rhs.ID;
+	}
+
 };
 
 struct road {
@@ -49,6 +56,8 @@ struct road {
 		end = e;
 		ID = id;
 	}
+
+	road(){}
 	// Will have a quad to represent for drawing
 };
 

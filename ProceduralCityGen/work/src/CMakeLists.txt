@@ -19,6 +19,9 @@ SET(headers
 	"spline.hpp"
 	"cycleUtil.hpp"
 	"aStarSearchAlgo.hpp"
+	"VEvent.hpp"
+	"VEdge.hpp"
+	"Voronoi.hpp"
 )
 
 
@@ -33,6 +36,7 @@ SET(sources
 	"roadNetwork.cpp"
 	"spline.cpp"
 	"aStarSearchAlgo.cpp"
+	"Voronoi.cpp"
 )
 
 # Add executable target and link libraries

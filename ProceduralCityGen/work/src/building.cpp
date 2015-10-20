@@ -63,10 +63,10 @@ void Building::initTexture() {
 	initShader();
 	glUseProgram(g_shader);
 	glUniform1i(glGetUniformLocation(g_shader, "texture0"), 0);
-	for(int i = 0; i < 2;i++){
-		glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[i]);
 
-	}
+	glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[0]);
+	glGenTextures(TOTAL_WALL_TEXTURES, tex_wall[1]);
+
 
 	glGenTextures(TOTAL_WINDOW_TEXTURES, tex_window[0]);
 	glGenTextures(1, tex_door[0]);
@@ -78,7 +78,6 @@ void Building::initTexture() {
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
 	loadTexture(tex_wall[0][2], "../work/res/textures/highrise003.jpg");
 	// loadTexture(tex_wall[0][3], "../work/res/textures/highrise004.jpg");
-
 	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
 	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
 	loadTexture(tex_wall[1][2], "../work/res/textures/brick003.jpg");

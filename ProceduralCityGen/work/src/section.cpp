@@ -24,7 +24,7 @@ line SectionDivider::findLongestEdge(section s) {
 	line longLine;
 
 	for (int i = 0; i < (int)s.lines.size(); i++) {
-		int newLength = abs(length(s.lines[i].start-s.lines[i].end));
+		int newLength = distance(s.lines[i].start,s.lines[i].end);
 		if (newLength > maxLength) {
 			maxLength = newLength;
 			longLine = s.lines[i];
@@ -262,16 +262,13 @@ vec2 SectionDivider::getSharedPoint(line a, line b) {
 		inter = getIntersection(a,b);
 	}catch(const noIntersectionException &e){cout << "Parallel in shared point" << endl;}
 
-	int asX = (int) round((a.start* 10.0).x); int aeX = (int) round((a.end* 10.0).x); int bsX = (int) round((b.start* 10.0).x); int beX = (int) round((b.end* 10.0).x);
-	int asY = (int) round((a.start* 10.0).y); int aeY = (int) round((a.end* 10.0).y); int bsY = (int) round((b.start* 10.0).y); int beY = (int) round((b.end* 10.0).y);
-
-	if ((asX == bsX && asY == bsY) || (asX == beX && asY == beY)){
+	if((floatEqual(a.start.x,b.start.x)&&floatEqual(a.start.y,b.start.y))||
+			(floatEqual(a.start.x,b.end.x)&&floatEqual(a.start.y,b.end.y))){
 		return a.start;
-	}
-	else if ((aeX == bsX && aeY == bsY) || (aeX == beX && aeY == beY)) {
+	}else if((floatEqual(a.end.x,b.start.x)&&floatEqual(a.end.y,b.start.y))||
+			(floatEqual(a.end.x,b.end.x)&&floatEqual(a.end.y,b.end.y))){
 		return a.end;
 	}
-
 	//cout << "A: " << a.start* 10 << endl;
 	//cout << "B: " << b.start*10 << endl;
 	//cout << "A: " << asX << " " << asY << " , "  << aeX << " " << aeY << endl;

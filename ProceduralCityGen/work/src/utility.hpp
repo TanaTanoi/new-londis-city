@@ -100,9 +100,14 @@ inline vec2 rotate(vec2 centrePoint, vec2 toRotate, float deg) {
 	double angleInRadians = radians(deg);
 	double cosTheta = cos(angleInRadians);
 	double sinTheta = sin(angleInRadians);
-	float x = (cosTheta * (toRotate.x - centrePoint.x) - sinTheta * (toRotate.y - centrePoint.y) + centrePoint.x);
-	float y = (sinTheta * (toRotate.x - centrePoint.x) + cosTheta * (toRotate.y - centrePoint.y) + centrePoint.y);
-	return vec2(x,y);
+	cout << "cosTheta " << cosTheta << "  sinTheta " << sinTheta << endl;
+	vec2 dir = toRotate-centrePoint;
+	float x = (cosTheta * (dir.x) - sinTheta * (dir.y));
+	float y = (sinTheta * (dir.x) + cosTheta * (dir.y));
+
+
+	cout << "  X  " << x << "   Y   " << y << endl;
+	return vec2(x,y)+centrePoint;
 }
 
 /*Returns a vec2 where r.x = gradient and r.y = y-offset*/
@@ -386,6 +391,16 @@ inline vec2 centrePointOfLine(line l){
 	dir = normalize(dir);
 	vec2 toReturn = l.start + dir * (leng / 2.0f);
 	return toReturn;
+}
+
+
+inline bool floatEqual(float x, float y){
+	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
+	return (int)round(x*10.0f) == (int)round(y*10.0f);
+}
+
+inline bool vecEqual(vec2 a, vec2 b){
+	return floatEqual(a.x, b.x) && floatEqual(a.y, b.y);
 }
 
 inline vector<line> linesIntersectingWithSection(section s, vec2 perpBi,
