@@ -38,6 +38,12 @@ class Vehicle {
 
 private:
 
+	// Unique ID
+	int m_id;
+
+	// Texture ID
+	int m_texID = -1;
+
 	// Fields for storing raw obj information
 	std::string m_filename;
 	std::vector<comp308::vec3> m_points;	// Point list
@@ -75,8 +81,8 @@ private:
 
 public:
 
-	Vehicle(std::string);
-	Vehicle(std::string, comp308::vec3, comp308::vec3, comp308::vec3);
+	Vehicle(std::string, int);
+	Vehicle(std::string, int, comp308::vec3, comp308::vec3, comp308::vec3);
 	virtual ~Vehicle();
 
 	bool hasReachedGoal(comp308::vec3 *goal);
@@ -93,7 +99,7 @@ public:
 	}
 
 	inline void incrementSplineTime() {
-		m_t += 0.01;
+		m_t += 0.008;
 	}
 
 	inline const float getSplineTime() const {
@@ -103,6 +109,8 @@ public:
 	inline const float getPathIndex() const {
 		return m_pathIndex;
 	}
+
+	void addPath(std::vector<cycle::roadNode>);
 
 	void setPath(std::vector<cycle::roadNode>);
 
@@ -191,6 +199,18 @@ public:
 
 	inline void setPosPrevious(const comp308::vec3& posPrevious) {
 		m_pos_previous = posPrevious;
+	}
+
+	inline const int getId() const {
+		return m_id;
+	}
+
+	inline void setTexture(const int texture = -1) {
+		m_texID = texture;
+	}
+
+	inline const int getTexture() const {
+		return m_texID;
 	}
 };
 

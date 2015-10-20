@@ -77,12 +77,12 @@ void Building::initTexture() {
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
 	loadTexture(tex_wall[0][2], "../work/res/textures/highrise003.jpg");
-	loadTexture(tex_wall[0][3], "../work/res/textures/highrise004.jpg");
+	// loadTexture(tex_wall[0][3], "../work/res/textures/highrise004.jpg");
 
 	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
 	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
 	loadTexture(tex_wall[1][2], "../work/res/textures/brick003.jpg");
-	loadTexture(tex_wall[1][3], "../work/res/textures/brick004.jpg");
+	// loadTexture(tex_wall[1][3], "../work/res/textures/brick004.jpg");
 
 	loadTexture(tex_window[0][0], "../work/res/textures/glass01.jpg");
 	loadTexture(tex_window[0][1], "../work/res/textures/window02.jpg");

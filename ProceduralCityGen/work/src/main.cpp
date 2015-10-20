@@ -61,10 +61,13 @@ int main(int argc, char **argv) {
 				cout<<"Car mode is a mode, not a parameter, It must be the first argument"<<endl;
 				return -1;
 			}
+			options = options|op_modelview;
 			if(i+1<argc){//check for optional parameter
 				// add optional parameter
-				car_mode_number = std::atoi(argv[i+1]);
-				i++;
+				if(argv[i+1][0]!='-'){
+					car_mode_number = std::atoi(argv[i+1]);
+					i++;
+				}
 			}
 			mode = CAR_MODE;
 		}else if(argument.compare("network")==0){
@@ -200,11 +203,11 @@ int main(int argc, char **argv) {
 
 	}
 
-	/*Setup camera and mouse stuff here*/
-	if(mode == NETWORK_MODE||mode == SECTION_MODE){
-		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
-	}else if((options&op_modelview)||mode==CAR_MODE){
+	/*Setup mouse stuff here*/
+	if((options&op_modelview)){//model view overwrites other types of
 		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
+	}else if(mode == NETWORK_MODE||mode == SECTION_MODE){
+		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
 	}else{
 		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 	}
@@ -225,7 +228,6 @@ void renderLoop(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-	//TODO clean up all of this gross code when we integrate
 
 	if(options &op_heightmap){
 		//Spline map mode
@@ -323,7 +325,7 @@ void renderLoop(){
 		setupCamera();
 		initLighting();
 		glTranslatef(-20, -2, 20);
-		drawGrid(40, 1);
+		// drawGrid(40, 1);
 		// Render the vehicles
 		vector<cycle::road> roads = g_network->getAllRoads();
 		for (int i = 0; i < (int) roads.size(); ++i) {
@@ -391,7 +393,7 @@ void initBuildingGenerator() {
 	glCullFace(GL_BACK);
 	/*Create a new building object*/
 	building = Building();
-	building.initTexture();
+
 	/*Initialize shader and heightmap points*/
 	initSkybox("../work/res/textures/cubeMap.jpg");
 	skybox_shader = makeShaderProgram("../work/res/shaders/skybox_shader.vert",
@@ -400,9 +402,11 @@ void initBuildingGenerator() {
 	building.heightmap_points.push_back(vec2(0, g_winHeight / 2));
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
+	building.initTexture();
 }
 
 void initLighting() {
+
 	float direction[] = { 0.0f, -0.5f, -0.5f, 0.0f };
 	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -419,17 +423,16 @@ void initLighting() {
 	vec3 difference = (vec3(0, 0, 0)
 			- vec3(light_position[0], light_position[1], light_position[2]));
 	float spotlight_direction[] = { p_dir.x, p_dir.y, p_dir.z, 0.0f };
-
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, (2.1f) - triggerDiff);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 200);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotlight_direction);
-
 	glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHTING);
+
 }
 
 /*Method taken from the internet that replicates gluPerspective using glFrustum*/

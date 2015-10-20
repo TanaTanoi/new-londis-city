@@ -20,16 +20,18 @@
 using namespace std;
 using namespace comp308;
 
-Vehicle::Vehicle(string filename) {
+Vehicle::Vehicle(string filename, int id) {
 	init(filename);
+	m_id = id;
 	// m_pos = vec3();
 	m_rot = vec3();
 	m_scale = vec3(0.1, 0.1, 0.1);
 }
 
 // Moves the starting position of the vehicle
-Vehicle::Vehicle(string filename, vec3 start_pos, vec3 start_rot, vec3 scale) {
+Vehicle::Vehicle(string filename, int id, vec3 start_pos, vec3 start_rot, vec3 scale) {
 	init(filename);
+	m_id = id;
 	// m_pos = start_pos;
 	m_rot = start_rot;
 	m_scale = scale;
@@ -265,9 +267,13 @@ cycle::roadNode Vehicle::getPreviousTarget() {
 
 	return m_path[m_pathIndex];
 }
+
+void Vehicle::addPath(std::vector<cycle::roadNode> path) {
+	m_path.insert(m_path.end(), path.begin(), path.end());
+}
+
 void Vehicle::setPath(std::vector<cycle::roadNode> path) {
 	cout << "Path size " << path.size() << endl;
 	m_path = path;
 	m_pathIndex = 0;
 }
-
