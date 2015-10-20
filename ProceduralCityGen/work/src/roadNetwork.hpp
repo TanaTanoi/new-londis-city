@@ -12,6 +12,7 @@
 #include <queue>
 #include <map>
 #include <vector>
+#include <set>
 #include "utility.hpp"
 #include "comp308.hpp"
 #include "cycleUtil.hpp"
@@ -22,6 +23,7 @@ class RoadNetwork{
 private:
 	std::map<int,std::vector<int>> adjacencyList; // stores road ID to other roadID's it connects to
 	std::vector<cycle::roadNode> allNodes; // has all nodes
+	std::set<cycle::roadNode> canBranch;
 	std::vector<cycle::road> allRoads; // has all roads
 	std::vector<cycle::primitive> cycles;
 	int nodeID = 0;
@@ -33,6 +35,12 @@ private:
 	float minHeight;
 	float farLeft;
 	float farRight;
+
+	// L system param
+	int maxLength = 100;
+	int minLength = 40;
+	int minAngle = -90;
+	int maxAngle = 90;
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;
@@ -61,6 +69,10 @@ private:
 	void setCycleEdge(std::vector<cycle::road> *, int, int);
 	void findMinimumCycles();
 	void removeEdge(std::vector<cycle::road>*,  std::map<int,std::vector<int>> * ,int);
+
+	void genBranchRoads(comp308::vec2);
+	void branch(cycle::roadNode);
+	void updateBranchList(cycle::roadNode);
 
 	void genGridPoints();
 	void genRadialPoints();
