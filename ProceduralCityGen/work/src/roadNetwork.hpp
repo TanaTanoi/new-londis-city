@@ -92,7 +92,7 @@ private:
 public:
 	RoadNetwork();
 	void renderRoads();
-	void createRoads(util::section, bool);
+	void createRoads(bool);
 	void recDivide(cycle::road);
 
 	// Testing
