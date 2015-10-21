@@ -41,7 +41,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
 	canBranch.insert(rn);
 
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < 15; i++) {
 		cout << "I " << i << endl;
 		vector<roadNode> toAdd;
 		vector<roadNode> toRemove;
@@ -165,7 +165,9 @@ vec2 RoadNetwork::direction(roadNode n){
 	return vec2(0,1);
 
 }
-
+/* REQUIRES: If inter is a point that intersects with the road r:
+ * Returns the start or end points if they are close enough, else returns -1
+ *   */
 roadNode RoadNetwork::snapToExisting(vec2 inter, road r){
 	float startDist = distance(inter,r.start.location);
 	if(startDist < snapDistance){
@@ -175,9 +177,11 @@ roadNode RoadNetwork::snapToExisting(vec2 inter, road r){
 	if(endDist < snapDistance){
 		return r.end;
 	}
-	return {vec2(),-1};
+	return {vec2(),-1};//don't change if here
 }
-
+/* Returns a node that should be the end of the road, creating a new one
+ * in the case of : not intersecting; or intersecting an existing road,
+ * else attaches to existing road node. */
 roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	cout << "snap to intersection " << endl;
 
@@ -192,20 +196,21 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 
 	if((int)intersect.size() == 0){
 		roadNode oldEnd = addNode(end);
-		return oldEnd;
+		return oldEnd;//make a new node if nothing intersects
 	}
 
-	sortByIntersection(&intersect, start.location, end);
+	sortByIntersection(&intersect, start.location, end);//sort by distance
 
 	vec2 firstInter = getIntersection(start.location ,end, intersect[0].start.location, intersect[0].end.location);
-	roadNode newEnd = snapToExisting(firstInter, intersect[0]);
+	roadNode newEnd = snapToExisting(firstInter, intersect[0]);//if it should snap to existing point
 
-	if(newEnd.ID == -1){
+	if(newEnd.ID == -1){				//if it doesn't snap to existing, make a new road node that intersects line
 		newEnd = addNode(firstInter);
-	}else if((int)adjacencyList[newEnd.ID].size()>3){
+		updateAdjacencyList(intersect[0],newEnd);
+	}else if((int)adjacencyList[newEnd.ID].size()>3){//if it does, and it already has 4 nodes, then don't do anything at all.
 		return {vec2(),-1};
 	}
-	updateAdjacencyList(intersect[0],newEnd);
+
 	return newEnd;
 }
 
@@ -739,6 +744,16 @@ vector<primitive> RoadNetwork::extractPrimitives(){
 	while((int)heap.size()!=0){
 		if((int)roads.size()==0){
 			cout<<"BREAKING BECAUSE NO MORE ROADS"<<endl;
+			cout << "HEAP size" << (int)heap.size() << endl;
+			cout<<"TOP OF HEAP "<<heap[0].ID<<endl;
+			cout << "Adjacency List" << endl;
+			for(int i = 0; i < adjacencyList.size(); i++){
+				cout << " key " << i << ": ";
+				for(int j = 0; j < adjacencyList[i].size(); j++){
+					cout << " " << adjacencyList[i][j];
+				}
+				cout << endl;
+			}
 			break;
 		}
 
