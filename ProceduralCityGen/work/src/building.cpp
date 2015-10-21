@@ -77,11 +77,12 @@ void Building::initTexture() {
 	loadTexture(tex_wall[0][0], "../work/res/textures/highrise001.jpg");
 	loadTexture(tex_wall[0][1], "../work/res/textures/highrise002.jpg");
 	loadTexture(tex_wall[0][2], "../work/res/textures/highrise003.jpg");
-	// loadTexture(tex_wall[0][3], "../work/res/textures/highrise004.jpg");
+	loadTexture(tex_wall[0][3], "../work/res/textures/highrise004.jpg");
+
 	loadTexture(tex_wall[1][0], "../work/res/textures/brick001.jpg");
 	loadTexture(tex_wall[1][1], "../work/res/textures/brick002.jpg");
 	loadTexture(tex_wall[1][2], "../work/res/textures/brick003.jpg");
-	// loadTexture(tex_wall[1][3], "../work/res/textures/brick004.jpg");
+	loadTexture(tex_wall[1][3], "../work/res/textures/brick004.jpg");
 
 	loadTexture(tex_window[0][0], "../work/res/textures/glass01.jpg");
 	loadTexture(tex_window[0][1], "../work/res/textures/window02.jpg");
@@ -864,9 +865,11 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 
 /*Renders a road between two points of a given width*/
 void Building::generateRoad(vec2 a, vec2 b,float width){
+	srand(a.x+b.x*a.y*b.y);
+	float ground = ((float)rand()/RAND_MAX)*0.02-0.01;
 	vec2 dir = (b-a);
-	a += normalize(dir) * 0.1;
-	b -= normalize(dir) * 0.1;
+//	a += normalize(dir) * 0.1;
+//	b -= normalize(dir) * 0.1;
 	vec3 dir3D = vec3(dir.x,0,dir.y);
 	dir3D = normalize(dir3D);
 	vec3 right3D = cross(dir3D, vec3(0,1,0));
@@ -893,7 +896,7 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 		vec2 v = endATri[i];
 		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
-		glVertex3f(v.x, 0, v.y);
+		glVertex3f(v.x, ground, v.y);
 	}
 	glEnd();
 	vector<vec2> endBTri;
@@ -909,7 +912,7 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 		vec2 v = endBTri[i];
 		//tex coord is the length
 		glTexCoord2f((v.x-boundingBox[0].x)/bb_width, (v.y - boundingBox[0].y) / bb_height);
-		glVertex3f(v.x, 0, v.y);
+		glVertex3f(v.x, ground, v.y);
 	}
 
 	glEnd();
@@ -923,12 +926,12 @@ void Building::generateRoad(vec2 a, vec2 b,float width){
 
 	glBegin(GL_QUADS);
 	glTexCoord2d(0,0);
-	glVertex3f(roadPoints[0].x,0,roadPoints[0].y);
+	glVertex3f(roadPoints[0].x,ground,roadPoints[0].y);
 	glTexCoord2d(0,leng);
-	glVertex3f(roadPoints[1].x,0,roadPoints[1].y);
+	glVertex3f(roadPoints[1].x,ground,roadPoints[1].y);
 	glTexCoord2d(1,leng);
-	glVertex3f(roadPoints[2].x,0,roadPoints[2].y);
+	glVertex3f(roadPoints[2].x,ground,roadPoints[2].y);
 	glTexCoord2d(1,0);
-	glVertex3f(roadPoints[3].x,0,roadPoints[3].y);
+	glVertex3f(roadPoints[3].x,ground,roadPoints[3].y);
 	glEnd();
 }

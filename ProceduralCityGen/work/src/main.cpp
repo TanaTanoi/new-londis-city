@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			mode = CAR_MODE;
-		} else if (argument.compare("network") == 0) {
+		}else if (argument.compare("network") == 0) {
 			if (i + 3 >= argc) {
 				cout
 				<< "Network mode requires three parameters, [type], [size], and [cycle bool]"
@@ -93,6 +93,12 @@ int main(int argc, char **argv) {
 				i = i + 3;
 			}
 			mode = NETWORK_MODE;
+		}else if(argument.compare("section")==0){
+			if (i != 1) {
+				cout<< "Section mode is a mode, not a parameter, It must be the first argument"<< endl;
+				return -1;
+			}
+			mode = SECTION_MODE;
 		}else if(argument.compare("-seed")==0){
 			if(i+1>=argc){//if we don't have an additional argument
 				cout<<"Seed requires a parameter (example usage. '-seed COMP308')"<<endl;
@@ -121,6 +127,8 @@ int main(int argc, char **argv) {
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
 		}else if(argument.compare("-fullbright")==0){
 			options = options|op_fullbright;
+		}else if(argument.compare("-experimental")==0){
+			options = options|op_experimental;
 		} else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
@@ -366,10 +374,9 @@ void renderLoop() {
  *section code.*/
 void generateBuildings() {
 
-
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
-	g_network->testNetwork();
+	g_network->createRoads(options&op_experimental);
 	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
@@ -380,6 +387,7 @@ void generateBuildings() {
 		}
 		lotOutlines.push_back(Generator::pointsToSections(points));
 	}
+
 	cout << "Lot outlines :" << lotOutlines.size() << endl;
 	cout << "Dividing Sections.." << endl;
 	// Divides sections

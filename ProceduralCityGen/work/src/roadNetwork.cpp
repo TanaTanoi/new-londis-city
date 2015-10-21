@@ -551,13 +551,25 @@ void RoadNetwork::createNewYorkGrid(section s){
 
 }
 
-void RoadNetwork::createRoads(section world, bool gridOn){
+void RoadNetwork::createRoads(bool gridOn){
 
-	outline = world;
+	line a = {vec2(400,400), vec2(100,400), 0};
+	line b = {vec2(100,400), vec2(100,100), 1};
+	line c = {vec2(100,100), vec2(400,100), 2};
+	line d = {vec2(400,100), vec2(400,400), 3};
+
+	vector<line> lines;
+	lines.push_back(a);
+	lines.push_back(b);
+	lines.push_back(c);
+	lines.push_back(d);
+
+
+	section s;
+	s.lines = lines;
 	calulateBoundary();
-//
 	if(gridOn){
-	createNewYorkGrid(outline);
+	createNewYorkGrid(s);
 	}
 	else{
 		genBranchRoads(vec2(250,250));
@@ -593,22 +605,7 @@ void RoadNetwork::createRoads(section world, bool gridOn){
 
 void RoadNetwork::testNetwork(){
 
-	line a = {vec2(400,400), vec2(100,400), 0};
-	line b = {vec2(100,400), vec2(100,100), 1};
-	line c = {vec2(100,100), vec2(400,100), 2};
-	line d = {vec2(400,100), vec2(400,400), 3};
-
-	vector<line> lines;
-	lines.push_back(a);
-	lines.push_back(b);
-	lines.push_back(c);
-	lines.push_back(d);
-
-
-	section s;
-	s.lines = lines;
-
-	createRoads(s);
+	createRoads(false);
 }
 
 void RoadNetwork::createVoronoiRoads(){
@@ -871,9 +868,7 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 
 			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
 			cout<< " Output "<<toRemove<<endl;
-			cout << "ROAD SIZE AT G IS "<< (int)(*roads).size()<< endl;
 			roads->erase(roads->begin() + toRemove);//remove edge (find road and remove road)
-			cout << "ROAD AFTR AT G IS "<< (int)(*roads).size()<< endl;
 			removeAdjacencyLinks(startID,adjs); //remove vertex (remove all links to this and itself from the adj list)
 			startID = endID;
 		}
