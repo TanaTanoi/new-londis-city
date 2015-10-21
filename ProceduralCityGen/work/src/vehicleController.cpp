@@ -95,7 +95,7 @@ void VehicleController::initTexture(string filename, GLuint index) {
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(),
 	GL_UNSIGNED_BYTE, tex.dataPointer());
 
-	cout << tex.w << endl;
+	// cout << tex.w << endl;
 }
 
 void VehicleController::initVehicles() {
@@ -114,6 +114,7 @@ void VehicleController::initVehicles() {
 		m_vehicles[i].setTexture(index);
 
 		// Set a random starting position
+		srand(rand());
 		vector<roadNode> goals = m_network->getAllNodes();
 		srand(rand());
 		int randomNumber = rand() % goals.size();
@@ -121,8 +122,8 @@ void VehicleController::initVehicles() {
 		roadNode start = goals[randomNumber];
 		m_vehicles[i].setStartPos(start);
 
-		cout << "Starting position " << m_vehicles[i].getStartPos().location
-				<< endl;
+		// cout << "Starting position " << m_vehicles[i].getStartPos().location
+		//		<< endl;
 		m_vehicles[i].setPos(vec3(start.location.x, 0, start.location.y));
 		m_vehicles[i].setPosPrevious(
 				vec3(start.location.x, 0, start.location.y));
@@ -148,13 +149,13 @@ void VehicleController::tick() {
 			// Path must be >= 3 otherwise the program won't work
 			while ((int) m_aStar->getPath(&goal).size() < 3) {
 
-				cerr << "Path is size three!!" << endl;
+				// cerr << "Path is size three!!" << endl;
 
 				goal = generateGoal(&m_vehicles[i]);
 
 				// Generate path
 				m_aStar->aStarSearch(&start, &goal);
-				cout << "Found path" << endl;
+				// cout << "Found path" << endl;
 			}
 
 			// XXX: first and last points are skipped as they are control points
@@ -224,9 +225,8 @@ void renderTargets(Vehicle *v) {
 	for (int j = 0; j < (int) v->getPath().size(); ++j) {
 		t = v->getPath()[j];
 		// cout << "target " << t.ID << ", " << t.location << endl;
-		float world_scale = Generator::SECTION_TO_POINT_SCALE()*2.0f;
-		glVertex3f(t.location.x * world_scale, 0,
-				t.location.y * world_scale);
+		float world_scale = Generator::SECTION_TO_POINT_SCALE() * 2.0f;
+		glVertex3f(t.location.x * world_scale, 0, t.location.y * world_scale);
 	}
 	glEnd();
 	glPopMatrix();
@@ -275,7 +275,7 @@ void VehicleController::renderVehicle(Vehicle *vehicle, vec3 *trans, vec3 *rot,
 	glRotatef(rot->y, 0, 1, 0);
 
 	// Shift the vehicle to the left side of the road
-	glTranslatef(0, 0, world_scale * -0.2);
+	glTranslatef(0, 0, -0.1);
 	glScalef(scale->x, scale->y, scale->z);
 	vehicle->renderVehicle();
 	glPopMatrix();
@@ -348,8 +348,8 @@ roadNode VehicleController::generateGoal(Vehicle* vehicle) {
 	// Vector of all of the possible goals
 	vector<roadNode> goals = m_network->getAllNodes();
 
-	int randomNumber = rand() % goals.size();
 	srand(rand());
+	int randomNumber = rand() % goals.size();
 	roadNode goal = goals[randomNumber];
 
 	if (vehicle->getGoal().location.x == -1)
@@ -414,7 +414,6 @@ bool VehicleController::canTravel(Vehicle *v) {
 //				cout << "DIFF " << diff << endl;
 //				cout << "FRONT " << front << endl;
 //				if (dist <= 0.9f && front > 0.99f) {
-//					cerr << "Oi, get off my ass cunt " << endl;
 //					// return false;
 //				}
 ////			}
@@ -434,33 +433,33 @@ bool VehicleController::canTravel(Vehicle *v) {
 					m_vehicles[i].getPath()[m_vehicles[i].getPathIndex() - 1];
 			if (targ1.ID == targ2.ID || targ1.ID == targ3.ID) {
 
-				cout << "Vehicle " << v->getId() << " is at: " << v->getPos()
-						<< endl;
-				cout << "Vehicle " << m_vehicles[i].getId() << " is at: "
-						<< m_vehicles[i].getPos() << endl;
+				// cout << "Vehicle " << v->getId() << " is at: " << v->getPos()
+				// 		<< endl;
+				// cout << "Vehicle " << m_vehicles[i].getId() << " is at: "
+				// 		<< m_vehicles[i].getPos() << endl;
 
 				// Calculate the distance between the vehicles and its neigbours
 				float dist = distance(v->getPos(), m_vehicles[i].getPos());
-				cout << "	Distance " << dist << endl;
+				// cout << "	Distance " << dist << endl;
 
-				if (dist == 0)
-					cerr << "Holy shit holy shit bad things" << endl;
+				// if (dist == 0)
+				// 	cerr << "bad things" << endl;
 
-				// Find the direction vector of v
-				vec2 target = v->getPath()[v->getPathIndex()].location;
-				vec2 dir = normalize(
-						vec2(target.x - v->getPos().x,
-								target.y - v->getPos().z));
-
-				// Find which vehicle is in front
-				vec3 diff3d = v->getPos() - m_vehicles[i].getPos();
-				vec2 diff = vec2(diff3d.x, diff3d.z);
-				float front = dot(dir, normalize(diff));
+//				// Find the direction vector of v
+//				vec2 target = v->getPath()[v->getPathIndex()].location;
+//				vec2 dir = normalize(
+//						vec2(target.x - v->getPos().x,
+//								target.y - v->getPos().z));
+//
+//				// Find which vehicle is in front
+//				vec3 diff3d = v->getPos() - m_vehicles[i].getPos();
+//				vec2 diff = vec2(diff3d.x, diff3d.z);
+//				float front = dot(dir, normalize(diff));
 
 				// If the vehicle is too close to another one stop it.
 				if (length(v->getPos()) > length(m_vehicles[i].getPos())
 						&& dist <= 30) {
-					cerr << "Too close tumeke " << endl;
+					// cerr << "Too close tumeke " << endl;
 					return false;
 				}
 			}
@@ -511,8 +510,8 @@ void VehicleController::readTextures(string filename) {
 		m_filenames_tex.push_back(line);
 	}
 
-	for (string s : m_filenames_tex)
-		cout << s << endl;
+//	for (string s : m_filenames_tex)
+//		cout << s << endl;
 
 	m_textures = new GLuint[m_filenames_tex.size() + 1];
 

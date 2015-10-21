@@ -24,7 +24,7 @@ vector<roadNode> AStarSearchAlgo::getPath(roadNode *target) {
 
 	m_path.clear();
 
-	cout << "Reversing..." << endl;
+	// cout << "Reversing..." << endl;
 
 	for (int i = target->ID; i < (int) m_allNodes.size();
 			i = m_allNodes[i].from->ID) {
@@ -41,33 +41,18 @@ vector<roadNode> AStarSearchAlgo::getPath(roadNode *target) {
 
 	reverse(m_path.begin(), m_path.end());
 
-	cout << "Reversing Done, size: " << m_path.size() << endl;
+	// cout << "Reversing Done, size: " << m_path.size() << endl;
 	return m_path;
 }
 
 void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 
-	cout << "Finding path" << endl;
-	cout << "Number of nodes: " << m_allNodes.size() << endl;
+	// cout << "Finding path" << endl;
+	// cout << "Number of nodes: " << m_allNodes.size() << endl;
 	m_start = *start;
 	m_goal = *goal;
 
 	m_visited.clear();
-
-//	for (roadNode n : m_allNodes) {
-//		n.from = NULL;
-//		n.hasFrom = false;
-//		n.isVisited_aStar = false;
-//
-//		cout << "roadNode: " << n.ID << " connects to" << endl;
-//		;
-//
-//		for (int index : m_adjacencyList[n.ID]) {
-//			cout << "roadNode: " << m_allNodes[index].ID << endl;
-//		}
-//
-//		cout << endl;
-//	}
 
 	for (int i = 0; i < (int) m_allNodes.size(); ++i) {
 		m_allNodes[i].from = NULL;
@@ -100,7 +85,7 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 			// cout << "NodeID: " << node->ID << endl;
 			// If the goal has been found
 			if (m_allNodes[nodeID].ID == goal->ID) {
-				cout << "NodeID found!!" << endl;
+				// cout << "NodeID found!!" << endl;
 				return;
 			}
 
