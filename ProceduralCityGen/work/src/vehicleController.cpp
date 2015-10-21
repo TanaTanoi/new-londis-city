@@ -140,7 +140,7 @@ void VehicleController::tick() {
 
 			// Generate path
 			m_aStar->aStarSearch(&start, &goal);
-			cout << "Found path" << endl;
+			// cout << "Found path" << endl;
 
 			// Path must be >= 3 otherwise the program won't work
 			while ((int) m_aStar->getPath(&goal).size() < 3) {
@@ -180,7 +180,7 @@ void VehicleController::tick() {
 
 		if (m_vehicles[i].getSplineTime() >= 1) {
 
-			cout << "Target reached" << endl;
+			// cout << "Target reached" << endl;
 
 			// Change the target
 			m_vehicles[i].nextTarget();
@@ -234,12 +234,12 @@ void renderTargets(Vehicle *v) {
 void VehicleController::renderVehicle(Vehicle *vehicle, vec3 *trans, vec3 *rot,
 		vec3 *scale, int texture) {
 
-	cout << "Rendering at " << *trans << ", " << rot->y << endl;
+	// cout << "Rendering at " << *trans << ", " << rot->y << endl;
 
 	vehicle->setPos(*trans);
 	vehicle->setRot(*rot);
 
-	cout << "Texture " << texture << endl;
+	// cout << "Texture " << texture << endl;
 
 	// -1 means no texture
 	if (texture > 0) {
@@ -307,7 +307,7 @@ vec3 VehicleController::interpolate(Vehicle *v, roadNode *prev, roadNode *cur,
 
 	if (canTravel(v)) {
 		v->incrementSplineTime();
-		cout << "Spline time " << v->getSplineTime() << endl;
+		// cout << "Spline time " << v->getSplineTime() << endl;
 		return vec3(translate.x, 0, translate.y);
 	}
 
@@ -336,11 +336,30 @@ bool VehicleController::reachedGoal(Vehicle* vehicle) {
 
 roadNode VehicleController::generateGoal(Vehicle* vehicle) {
 
+	// TODO make the goal be in the direction of the player
+
 	// Vector of all of the possible goals
 	vector<roadNode> goals = m_network->getAllNodes();
 
 	int randomNumber = rand() % goals.size();
-	return goals[randomNumber];
+	roadNode goal = goals[randomNumber];
+
+	if (vehicle->getGoal().location.x == -1)
+		return goal;
+
+	// vec3 controlPoint = vehicle->getPath()[vehicle->getPath().size() - 1];
+	// vec3 rot = yaw(vehicle, &controlPoint);
+
+//	// If direction is to the right
+//	if (0 < rot.y && rot.y < 180) {
+//
+//	}
+//	// If the direction is to the left
+//	else if (-180 < rot.y && rot.y < 0) {
+//
+//	}
+
+	return goal;
 }
 
 /*
@@ -367,31 +386,47 @@ bool VehicleController::canTravel(Vehicle *v) {
 
 				// Calculate the distance between the vehicles and its neigbours
 				float dist = distance(v->getPos(), m_vehicles[i].getPos());
+				cout << "	Distance " << dist << endl;
 
 				// If the vehicle is too close to another one stop it.
 				if (length(v->getPos()) > length(m_vehicles[i].getPos())
-						&& dist <= 0.1)
+						&& dist <= 20) {
+					cerr << "Oi, get off my ass cunt " << endl;
 					return false;
+				}
 			}
 
 			// If they are about to intersect and not traveling in the same direction
 			else if (!v->getPath().empty()
 					&& !m_vehicles[i].getPath().empty()) {
+
+				// Current target of current vehicle
 				roadNode targ1 = v->getPath()[v->getPathIndex()];
+
+				// Current target of other vehicle
 				roadNode targ2 =
 						m_vehicles[i].getPath()[m_vehicles[i].getPathIndex()];
 
-				if (targ1.ID == targ2.ID) {
+				// Previous target of other vehicle
+				roadNode targ3 =
+						m_vehicles[i].getPath()[m_vehicles[i].getPathIndex() - 1];
+				if (targ1.ID == targ2.ID || targ1.ID == targ3.ID) {
 
-					cerr << "Checking collisions " << endl;
+					cout << "Vehicle " << v->getId() << " is at: "
+							<< v->getPos() << endl;
+					cout << "Vehicle " << m_vehicles[i].getId() << " is at: "
+							<< m_vehicles[i].getPos() << endl;
 
 					// Calculate the distance between the vehicles and its neigbours
 					float dist = distance(v->getPos(), m_vehicles[i].getPos());
-					cerr << "Distance " << dist << endl;
+					cout << "	Distance " << dist << endl;
+
+					if (length(v->getPos()) == length(m_vehicles[i].getPos()))
+						cerr << "Holy shit holy shit bad things" << endl;
 
 					// If the vehicle is too close to another one stop it.
 					if (length(v->getPos()) > length(m_vehicles[i].getPos())
-							&& dist <= 10) {
+							&& dist <= 30) {
 						cerr << "Too close tumeke " << endl;
 						return false;
 					}

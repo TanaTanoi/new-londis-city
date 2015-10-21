@@ -1,1 +1,3 @@
-../work/res/textures/brick001.jpg
+../work/res/textures/red_matte001.jpg
+../work/res/textures/blue_matte001.jpg
+../work/res/textures/black_matte001.png
