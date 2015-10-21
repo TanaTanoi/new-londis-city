@@ -24,10 +24,24 @@ Car mode:
   
 Section mode:
   "section"
+  Displays a randomly generated lot in 2D and how it would be subdivided.
+  Pressing n will generate a new lot and pressing s will toggle the wireframe
+  and fill mode for drawing the sections.  
 
 Network mode:
-  "network [type] [size] [cycle bool]"
+  "network [type:int] [size:int] [cycle bool:int]"
   Displays a road network in 2D TODO define types and cycle
+  
+  type: 0 - grid
+        1 - branch
+        
+  size: 0 - small
+	1 - medium
+	2 - large
+	
+  cycle 0 - don't highlight lots
+	1 - highlight lots 
+  
   
 PARAMETERS: Global parameters that change the result of the program
 -seed [seed:string]
