@@ -224,8 +224,9 @@ void renderTargets(Vehicle *v) {
 	for (int j = 0; j < (int) v->getPath().size(); ++j) {
 		t = v->getPath()[j];
 		// cout << "target " << t.ID << ", " << t.location << endl;
-		glVertex3f(t.location.x * Generator::SECTION_TO_POINT_SCALE(), 0,
-				t.location.y * Generator::SECTION_TO_POINT_SCALE());
+		float world_scale = Generator::SECTION_TO_POINT_SCALE()*2.0f;
+		glVertex3f(t.location.x * world_scale, 0,
+				t.location.y * world_scale);
 	}
 	glEnd();
 	glPopMatrix();

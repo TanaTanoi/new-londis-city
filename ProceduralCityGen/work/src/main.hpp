@@ -35,6 +35,7 @@ enum Options{
 	op_joystick   =	0x04,
 	op_modelview  = 0x08,
 	op_fullbright = 0x10,
+	op_experimental=0x20,
 };
 unsigned char options = 0;
 
@@ -51,7 +52,7 @@ int showcase_mode_type = 0;
 float showcase_mode_size = 1.0f;
 int showcase_mode_angle = 0;
 /* Car mode options*/
-int car_mode_number = 10;
+int car_mode_number = 50;
 
 /*Network mode options*/
 int network_mode_type = 0;

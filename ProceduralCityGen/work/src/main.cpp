@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			mode = CAR_MODE;
-		} else if (argument.compare("network") == 0) {
+		}else if (argument.compare("network") == 0) {
 			if (i + 3 >= argc) {
 				cout
 				<< "Network mode requires three parameters, [type], [size], and [cycle bool]"
@@ -93,6 +93,12 @@ int main(int argc, char **argv) {
 				i = i + 3;
 			}
 			mode = NETWORK_MODE;
+		}else if(argument.compare("section")==0){
+			if (i != 1) {
+				cout<< "Section mode is a mode, not a parameter, It must be the first argument"<< endl;
+				return -1;
+			}
+			mode = SECTION_MODE;
 		}else if(argument.compare("-seed")==0){
 			if(i+1>=argc){//if we don't have an additional argument
 				cout<<"Seed requires a parameter (example usage. '-seed COMP308')"<<endl;
@@ -100,6 +106,14 @@ int main(int argc, char **argv) {
 			}else{
 				user_seed = Building::basicHashcode(std::string(argv[i+1]));
 				cout<<"Using seed "<< argv[i+1]<<endl;
+				i+=1;
+			}
+		}else if(argument.compare("-totalcars")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"Total Cars requires a parameter (example usage. '-totalcars 70')"<<endl;
+				return -1;
+			}else{
+				car_mode_number = std::atoi(argv[i + 1]);
 				i+=1;
 			}
 		} else if (argument.compare("-heightmap") == 0) {
@@ -121,6 +135,8 @@ int main(int argc, char **argv) {
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
 		}else if(argument.compare("-fullbright")==0){
 			options = options|op_fullbright;
+		}else if(argument.compare("-experimental")==0){
+			options = options|op_experimental;
 		} else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
@@ -173,6 +189,8 @@ int main(int argc, char **argv) {
 	if (mode == FULL_MODE) {
 		initBuildingGenerator();
 		initLighting();
+
+
 		if (!(options & op_heightmap)) {
 			cout << "No heightmap, generating buildings now" << endl;
 			//if we don't want a height map, just generate the buildings
@@ -278,12 +296,14 @@ void renderLoop() {
 			building.generateRoad(r.start.location * scale,
 					r.end.location * scale, 0.2f);
 		}
+
+		g_vehicleCtrl->tick();
+
 		/*Draw world*/
 		building.drawGround(100.0f);
 		drawSkycube(100.0f);	//the further away it is the better it looks
 
 	} else if (mode == SHOWCASE_MODE) {
-
 		setupCamera();
 		initLighting();
 		glTranslatef(0, -1, 0);
@@ -360,9 +380,10 @@ void renderLoop() {
  *assigns buildings to the loads, and stores them in the
  *section code.*/
 void generateBuildings() {
+
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
-	g_network->testNetwork();
+	g_network->createRoads(options&op_experimental);
 	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
@@ -373,6 +394,7 @@ void generateBuildings() {
 		}
 		lotOutlines.push_back(Generator::pointsToSections(points));
 	}
+
 	cout << "Lot outlines :" << lotOutlines.size() << endl;
 	cout << "Dividing Sections.." << endl;
 	// Divides sections
@@ -403,6 +425,11 @@ void generateBuildings() {
 		l.buildings.high = building.generateBuildingsFromSections(l.sections,range,min);
 		g_sections->addBuildingToLot(l);
 	}
+	g_vehicleCtrl = new VehicleController(
+			"../work/res/assets/vehicle_config.txt",
+			"../work/res/assets/tex_config.txt", car_mode_number);
+
+	g_vehicleCtrl->parseRoadNetwork(g_network);
 	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
 }
 
