@@ -119,6 +119,8 @@ int main(int argc, char **argv) {
 		}else if (argument.compare("-modelview") == 0) {
 			options = options|op_modelview;
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
+		}else if(argument.compare("-fullbright")==0){
+			options = options|op_fullbright;
 		} else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
@@ -265,7 +267,6 @@ void renderLoop() {
 		/*Draw buildings*/
 		for (lot l : g_sections->getLots()) {
 			glPushMatrix();
-			glTranslatef(0, 0.05f, 0);
 			glCallList(l.buildings.high);
 			glPopMatrix();
 			building.generateBlock(l.boundingBox, 0.0f);
@@ -430,14 +431,21 @@ void initBuildingGenerator() {
 }
 
 void initLighting() {
+	float ambient_full[] ={ 0.99f, 0.99f, 0.99f, 1.0f };
+	float ambient[]= { 0.2f, 0.2f, 0.2f, 1.0f };
 
 	float direction[] = { 0.0f, -0.5f, -0.5f, 0.0f };
 	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+
 	float specular[] = { 1, 1, 1, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	if(options&op_fullbright){
+		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_full);
+	}else{
+		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	}
+
 	glEnable(GL_LIGHT0);
 
 	float light_ambient[] = { triggerDiff / 2.0f, triggerDiff / 2.0f,

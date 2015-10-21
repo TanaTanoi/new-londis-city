@@ -357,7 +357,7 @@ void Building::generateFlatPointRoof(std::vector<comp308::vec2> points, float el
 		vector<vec3> top;
 		/*Height is a value between 1 and 1.5 + the elevation (so height-elevation is the change in Y)*/
 		vec2 mid = Generator::centerPoint(points);
-		float height = abs(length(points[0]-mid))/2.0f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
+		float height = abs(length(points[0]-mid))/4.0f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX/0.5f)+1.0f;
 		height+=elevation;
 		for (int i = 0;i<n;i++) {
 			bot.push_back(vec3(points[i].x, elevation, points[i].y));
@@ -628,8 +628,8 @@ void Building::generateBuilding(buildingParams* parameters, buildingLOD* result)
 			floorPlan = Generator::generateFloorPlan(center, minDist, (rand() % 4) + 4);
 		}else if (chance < 100) {
 			//2% chance to be crazyish
-			floorPlan = Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4);
-			floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, minDist*0.8, (rand() % 4) + 4));
+			floorPlan = Generator::generateFloorPlan(center, minDist*0.6, (rand() % 4) + 4);
+			floorPlan = Generator::combinePlans(floorPlan, Generator::generateFloorPlan(center, minDist*0.6, (rand() % 4) + 4));
 		}else{
 			//3% modern crazy style
 			glNewList(result->low, GL_COMPILE);

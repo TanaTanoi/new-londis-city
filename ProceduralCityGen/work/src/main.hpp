@@ -34,6 +34,7 @@ enum Options{
 	op_heightmap  =	0x02,
 	op_joystick   =	0x04,
 	op_modelview  = 0x08,
+	op_fullbright = 0x10,
 };
 unsigned char options = 0;
 
