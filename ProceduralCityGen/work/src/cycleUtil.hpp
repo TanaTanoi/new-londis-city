@@ -226,13 +226,10 @@ inline void removeFromHeap(vector<roadNode> * heap, int ID) {
  */
 inline bool contains(vector<roadNode> visited, roadNode node) {
 	int n = (int) visited.size();
-	cout << "In contains " << n << endl;
 	if (n == 0) {
-		cout << "is zero" << endl;
 		return false;
 	}
 	for (int i = 0; i < n; i++) {
-		cout << "There is no error here" << endl;
 		if (visited[i].ID == node.ID) {
 			return true;
 		}

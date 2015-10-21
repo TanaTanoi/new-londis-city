@@ -219,7 +219,6 @@ inline vec2 getIntersection(line l, line o) {
  Intersection method given two lines, represented by 2 start and end vectors*/
 inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 
-	cout << "Getting intersection " << a1.x << "," << a1.y << " " << a2.x << "," << a2.y << "         " << b1.x << "," << b1.y << " " << b2.x << "," << b2.y << " " << endl;
 
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);

@@ -41,7 +41,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
 	canBranch.insert(rn);
 
-	for (int i = 0; i < 15; i++) {
+	for (int i = 0; i < 7; i++) {
 		cout << "I " << i << endl;
 		vector<roadNode> toAdd;
 		vector<roadNode> toRemove;
@@ -157,7 +157,7 @@ vec2 RoadNetwork::direction(roadNode n){
 		cout << "Other " << other.location.x << "  " << other.location.y << "  N  " << n.location.x << " " << n.location.y <<endl;
 		dir = findPerp(other.location - n.location);
 
-		return 1*vec2(dir.x*cs - dir.y*sn, dir.x*sn + dir.y*cs);
+		return -1*vec2(dir.x*cs - dir.y*sn, dir.x*sn + dir.y*cs);
 	}
 
 	}
@@ -574,7 +574,7 @@ void RoadNetwork::createRoads(section world){
 	//		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
 	//	}
 
-	//findMinimumCycles();
+	findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways
@@ -736,9 +736,11 @@ vector<primitive> RoadNetwork::extractPrimitives(){
 
 	cout << "All nodes " << (int)allNodes.size() << endl;
 	cout << "Heap size" << (int)heap.size() << endl;
-
-	while((int)heap.size() > 0){
-
+	while((int)heap.size()!=0){
+		if((int)roads.size()==0){
+			cout<<"BREAKING BECAUSE NO MORE ROADS"<<endl;
+			break;
+		}
 
 		roadNode vertex = heap[0];
 		vector<int> adjs = adjacencies[vertex.ID];
@@ -747,20 +749,21 @@ vector<primitive> RoadNetwork::extractPrimitives(){
 		if(noAdj == 0){
 			cout << "Extracting isolated vertex" << endl;
 			// extract isolated vertex
+			cout<<"IV Heap Before"<<(int)heap.size()<<endl;
 			extractIsolatedVertex(&primitives, &heap, &adjacencies);
-		}
-
-		else if ( noAdj == 1){
+			cout<<"IV Heap After"<<(int)heap.size()<<endl;
+		}else if ( noAdj == 1){
 			cout << "Extracting filament vertex" << endl;
 			// extract filament
+			cout<<"EF Heap Before"<<(int)heap.size()<<endl;
 			extractFilament(vertex.ID, adjacencies[vertex.ID][0] ,&primitives, &heap, &adjacencies, &roads);
-		}
-
-		else{
+			cout<<"EF Heap After"<<(int)heap.size()<<endl;
+		}else{
 			// extract filament or cycle
 			cout << "Extracting cycle" << endl;
 			extractPrimitive(&primitives, &heap, &adjacencies, &roads);
 		}
+		cout<< " HEAP SIZE "<<(int)heap.size()<<endl;
 
 	}
 
@@ -780,10 +783,10 @@ void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives, vector<r
 
 // Note: visiting a vertex should remove it from adjacency list
 
-void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
-	cout << "Extracting a filament " << endl;
-	if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
-		cout << "Testing a cycle edge " << endl;
+void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives,
+		vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
+	cout << "Extracting a filament road size: "<<(int)(*roads).size() << endl;
+	if((*roads)[(findRoadIndex((*roads),startID,endID))].isCycleEdge){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
 		if((int)(*adjs)[startID].size() >= 3){
 
 			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
@@ -799,25 +802,23 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 			cout<<"start id is " <<startID<<endl;
 			endID = (*adjs)[startID][0];
 			if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){//  if cycle edge
-				removeFromHeap(heap,startID);// remove from heap
-				int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
-				roads->erase(roads->begin() + toRemove);// remove edge
-				removeAdjacencyLinks(startID,adjs); //remove vertex
+				removeFromHeap(heap,startID);							//remove from heap
+				int toRemove = findRoadIndex((*roads),startID,endID); 	//remove edge v0 to v1
+				roads->erase(roads->begin() + toRemove);				//remove edge
+				removeAdjacencyLinks(startID,adjs); 					//remove vertex
 				startID = endID;
 				cout<<"SIZE "<<(int)(*adjs)[startID].size()<<endl;
-			}
-			else{
+			}	else{
 				cout<<"Breaking because his road isn't a cycle edge"<<endl;
 				break;
 			}
 		}
 		cout<<"We then ask this ol if what up"<<endl;
 		if((int)(*adjs)[startID].size() == 0){
-			removeFromHeap(heap,startID);//remove from heap
+			removeFromHeap(heap,startID);		//remove from heap
 			removeAdjacencyLinks(startID,adjs); //remove vertex
 		}
-	}
-	else{
+	}else{
 		cout << "Not a cycle edge " << endl; // Here safe
 		primitive p;
 		p.type = 1; // sets to filament
@@ -831,9 +832,11 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 			//			cout<< endl;
 
 			p.vertices.push_back(allNodes[startID]);
-			cout << "Removing " <<startID << " " <<endID;
+			cout << "Removing " <<startID << " " <<endID<<endl;
 			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+			cout << "ROAD SIZE AT F IS "<< (int)(*roads).size()<< endl;
 			roads->erase(roads->begin() + toRemove);//remove edge
+			cout << "ROAD AFTR AT F IS "<< (int)(*roads).size()<< endl;
 			startID = endID;
 			if((int)(*adjs)[startID].size() == 1){
 				endID = (*adjs)[startID][0];
@@ -848,8 +851,9 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 
 			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
 			cout<< " Output "<<toRemove<<endl;
-			cout << "Here" << endl;
+			cout << "ROAD SIZE AT G IS "<< (int)(*roads).size()<< endl;
 			roads->erase(roads->begin() + toRemove);//remove edge (find road and remove road)
+			cout << "ROAD AFTR AT G IS "<< (int)(*roads).size()<< endl;
 			removeAdjacencyLinks(startID,adjs); //remove vertex (remove all links to this and itself from the adj list)
 			startID = endID;
 		}
@@ -891,43 +895,43 @@ void RoadNetwork::removeEdge(vector<road> * roads, map<int,vector<int>> * adjs, 
 void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
 	vector<roadNode> visited = vector<roadNode>();
 	vector<roadNode> sequence;
-	cout<<"Afdfdfdfed " << roads->size()<<endl;
-	roadNode start = (*heap)[0]; // v0
-	roadNode v1 = getClockwiseMost(start, (*adjs)[start.ID]); // v1
+	cout<<"Afdfdfdfed " << (int)roads->size()<<endl;
+	roadNode start = (*heap)[0]; // insert v0
+	roadNode v1 = getClockwiseMost(start, (*adjs)[start.ID]);	// v1 := most clockwise of v0
 
-	sequence.push_back(start);
+	sequence.push_back(start);									//add v0
 
-	roadNode vprev = start;
+	roadNode vprev = start;			//vp = v0
 
-	roadNode vcurr = v1;
+	roadNode vcurr = v1;			//vc = v1
 
 	cout << "Start: " << start.ID;
 	cout << " v1: " << v1.ID;
 	cout<<endl;
 
-
-	while(vcurr.ID != start.ID && !contains(visited,vcurr)){
+	while(vcurr.ID!=-1&&vcurr.ID != start.ID && !contains(visited,vcurr)){//while vc != null && vc != v0 and vc != visited
 		cout << "In cycle while loop" <<endl;
 
-		sequence.push_back(vcurr);
-		visited.push_back(vcurr);
-		if((int)(*adjs)[vcurr.ID].size() == 1){
-			cout << "Break " << endl;
-			break;
-		}
-		roadNode vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);
-		vprev = vcurr;
-		vcurr = vnext;
+		sequence.push_back(vcurr);	//TODO why do we do this before break?
+		visited.push_back(vcurr);	//We break after because its an early break condition
+
+//		if((int)(*adjs)[vcurr.ID].size() == 1){ //if vc(the next vc) == null, then end
+//			cout << "Break " << endl;
+//			break;
+//		}
+
+		roadNode vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);//vnext = anti clockwise between vp and vc
+		vprev = vcurr;				//vp := vc
+		vcurr = vnext;				//vc := vn
 	}
 	///curr is now equal to start, if cycle.
 	cout << "Passed while loop" << endl;
 
-	if((int)(*adjs)[vcurr.ID].size() == 1){
+	if(vcurr.ID==-1){	//if vc approximates to null
 		//Filament found, may not actaully start at vprev, but it is a part of it
 		cout << "Filament found" << endl;
-		extractFilament(vcurr.ID, (*adjs)[vcurr.ID][0], primitives, heap, adjs, roads);
-	}
-	else if(vcurr.ID == start.ID){
+		extractFilament(vprev.ID, (*adjs)[vprev.ID][0], primitives, heap, adjs, roads);//Use vc because vc would be null if possible
+	}else if(vcurr.ID == start.ID){
 		cout << "Minimal cycle found" << endl;
 		// Minimal cycle found
 		primitive p = {sequence, 2};
@@ -937,8 +941,6 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 		int n = (int)sequence.size();
 
 		for(int i = 0; i < n;i++){
-			cout << "Here" << endl;
-
 			setCycleEdge(roads,i,(i+1)%n);
 		}
 
@@ -960,21 +962,18 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 			cout<<"Exracted filament v1.ID"<<endl;
 			extractFilament(v1.ID, (*adjs)[v1.ID][0], primitives, heap, adjs, roads);
 		}
-	}
-
-	else{
-		cout << "Else loop" << endl;
+	}else{
 		while((int)(*adjs)[start.ID].size() == 2){
 			//cout << "Stuck in else while loop" << endl;
 			if((*adjs)[start.ID].at(0) != v1.ID){
 				v1 = start;
 				start = allNodes[(*adjs)[start.ID][0]];
-			}
-			else{
+			}else{
 				v1 = start;
 				start = allNodes[(*adjs)[start.ID][1]];
 			}
 		}
+		cout<<"Extracting a thingy but not a cycle edge"<<endl;
 		extractFilament(start.ID, v1.ID, primitives, heap, adjs, roads);
 	}
 
@@ -1029,6 +1028,7 @@ roadNode RoadNetwork::getClockwiseMost(roadNode current, vector<int> adj){
 // Gets the clockwiseMost adjacent vertex
 // Returns the ID of it
 roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current, vector<int> adj){
+	if((int)adj.size()==1){return {vec2(0,0),-1};}
 	vec2 dCurr = current.location - vprev.location; //support line
 	roadNode vnext = allNodes[adj[0]]; // sets up first adjacent vertex
 
