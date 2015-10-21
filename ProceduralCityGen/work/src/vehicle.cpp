@@ -148,10 +148,10 @@ void Vehicle::readOBJ(string filename) {
 	}
 
 	cout << "Reading OBJ file is DONE." << endl;
-	cout << m_points.size() - 1 << " points" << endl;
-	cout << m_uvs.size() - 1 << " uv coords" << endl;
-	cout << m_normals.size() - 1 << " normals" << endl;
-	cout << m_triangles.size() << " faces" << endl;
+//	cout << m_points.size() - 1 << " points" << endl;
+//	cout << m_uvs.size() - 1 << " uv coords" << endl;
+//	cout << m_normals.size() - 1 << " normals" << endl;
+//	cout << m_triangles.size() << " faces" << endl;
 
 	// If we didn't have any normals, create them
 	if (m_normals.size() <= 1)
@@ -190,7 +190,7 @@ void Vehicle::createNormals() {
 		if (vertexNormal.x != 0)
 			normalize(vertexNormal);
 
-	cout << m_normals.size() - 1 << " normals" << endl;
+	// cout << m_normals.size() - 1 << " normals" << endl;
 
 }
 
@@ -200,7 +200,7 @@ void Vehicle::createDisplayListPoly() {
 		glDeleteLists(m_displayListPoly, 1);
 
 	// Create a new list
-	cout << "Creating Poly Geometry" << endl;
+	// cout << "Creating Poly Geometry" << endl;
 	m_displayListPoly = glGenLists(1);
 	glNewList(m_displayListPoly, GL_COMPILE);
 
@@ -238,7 +238,7 @@ void Vehicle::createDisplayListPoly() {
 	glEnd();
 
 	glEndList();
-	cout << "Finished creating Poly Geometry" << endl;
+	// cout << "Finished creating Poly Geometry" << endl;
 }
 
 void Vehicle::renderVehicle() {
@@ -253,7 +253,7 @@ bool Vehicle::hasReachedGoal(vec3 *goal) {
 }
 
 cycle::roadNode Vehicle::nextTarget() {
-	cout << "path index " << m_pathIndex << endl;
+	// cout << "path index " << m_pathIndex << endl;
 	return m_path[m_pathIndex++];
 }
 
@@ -273,7 +273,7 @@ void Vehicle::addPath(std::vector<cycle::roadNode> path) {
 }
 
 void Vehicle::setPath(std::vector<cycle::roadNode> path) {
-	cout << "Path size " << path.size() << endl;
+	// cout << "Path size " << path.size() << endl;
 	m_path = path;
 	m_pathIndex = 0;
 }
