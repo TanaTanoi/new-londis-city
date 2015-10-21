@@ -46,7 +46,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 			branch(allNodes[i]);
 		}
 	}
-	
+
 }
 
 void RoadNetwork::branch(roadNode n) {
@@ -67,13 +67,13 @@ void RoadNetwork::branch(roadNode n) {
 	addRoad(n,end);
 
 	updateBranchList(n);
-	
+
 }
 
 void RoadNetwork::updateBranchList(roadNode n) {
 	float random = ((float)rand() / (RAND_MAX));
 	int noAdj = (int)adjacencyList[n.ID].size();
-	
+
 	if (noAdj == 1) {
 		if (random < 0.1) { canBranch.erase(n); } // 10% chance of being removed
 	}
@@ -381,8 +381,8 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
-	genBranchRoads(vec2(250,250));
-	//createNewYorkGrid(outline);
+//	genBranchRoads(vec2(250,250));
+	createNewYorkGrid(outline);
 	//genRadialPoints();
 	//createVoronoiRoads();
 	//testIsolatedVertex();
@@ -405,7 +405,7 @@ void RoadNetwork::createRoads(section world){
 //		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
 //	}
 
-	//findMinimumCycles();
+	findMinimumCycles();
 	cout << "Done !" << endl;
 	// Now take in population density
 	// Now generate highways

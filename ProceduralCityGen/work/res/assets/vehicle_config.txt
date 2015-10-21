@@ -1,1 +1,2 @@
-../work/res/assets/sphere.obj
+../work/res/assets/car1.obj
+../work/res/assets/car2.obj
