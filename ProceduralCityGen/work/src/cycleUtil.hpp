@@ -34,6 +34,15 @@ struct roadNode {
 		ID = id;
 	}
 	roadNode() {}
+
+	bool operator<(const roadNode &rhs) const {
+		return ID < rhs.ID;
+	}
+
+	bool operator==(const roadNode &rhs) const {
+		return ID == rhs.ID;
+	}
+
 };
 
 struct road {

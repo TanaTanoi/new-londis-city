@@ -45,8 +45,9 @@ clock_t begin_time = clock();
 void renderTargets(Vehicle *);
 
 VehicleController::VehicleController(string vehicles, string textures,
-		vector<vec3> limits, vec3 bounds) {
+		int size) {
 
+	m_size = size;
 	readConfig(vehicles);
 	readTextures(textures);
 }
@@ -64,6 +65,7 @@ VehicleController::~VehicleController() {
 	m_network = NULL;
 	m_aStar = NULL;
 	m_spline = NULL;
+//	delete[] m_textures;
 }
 
 void VehicleController::parseRoadNetwork(RoadNetwork *network) {
@@ -74,14 +76,40 @@ void VehicleController::parseRoadNetwork(RoadNetwork *network) {
 	initVehicles();
 }
 
+void VehicleController::initTexture(string filename, GLuint index) {
+
+	image tex(filename);
+
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &m_textures[index]); // Generate texture ID
+	glBindTexture(GL_TEXTURE_2D, m_textures[index]); // Bind it as a 2D texture
+
+	// Setup sampling strategies
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+	GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Finally, actually fill the data into our texture
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tex.w, tex.h, tex.glFormat(),
+	GL_UNSIGNED_BYTE, tex.dataPointer());
+
+	cout << tex.w << endl;
+}
+
 void VehicleController::initVehicles() {
 
 	// TODO will have to change this according to the size of the map
-	int size = 10, index;
+	int size = m_size, index;
 
 	for (int i = 0; i < size; i++) {
 		index = rand() % m_filenames_car.size();
-		m_vehicles.push_back(Vehicle(m_filenames_car[index]));
+		m_vehicles.push_back(Vehicle(m_filenames_car[index], i));
+
+		// Set a texture
+		index = rand() % m_filenames_tex.size() + 1;
+		m_vehicles[i].setTexture(index);
 
 		// Set a random starting position
 		vector<roadNode> goals = m_network->getAllNodes();
@@ -129,7 +157,7 @@ void VehicleController::tick() {
 			// XXX: first and last points are skipped as they are control points
 
 			// Update the path
-			m_vehicles[i].setPath(m_aStar->getPath(&goal));
+			m_vehicles[i].addPath(m_aStar->getPath(&goal));
 
 			// Set goal
 			m_vehicles[i].setGoal(
@@ -137,10 +165,15 @@ void VehicleController::tick() {
 							- 2]);
 
 			// Set the starting position to be the previous goal
-			m_vehicles[i].setStartPos(m_vehicles[i].getGoal());
+//			m_vehicles[i].setStartPos(
+//					m_vehicles[i].getPath()[(int) m_vehicles[i].getPath().size()
+//							- 1]);
+			m_vehicles[i].setStartPos(goal);
 
 			// Skip the first target
 			m_vehicles[i].nextTarget();
+
+			m_vehicles[i].resetSplineTime();
 		}
 
 		roadNode target = m_vehicles[i].getCurrentTarget();
@@ -158,13 +191,23 @@ void VehicleController::tick() {
 
 		// Calculate transformation
 		vec3 trans = interpolate(&m_vehicles[i], m_vehicles[i].getPathIndex());
-		vec3 rot = vec3(0);
+
+		vec3 rot;
+		if (length(trans) == length(m_vehicles[i].getPos()))
+			rot = m_vehicles[i].getRot();
+		else
+			rot = yaw(&m_vehicles[i], &trans);
+
 		vec3 scale = vec3(0.1);
 
-		renderVehicle(&m_vehicles[i], &trans, &rot, &scale);
+		renderVehicle(&m_vehicles[i], &trans, &rot, &scale,
+				m_vehicles[i].getTexture());
 	}
 }
 
+/*
+ * Render the vehicles path (Debugging)
+ */
 void renderTargets(Vehicle *v) {
 
 	// Render the vehicles' target as a point
@@ -185,32 +228,54 @@ void renderTargets(Vehicle *v) {
 	glPopMatrix();
 }
 
+/*
+ * Render a vehicle given a transformation and texture
+ */
 void VehicleController::renderVehicle(Vehicle *vehicle, vec3 *trans, vec3 *rot,
 		vec3 *scale, int texture) {
 
-	cout << "Rendering at " << *trans << endl;
+	cout << "Rendering at " << *trans << ", " << rot->y << endl;
+
+	vehicle->setPos(*trans);
+	vehicle->setRot(*rot);
+
+	cout << "Texture " << texture << endl;
+
+	// -1 means no texture
+	if (texture > 0) {
+
+		// Enable Drawing texures
+		glEnable(GL_TEXTURE_2D);
+
+		// Use Texture as the color
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		// Set the location for binding the texture
+		glActiveTexture(GL_TEXTURE0);
+
+		// Bind the texture
+		glBindTexture(GL_TEXTURE_2D, m_textures[texture]);
+	}
 
 	// Render the vehicle
 	glPushMatrix();
+
+	// Translate it to grid coordinates
 	glTranslatef(trans->x * Generator::SECTION_TO_POINT_SCALE(),
 			trans->y * Generator::SECTION_TO_POINT_SCALE(),
 			trans->z * Generator::SECTION_TO_POINT_SCALE());
+
+	// Rotate vehicle in the direction it is facing
+	glRotatef(rot->y, 0, 1, 0);
+
+	// Shift the vehicle to the left side of the road
+	glTranslatef(0, 0, -0.2);
 	glScalef(scale->x, scale->y, scale->z);
 	vehicle->renderVehicle();
 	glPopMatrix();
 
-	// Render the vehicles' position as a point
-//	glPushMatrix();
-//	// glRotatef(rotate.y, 0, 1, 0);
-//	glTranslatef(0, 0.2, 0);
-//	glPointSize(20);
-//	glColor3f(1.0, 0.0, 0.0);
-//	glBegin(GL_POINTS);
-//	glVertex3f(trans->x * Generator::SECTION_TO_POINT_SCALE(),
-//			trans->y * Generator::SECTION_TO_POINT_SCALE(),
-//			trans->z * Generator::SECTION_TO_POINT_SCALE());
-//	glEnd();
-//	glPopMatrix();
+	// Clean up
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 vec3 VehicleController::interpolate(Vehicle *v, int pathIndex) {
@@ -240,35 +305,27 @@ vec3 VehicleController::interpolate(Vehicle *v, roadNode *prev, roadNode *cur,
 	vec2 translate = Spline::calculatePoint(targ1, turn1, turn2, targ3,
 			v->getSplineTime());
 
-	v->incrementSplineTime();
+	if (canTravel(v)) {
+		v->incrementSplineTime();
+		cout << "Spline time " << v->getSplineTime() << endl;
+		return vec3(translate.x, 0, translate.y);
+	}
 
-	cout << "Spline time " << v->getSplineTime() << endl;
+	return v->getPos();
+}
 
-	return vec3(translate.x, 0, translate.y);
+/*
+ * Calculate the angle between two points (y axis)
+ */
+vec3 VehicleController::yaw(Vehicle *v, vec3 *newPos) {
+	vec3 oldPos = v->getPos();
+	float angle = atan2(newPos->z - oldPos.z, newPos->x - oldPos.x);
+	return vec3(0, degrees(-angle), 0);
 }
 /**
  * Has the vehicle reached it's goal?
  */
 bool VehicleController::reachedGoal(Vehicle* vehicle) {
-
-//	// If a goal has not been set
-//	if (vehicle->getGoal().location.x == -1)
-//		return true;
-//
-//	roadNode goal = vehicle->getGoal();
-//	vec2 currentPos = vec2(vehicle->getPos().x, vehicle->getPos().z);
-//
-//	util::checkZone check = util::checkZone(goal.location.x / 2.0,
-//			goal.location.y / 2.0, GIVE);
-//
-//	if (floor(currentPos.x) == goal.location.x
-//			&& floor(currentPos.y) == goal.location.y) {
-//		cout << "Aww gummon " << endl;
-//		return true;
-//	}
-//
-//	return check.contains(&currentPos);
-	cout << "path index " << vehicle->getPathIndex() << endl;
 
 	// If a goal has not been set
 	if (vehicle->getGoal().location.x == -1)
@@ -286,33 +343,64 @@ roadNode VehicleController::generateGoal(Vehicle* vehicle) {
 	return goals[randomNumber];
 }
 
-/**
+/*
  * Has the vehicle reached it's target?
  */
-bool VehicleController::reachedTarget(Vehicle *vehicle, roadNode *target) {
-
-	// return vec2(vehicle->getPos().x, 0, vehicle->getPos().x) == target->location;
-	vec2 currentPos = vec2(vehicle->getPos().x, vehicle->getPos().z);
-
-	util::checkZone check = util::checkZone(target->location.x / 2.0,
-			target->location.y / 2.0, GIVE);
-
-	// cout << "currentPos " << currentPos << endl;
-	// cout << "target " << target->location << endl;
-	// cout << "currentPos floor " << floor(currentPos.x) << ", "
-	// << floor(currentPos.y) << endl;
-	if (check.contains(&currentPos))
-		cout << "FUCK YOU" << endl;
-
-	if (floor(currentPos.x) == target->location.x
-			&& floor(currentPos.y) == target->location.y) {
-		cout << "Aww gummon " << endl;
-		return true;
-	}
-
-	return check.contains(&currentPos);
+bool VehicleController::reachedTarget(Vehicle *vehicle) {
+	return vehicle->getSplineTime() >= 1;
 }
 
+/*
+ * Collision detection
+ */
+bool VehicleController::canTravel(Vehicle *v) {
+
+	for (int i = 0; i < (int) m_vehicles.size(); ++i) {
+
+		// We don't want to check itself
+		if (v->getId() != i) {
+
+			// Find if they are in the same direction
+			if (length(cross(v->getPos(), m_vehicles[i].getPos())) == 0) {
+
+				cerr << v->getId() << " and " << i << " are colliding" << endl;
+
+				// Calculate the distance between the vehicles and its neigbours
+				float dist = distance(v->getPos(), m_vehicles[i].getPos());
+
+				// If the vehicle is too close to another one stop it.
+				if (length(v->getPos()) > length(m_vehicles[i].getPos())
+						&& dist <= 0.1)
+					return false;
+			}
+
+			// If they are about to intersect and not traveling in the same direction
+			else if (!v->getPath().empty()
+					&& !m_vehicles[i].getPath().empty()) {
+				roadNode targ1 = v->getPath()[v->getPathIndex()];
+				roadNode targ2 =
+						m_vehicles[i].getPath()[m_vehicles[i].getPathIndex()];
+
+				if (targ1.ID == targ2.ID) {
+
+					cerr << "Checking collisions " << endl;
+
+					// Calculate the distance between the vehicles and its neigbours
+					float dist = distance(v->getPos(), m_vehicles[i].getPos());
+					cerr << "Distance " << dist << endl;
+
+					// If the vehicle is too close to another one stop it.
+					if (length(v->getPos()) > length(m_vehicles[i].getPos())
+							&& dist <= 10) {
+						cerr << "Too close tumeke " << endl;
+						return false;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
 /**
  * Reads the file which contains all of the vehicle models
  */
@@ -350,16 +438,18 @@ void VehicleController::readTextures(string filename) {
 	}
 
 	while (file.good()) {
-
 		// Read the line
 		getline(file, line);
 		m_filenames_tex.push_back(line);
 	}
 
-	m_textures = new GLuint[m_filenames_tex.size()];
+	for (string s : m_filenames_tex)
+		cout << s << endl;
 
-	//	for (int i = 0; i < (int)m_filenames_tex.size(); i++)
-	//		initTexture(m_filenames_tex[i], i + 1);
+	m_textures = new GLuint[m_filenames_tex.size() + 1];
+
+	for (int i = 0; i < (int) m_filenames_tex.size(); i++)
+		initTexture(m_filenames_tex[i], i + 1);
 
 	cout << "Finished reading texture files" << endl;
 }

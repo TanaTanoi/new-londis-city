@@ -23,7 +23,6 @@ RoadNetwork *g_network = nullptr;
 // Controls the vehicles in the city
 VehicleController *g_vehicleCtrl = nullptr;
 
-
 /*Supplied seed for generation*/
 int user_seed = 42;
 
@@ -35,54 +34,63 @@ int main(int argc, char **argv) {
 
 	/*Running some checks*/
 
-	options = options&0;
-
+	options = options & 0;
 
 	/*Read command line arguments and augment options. This only sets options, it doesn't run any code*/
-	for(int i = 1;i < argc;i++){
+	for (int i = 1; i < argc; i++) {
 		string argument = string(argv[i]);
-		if(argument.compare("showcase")==0){
+		if (argument.compare("showcase") == 0) {
 			//Showcase mode "showcase [type] [size]" and can take optional seed
-			if(i+2>=argc){
-				cout<<"Showcase mode requires two parameters, [type] and [size]"<<"\n";
-				cout<<"    (e.g. 'showcase 3 15')"<<endl;
+			if (i + 2 >= argc) {
+				cout
+				<< "Showcase mode requires two parameters, [type] and [size]"
+				<< "\n";
+				cout << "    (e.g. 'showcase 3 15')" << endl;
 				return -1;
-			}else if(i != 1){
-				cout<<"Showcase mode is a mode, not a parameter. It must be the first argument"<<endl;
+			} else if (i != 1) {
+				cout
+				<< "Showcase mode is a mode, not a parameter. It must be the first argument"
+				<< endl;
 				return -1;
-			}else{
+			} else {
 				mode = SHOWCASE_MODE;
-				showcase_mode_type = std::atoi(argv[i+1]);
-				showcase_mode_size = std::atoi(argv[i+2])/10.0f;
-				i=i+2;
+				showcase_mode_type = std::atoi(argv[i + 1]);
+				showcase_mode_size = std::atoi(argv[i + 2]) / 10.0f;
+				i = i + 2;
 			}
-		}else if(argument.compare("car")==0){
-			if(i != 1){
-				cout<<"Car mode is a mode, not a parameter, It must be the first argument"<<endl;
+		} else if (argument.compare("car") == 0) {
+			if (i != 1) {
+				cout
+				<< "Car mode is a mode, not a parameter, It must be the first argument"
+				<< endl;
 				return -1;
 			}
-			options = options|op_modelview;
-			if(i+1<argc){//check for optional parameter
+			options = options | op_modelview;
+			if (i + 1 < argc) { //check for optional parameter
 				// add optional parameter
-				if(argv[i+1][0]!='-'){
-					car_mode_number = std::atoi(argv[i+1]);
+				if (argv[i + 1][0] != '-') {
+					car_mode_number = std::atoi(argv[i + 1]);
 					i++;
 				}
 			}
 			mode = CAR_MODE;
-		}else if(argument.compare("network")==0){
-			if(i+3>=argc){
-				cout<<"Network mode requires three parameters, [type], [size], and [cycle bool]"<<endl;
+		} else if (argument.compare("network") == 0) {
+			if (i + 3 >= argc) {
+				cout
+				<< "Network mode requires three parameters, [type], [size], and [cycle bool]"
+				<< endl;
 				return -1;
-			}else if(i != 1){
-				cout<<"Network mode is a mode, not a parameter, It must be the first argument"<<endl;
+			} else if (i != 1) {
+				cout
+				<< "Network mode is a mode, not a parameter, It must be the first argument"
+				<< endl;
 				return -1;
-			}else{
+			} else {
 				//if valid
-				network_mode_type = std::atoi(argv[i+1]);
-				network_mode_size = std::atoi(argv[i+2]);
-				network_mode_cycles = std::atoi(argv[i+3]);
-				i=i+3;
+				network_mode_type = std::atoi(argv[i + 1]);
+				network_mode_size = std::atoi(argv[i + 2]);
+				network_mode_cycles = std::atoi(argv[i + 3]);
+				i = i + 3;
 			}
 			mode = NETWORK_MODE;
 		}else if(argument.compare("-seed")==0){
@@ -94,26 +102,27 @@ int main(int argc, char **argv) {
 				cout<<"Using seed "<< argv[i+1]<<endl;
 				i+=1;
 			}
-		}else if(argument.compare("-heightmap")==0){
+		} else if (argument.compare("-heightmap") == 0) {
 			//if the user wants a heightmap to pop up
-			cout<<"Heightmap Enabled"<<endl;
-			options = options |op_heightmap;
+			cout << "Heightmap Enabled" << endl;
+			options = options | op_heightmap;
 
-		}else if(argument.compare("-fullscreen")==0){
+		} else if (argument.compare("-fullscreen") == 0) {
 			//enable fullscreen
-			options = options| op_fullscreen;
+			options = options | op_fullscreen;
 			cout << "Fullscreen Enabled" << endl;
 
-		}else if(argument.compare("-joystick")==0){
+		} else if (argument.compare("-joystick") == 0) {
 			//enable joystick if it is present
-				options = options| op_joystick;
+			options = options| op_joystick;
 
 		}else if (argument.compare("-modelview") == 0) {
 			options = options|op_modelview;
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
-		}else{
+		} else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
-			cout << "Refer to README for information on command line arguments" << endl;
+			cout << "Refer to README for information on command line arguments"
+					<< endl;
 			return -1;
 		}
 	}
@@ -122,12 +131,12 @@ int main(int argc, char **argv) {
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	if (options&op_fullscreen) {
+	if (options & op_fullscreen) {
 		window = glfwCreateWindow(g_winWidth, g_winHeight,
-			"Procedural City Generator", glfwGetPrimaryMonitor(), nullptr);
-	}else{
+				"Procedural City Generator", glfwGetPrimaryMonitor(), nullptr);
+	} else {
 		window = glfwCreateWindow(g_winWidth, g_winHeight,
-			"Procedural City Generator", nullptr, nullptr);
+				"Procedural City Generator", nullptr, nullptr);
 	}
 	if (!window) {
 		glfwTerminate();
@@ -159,40 +168,42 @@ int main(int argc, char **argv) {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	srand(user_seed);
 
-	if(mode == FULL_MODE){
+	if (mode == FULL_MODE) {
 		initBuildingGenerator();
 		initLighting();
-		if(!(options&op_heightmap)){
-			cout<<"No heightmap, generating buildings now"<<endl;
+		if (!(options & op_heightmap)) {
+			cout << "No heightmap, generating buildings now" << endl;
 			//if we don't want a height map, just generate the buildings
 			generateBuildings();
 		}
 
-	}else if(mode == SHOWCASE_MODE){
+	} else if (mode == SHOWCASE_MODE) {
 		initBuildingGenerator();
 		initLighting();
-		single_list = building.generateSingleBuilding(showcase_mode_type,showcase_mode_size);
+		single_list = building.generateSingleBuilding(showcase_mode_type,
+				showcase_mode_size);
 
-	}else if(mode == CAR_MODE){
+	} else if (mode == CAR_MODE) {
 		cout << "Car mode" << endl;
 		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
 		// Load the vehicle files and textures
 		g_vehicleCtrl = new VehicleController(
 				"../work/res/assets/vehicle_config.txt",
-				"../work/res/assets/tex_config.txt", vector<vec3>(), vec3());
+				"../work/res/assets/tex_config.txt", car_mode_number);
 		// Creates road network
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
+
 		// Parse the road network
 		g_vehicleCtrl->parseRoadNetwork(g_network);
 		initBuildingGenerator();
 
-	}else if(mode == NETWORK_MODE){
+	} else if (mode == NETWORK_MODE) {
 		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
 		g_network->testNetwork();
 
-	}else if(mode == SECTION_MODE){
+	} else if (mode == SECTION_MODE) {
 		cout << "Section mode" << endl;
 		g_sections = new SectionDivider();
 		g_sections->testSection();
@@ -200,11 +211,11 @@ int main(int argc, char **argv) {
 	}
 
 	/*Setup mouse stuff here*/
-	if((options&op_modelview)){//model view overwrites other types of
+	if ((options & op_modelview)) { //model view overwrites other types of
 		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
-	}else if(mode == NETWORK_MODE||mode == SECTION_MODE){
+	} else if (mode == NETWORK_MODE || mode == SECTION_MODE) {
 		glfwSetCursorPosCallback(window, mouseMotionCallback2D);
-	}else{
+	} else {
 		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
 	}
 	glEnable(GL_SMOOTH);
@@ -219,13 +230,13 @@ int main(int argc, char **argv) {
 	glfwTerminate();
 }
 
-void renderLoop(){
+void renderLoop() {
 	/*## Render here ##*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-	if(options &op_heightmap){
+	if (options & op_heightmap) {
 		//Spline map mode
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -242,46 +253,47 @@ void renderLoop(){
 						building.heightmap_points[i - 2],
 						building.heightmap_points[i - 1],
 						building.heightmap_points[i],
-						building.heightmap_points[i+1],time);
+						building.heightmap_points[i + 1], time);
 				glVertex2f(splinePoint.x, g_winHeight - splinePoint.y);
 			}
 		}
 		glEnd();
-	}else if(mode == FULL_MODE){
+	} else if (mode == FULL_MODE) {
 		setupCamera();
 		initLighting();
 		glTranslatef(0, -2, 0);
 		/*Draw buildings*/
-		for(lot l:g_sections->getLots()){
+		for (lot l : g_sections->getLots()) {
 			glPushMatrix();
-			glTranslatef(0,0.05f,0);
+			glTranslatef(0, 0.05f, 0);
 			glCallList(l.buildings.high);
 			glPopMatrix();
-			building.generateBlock(l.boundingBox,0.0f);
+			building.generateBlock(l.boundingBox, 0.0f);
 		}
 
 		/*Draw roads*/
-		float scale = 2.0f*Generator::SECTION_TO_POINT_SCALE();
-		for(cycle::road r:g_network->getAllRoads()){
-			building.generateRoad(r.start.location*scale,r.end.location*scale,0.2f);
+		float scale = 2.0f * Generator::SECTION_TO_POINT_SCALE();
+		for (cycle::road r : g_network->getAllRoads()) {
+			building.generateRoad(r.start.location * scale,
+					r.end.location * scale, 0.2f);
 		}
 		/*Draw world*/
 		building.drawGround(100.0f);
 		drawSkycube(100.0f);	//the further away it is the better it looks
 
-	}else if(mode ==SHOWCASE_MODE){
+	} else if (mode == SHOWCASE_MODE) {
 
 		setupCamera();
 		initLighting();
 		glTranslatef(0, -1, 0);
 
 		glPushMatrix();
-		glRotatef(showcase_mode_angle,0,1,0);
+		glRotatef(showcase_mode_angle, 0, 1, 0);
 		glCallList(single_list);
 		glPopMatrix();
-		if(showcase_mode_angle>0){
+		if (showcase_mode_angle > 0) {
 			showcase_mode_angle++;
-			showcase_mode_angle%=360;
+			showcase_mode_angle %= 360;
 		}
 		building.drawGround(10.0f);
 		drawSkycube(100.0f);
@@ -303,7 +315,7 @@ void renderLoop(){
 		g_network->renderRoads();
 		glPopMatrix();
 
-	}else if(mode == SECTION_MODE){
+	} else if (mode == SECTION_MODE) {
 
 		glClearColor(0.0, 0.0, 0.0, 0.0); //Set the cleared screen colour to black
 		glViewport(0, 0, g_winWidth, g_winHeight); //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
@@ -321,15 +333,15 @@ void renderLoop(){
 		setupCamera();
 		initLighting();
 		glTranslatef(-20, -2, 20);
-		drawGrid(40, 1);
+		// drawGrid(40, 1);
 		// Render the vehicles
 		vector<cycle::road> roads = g_network->getAllRoads();
 		for (int i = 0; i < (int) roads.size(); ++i) {
 			building.generateRoad(
 					roads[i].start.location
 					* Generator::SECTION_TO_POINT_SCALE(),
-					roads[i].end.location
-					* Generator::SECTION_TO_POINT_SCALE(), 0.5f);
+					roads[i].end.location * Generator::SECTION_TO_POINT_SCALE(),
+					0.5f);
 		}
 
 		g_vehicleCtrl->tick();
@@ -339,38 +351,37 @@ void renderLoop(){
 	glfwSwapBuffers(window);
 	/* Poll for and process events */
 	glfwPollEvents();
-	if(options&op_joystick)
+	if (options & op_joystick)
 		joystickEventsPoll();
 }
 
 /*Generates the roads and finds the cycles, creates lots,
  *assigns buildings to the loads, and stores them in the
  *section code.*/
-void generateBuildings(){
-	cout<<"Generating network.."<<endl;
+void generateBuildings() {
+	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
 	g_network->testNetwork();
-	cout<<"All cycles "<<g_network->getCycles().size()<<endl;
+	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
-	for(cycle::primitive prim: g_network->getCycles()){
+	for (cycle::primitive prim : g_network->getCycles()) {
 		vector<vec2> points;
-		for(cycle::roadNode rn : prim.vertices){
+		for (cycle::roadNode rn : prim.vertices) {
 			points.push_back(rn.location);
 		}
 		lotOutlines.push_back(Generator::pointsToSections(points));
 	}
-	cout<<"Lot outlines :" << lotOutlines.size()<<endl;
-	cout<<"Dividing Sections.."<<endl;
+	cout << "Lot outlines :" << lotOutlines.size() << endl;
+	cout << "Dividing Sections.." << endl;
 	// Divides sections
 	g_sections = new SectionDivider();
 	g_sections->divideAllLots(lotOutlines);
-	cout<<"Generating buildings.."<<endl;
+	cout << "Generating buildings.." << endl;
 	// Generate building display list
 	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
-
-	vec2 min = vec2(10000,10000);
+			vec2 min = vec2(10000,10000);
 	vec2 max = vec2(0,0);
 	vec2 zero = vec2(0,0);
 	for(lot l: allLots){
@@ -391,7 +402,7 @@ void generateBuildings(){
 		l.buildings.high = building.generateBuildingsFromSections(l.sections,range,min);
 		g_sections->addBuildingToLot(l);
 	}
-	cout<<"Done! "<<g_sections->getLots().size()<<" lots created"<<endl;
+	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
 }
 
 /*Inits the building class, loads the shaders, and sets up the heightmap*/
@@ -406,7 +417,7 @@ void initBuildingGenerator() {
 	glCullFace(GL_BACK);
 	/*Create a new building object*/
 	building = Building();
-	building.initTexture();
+
 	/*Initialize shader and heightmap points*/
 	initSkybox("../work/res/textures/cubeMap.jpg");
 	skybox_shader = makeShaderProgram("../work/res/shaders/skybox_shader.vert",
@@ -415,6 +426,7 @@ void initBuildingGenerator() {
 	building.heightmap_points.push_back(vec2(0, g_winHeight / 2));
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
 	building.heightmap_points.push_back(vec2(g_winWidth, g_winHeight / 2));
+	building.initTexture();
 }
 
 void initLighting() {
@@ -473,7 +485,7 @@ void setupCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	perspectiveGL(45.0, float(g_winWidth) / float(g_winHeight), 0.1f, 1000.0f);
-	if (options&op_modelview) {
+	if (options & op_modelview) {
 		//if using model view
 		glTranslatef(0, 0, -50 * zoom);
 		glRotatef(-rotation.y, 1.0f, 0.0f, 0.0f);
@@ -514,7 +526,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		int mods) {
 	cout << "Key: " << key << endl;
 	if((options&op_heightmap) && key == 257&&action){
-
 		generateBuildings();
 		options = options^op_heightmap;//disable heightmap
 		cout<<"Disabling heightmap, entering render mode "<<(options&op_modelview)<<endl;
@@ -529,7 +540,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	}else if(mode == SHOWCASE_MODE && key == 257&&action){
 		showcase_mode_angle = 1;
-	}else if (key == 87 && action) {
+	} else if (key == 87 && action) {
 		p_pos += 0.05f * p_front * 1;
 	} else if (key == 65 && action) {
 		vec3 p_right = cross(p_up, p_front);
@@ -544,7 +555,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	//cout << button << " " << action << " " << mods << endl;
-	if ((options&op_heightmap) && action && button == GLFW_MOUSE_BUTTON_1) {
+	if ((options & op_heightmap) && action && button == GLFW_MOUSE_BUTTON_1) {
 		if (building.heightmap_points.size() < 2) {
 			building.heightmap_points.push_back(m_pos);
 			return;
@@ -602,7 +613,8 @@ void mouseMotionCallbackFPS(GLFWwindow* window, double xpos, double ypos) {
 	m_pos = vec2(xpos, ypos);
 }
 
-void mouseMotionCallbackModelView(GLFWwindow* window, double xpos,double ypos) {
+void mouseMotionCallbackModelView(GLFWwindow* window, double xpos,
+		double ypos) {
 	if (firstM) {
 		m_pos = vec2(xpos, ypos);
 		firstM = false;

@@ -37,6 +37,57 @@ void RoadNetwork::genGridPoints() {
 	}
 }
 
+void RoadNetwork::genBranchRoads(vec2 start) {
+	roadNode rn = addNode(start); // adds to adj list
+
+	for (int i = 0; i < 4; i++) {
+		int count = (int)allNodes.size();
+		for (int i = 0; i < count; i++) {
+			branch(allNodes[i]);
+		}
+	}
+	
+}
+
+void RoadNetwork::branch(roadNode n) {
+	// Gets length of new road
+	float random = ((float)rand() / (RAND_MAX));
+	float length = minLength + random*(maxLength - minLength);
+	random = ((float)rand() / (RAND_MAX));
+	// Gets angle of new road
+	float angle = minAngle + random* (maxAngle - minAngle);
+	float radAngle = radians(angle);
+	//Creates new road
+	vec2 dir = normalize(vec2((float)cos(radAngle), (float)sin(radAngle)));
+	vec2 road = dir*length;
+	vec2 endPoint = n.location + road;
+	// Adds new road
+	roadNode end = addNode(endPoint);
+	canBranch.insert(end); // adds new node to branch set
+	addRoad(n,end);
+
+	updateBranchList(n);
+	
+}
+
+void RoadNetwork::updateBranchList(roadNode n) {
+	float random = ((float)rand() / (RAND_MAX));
+	int noAdj = (int)adjacencyList[n.ID].size();
+	
+	if (noAdj == 1) {
+		if (random < 0.1) { canBranch.erase(n); } // 10% chance of being removed
+	}
+	else if (noAdj == 2) {
+		if (random < 0.35) { canBranch.erase(n); } // 35% chance of being removed
+	}
+	else if (noAdj == 3) {
+		if (random < 0.7) { canBranch.erase(n); } // 70% chance of being removed
+	}
+	else {
+		canBranch.erase(n); //remove from canBranch
+	}
+}
+
 void RoadNetwork::genRadialPoints() {
 	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;
 	vec2 centrePoint = vec2(farLeft + (farRight-farLeft)/2, minHeight + (maxHeight-minHeight)/2);
@@ -330,9 +381,10 @@ void RoadNetwork::createNewYorkGrid(section s){
 void RoadNetwork::createRoads(section world){
 	outline = world;
 	calulateBoundary();
+	genBranchRoads(vec2(250,250));
 	//createNewYorkGrid(outline);
 	//genRadialPoints();
-	createVoronoiRoads();
+	//createVoronoiRoads();
 	//testIsolatedVertex();
 	//testFilamentVertex();
 	//testCycle();
@@ -409,23 +461,23 @@ void RoadNetwork::createVoronoiRoads(){
 void RoadNetwork::renderRoads(){
 	//cout <<"rendering roads" << endl;
 
-	glColor3f(0.5,0.0,0.5);
-	glBegin(GL_POINTS);
-	for(vec2 dot : points){
-		glVertex2f(dot.x,dot.y);
-	}
-	glEnd();
+	//glColor3f(0.5,0.0,0.5);
+	//glBegin(GL_POINTS);
+	//for(vec2 dot : points){
+	//	glVertex2f(dot.x,dot.y);
+	//}
+	//glEnd();
 
-	glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
-	glBegin(GL_LINES);
-	for(line l : outline.lines){
-		glVertex2f(l.start.x, l.start.y);
-		glVertex2f(l.end.x, l.end.y);
-	}
-	glEnd();
+	//glColor3f(1.0f,1.0f,0.0f); // yellow world bounds
+	//glBegin(GL_LINES);
+	//for(line l : outline.lines){
+	//	glVertex2f(l.start.x, l.start.y);
+	//	glVertex2f(l.end.x, l.end.y);
+	//}
+	//glEnd();
 
-	glColor3f(1.0f,0.0f,0.0f); // red roads
-	glLineWidth(2.0f);
+	//glColor3f(1.0f,0.0f,0.0f); // red roads
+	//glLineWidth(2.0f);
 	glBegin(GL_LINES);
 	int j = 0;
 //	//	for(road r : allRoads){
@@ -473,15 +525,15 @@ void RoadNetwork::renderRoads(){
 	glPointSize(10);
 
 	glBegin(GL_POINTS);
-	/*(roadNode n : allNodes){
-//	for(int i = allNodes.size()-1;i>=0;i--){
-//		roadNode n = allNodes[i];
+	//for(roadNode n : allNodes){
+	for(int i = allNodes.size()-1;i>=0;i--){
+		roadNode n = allNodes[i];
 		//if(n.ID > 10 &&  n.ID < 13){
-			//glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+			glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
 
 			glVertex2f(n.location.x, n.location.y);
-		//}
-	}*/
+//	 }
+	}
 	glEnd();
 }
 
