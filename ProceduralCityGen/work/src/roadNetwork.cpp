@@ -41,7 +41,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
 	canBranch.insert(rn);
 
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 15; i++) {
 		cout << "I " << i << endl;
 		vector<roadNode> toAdd;
 		vector<roadNode> toRemove;
@@ -59,7 +59,46 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 		toRemove.clear();
 	}
 
+	//removeFilaments();
+
 }
+
+void RoadNetwork::removeFilaments(){
+	int count = 0;
+	int i= 0;
+
+	while(i < (int)allRoads.size()){
+		road r = allRoads[i];
+		if((int)adjacencyList[r.start.ID].size() ==1 ||  (int)adjacencyList[r.end.ID].size() ==1){
+
+				for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
+					if(adjacencyList[r.start.ID][i] == r.end.ID){
+						cout<<"REMOVE EDGE: Remove start from end"<<endl;
+						adjacencyList[r.start.ID].erase(adjacencyList[r.start.ID].begin() + i);
+						break;
+					}
+				}
+
+				for(int i = 0; i < (int)adjacencyList[r.end.ID].size(); i++){
+					if(adjacencyList[r.end.ID][i] == r.start.ID){
+						cout<<"REMOVE EDGE: Remove end from start"<<endl;
+						adjacencyList[r.end.ID].erase(adjacencyList[r.end.ID].begin() + i);
+						break;
+					}
+				}
+				allRoads.erase(allRoads.begin() + i);
+				count++;
+		}
+		else{
+			i++;
+		}
+	}
+
+	if(count > 0){
+		removeFilaments();
+	}
+}
+
 
 vec2 RoadNetwork::direction(roadNode n){
 	cout << "Getting direction" << endl;
@@ -72,6 +111,7 @@ vec2 RoadNetwork::direction(roadNode n){
 
 	int count = (int)adjacencyList[n.ID].size();
 	switch(count){
+
 	case 0: {
 		angle = minAngle + random*  (maxAngle - minAngle);
 		float radAngle = radians(angle);
@@ -111,10 +151,13 @@ vec2 RoadNetwork::direction(roadNode n){
 
 		roadNode other = allNodes[adjacencyList[n.ID][0]];
 		cout << "Length " <<length(other.location - n.location) << endl;
+		//		if(util::isNAN(length(n.location-other.location))){
+		//			return vec2(0,1);
+		//		}
 		cout << "Other " << other.location.x << "  " << other.location.y << "  N  " << n.location.x << " " << n.location.y <<endl;
 		dir = findPerp(other.location - n.location);
 
-		return -vec2(dir.x*cs - dir.y*sn, dir.x*sn + dir.y*cs);
+		return 1*vec2(dir.x*cs - dir.y*sn, dir.x*sn + dir.y*cs);
 	}
 
 	}
@@ -123,13 +166,27 @@ vec2 RoadNetwork::direction(roadNode n){
 
 }
 
-roadNode RoadNetwork::snapToIntersection(vec2 start, vec2 end){
+roadNode RoadNetwork::snapToExisting(vec2 inter, road r){
+	float startDist = distance(inter,r.start.location);
+	if(startDist < snapDistance){
+		return r.start;
+	}
+	float endDist = distance(inter,r.end.location);
+	if(endDist < snapDistance){
+		return r.end;
+	}
+	return {vec2(),-1};
+}
+
+roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	cout << "snap to intersection " << endl;
 
 	vector<road> intersect;
 	for(road r: allRoads){
-		if(intersects(start, end, r.start.location, r.end.location)){
-			intersect.push_back(r);
+		if(intersects(start.location, end, r.start.location, r.end.location)){
+			if(r.start.ID != start.ID && r.end.ID != start.ID){
+				intersect.push_back(r);
+			}
 		}
 	}
 
@@ -138,10 +195,16 @@ roadNode RoadNetwork::snapToIntersection(vec2 start, vec2 end){
 		return oldEnd;
 	}
 
-	sortByIntersection(&intersect, start, end);
+	sortByIntersection(&intersect, start.location, end);
 
-	vec2 firstInter = getIntersection(start,end, intersect[0].start.location, intersect[0].end.location);
-	roadNode newEnd = addNode(firstInter);
+	vec2 firstInter = getIntersection(start.location ,end, intersect[0].start.location, intersect[0].end.location);
+	roadNode newEnd = snapToExisting(firstInter, intersect[0]);
+
+	if(newEnd.ID == -1){
+		newEnd = addNode(firstInter);
+	}else if((int)adjacencyList[newEnd.ID].size()>3){
+		return {vec2(),-1};
+	}
 	updateAdjacencyList(intersect[0],newEnd);
 	return newEnd;
 }
@@ -154,13 +217,17 @@ void RoadNetwork::branch(roadNode n, vector<roadNode> * toAdd, vector<roadNode> 
 	random = ((float)rand() / (RAND_MAX));
 
 	vec2 dir = direction(n);
+	if(isNAN(dir.x) || isNAN(dir.y)){
+		return;
+	}
 
 	vec2 road = dir*length;
 	vec2 endPoint = n.location + road;
 
 	// Now checks for intersection and snap
-	roadNode end = snapToIntersection(n.location,endPoint);
+	roadNode end = snapToIntersection(n,endPoint);
 
+	if(end.ID == -1){return;}
 
 	// Adds new road
 	toAdd->push_back(end);
@@ -480,10 +547,11 @@ void RoadNetwork::createNewYorkGrid(section s){
 }
 
 void RoadNetwork::createRoads(section world){
+	srand(time(NULL));
 	outline = world;
 	calulateBoundary();
 	genBranchRoads(vec2(250,250));
-	//createNewYorkGrid(outline);
+//	createNewYorkGrid(outline);
 	//genRadialPoints();
 	//createVoronoiRoads();
 	//testIsolatedVertex();
@@ -491,14 +559,14 @@ void RoadNetwork::createRoads(section world){
 	//testCycle();
 
 	//	cout << endl;
-	//	cout << "Adjacency List" << endl;
-	//	for(int i = 0; i < adjacencyList.size(); i++){
-	//		cout << " key " << i << ": ";
-	//		for(int j = 0; j < adjacencyList[i].size(); j++){
-	//			cout << " " << adjacencyList[i][j];
-	//		}
-	//		cout << endl;
-	//	}
+	cout << "Adjacency List" << endl;
+	for(int i = 0; i < adjacencyList.size(); i++){
+		cout << " key " << i << ": ";
+		for(int j = 0; j < adjacencyList[i].size(); j++){
+			cout << " " << adjacencyList[i][j];
+		}
+		cout << endl;
+	}
 	//
 	//	cout << endl;
 	//	cout << "Road List" << endl;
@@ -560,7 +628,7 @@ void RoadNetwork::createVoronoiRoads(){
 }
 
 void RoadNetwork::renderRoads(){
-	cout <<"rendering roads" << endl;
+	//cout <<"rendering roads" << endl;
 
 	//glColor3f(0.5,0.0,0.5);
 	//glBegin(GL_POINTS);
@@ -605,20 +673,20 @@ void RoadNetwork::renderRoads(){
 	}
 	glEnd();
 	//	glColor3f(0.0,1.0,0.0);
-	//	for(primitive p :cycles){
-	//		float red = (float)rand()/(RAND_MAX);
-	//		srand(rand());
-	//		float gr = (float)rand()/RAND_MAX;
-	//		srand(rand());
-	//		float br = (float)rand()/RAND_MAX;
-	//		glColor3f(red,gr,br);
-	//		glBegin(GL_POLYGON);
-	//
-	//		for(roadNode v : p.vertices){
-	//			glVertex2f(v.location.x, v.location.y);
-	//		}
-	//		glEnd();
-	//	}
+	for(primitive p :cycles){
+		float red = (float)rand()/(RAND_MAX);
+		srand(rand());
+		float gr = (float)rand()/RAND_MAX;
+		srand(rand());
+		float br = (float)rand()/RAND_MAX;
+		glColor3f(red,gr,br);
+		glBegin(GL_POLYGON);
+
+		for(roadNode v : p.vertices){
+			glVertex2f(v.location.x, v.location.y);
+		}
+		glEnd();
+	}
 
 
 
@@ -1009,7 +1077,6 @@ void RoadNetwork::removeAdjacencyLinks(int ID, map<int,vector<int>> * adjs){
 	}
 	//Deletes it's own links
 	adjs->erase(ID);
-
 }
 
 void RoadNetwork::testIsolatedVertex(){

@@ -70,13 +70,14 @@ struct primitive {
 inline void sortByIntersection(vector<road> * roads, vec2 start, vec2 end){
 	vector<road> unsorted = (*roads);
 	roads->clear();
-	vector <float> distances;
-	for(int i = 0; i < (int)roads->size(); i++){
+	vector<float> distances;
+	for(int i = 0; i < unsorted.size(); i++){
+		cout << "I  " << i << endl;
 		vec2 inter = util::getIntersection(start, end, unsorted[i].start.location, unsorted[i].end.location);
 		float dist = distance(inter, start);
 		bool added = false;
 
-		for(int j = 0; j < (int)unsorted.size(); j++){
+		for(int j = 0; j < (int)roads->size(); j++){
 			if(!added && dist < (int)distances[j]){
 				distances.insert(distances.begin() + j, dist);
 				roads->insert(roads->begin() + j, unsorted[i]);
