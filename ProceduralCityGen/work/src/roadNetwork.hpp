@@ -39,8 +39,10 @@ private:
 	// L system param
 	int maxLength = 100;
 	int minLength = 40;
-	int minAngle = -90;
-	int maxAngle = 90;
+	int minAngle = 0;
+	int maxAngle = 360;
+	int minRotateAngle = -30;
+	int maxRotateAngle = 30;
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;
@@ -71,8 +73,10 @@ private:
 	void removeEdge(std::vector<cycle::road>*,  std::map<int,std::vector<int>> * ,int);
 
 	void genBranchRoads(comp308::vec2);
-	void branch(cycle::roadNode);
-	void updateBranchList(cycle::roadNode);
+	void branch(cycle::roadNode,std::vector<cycle::roadNode> * toAdd, std::vector<cycle::roadNode> * toRemove);
+	comp308::vec2 direction(cycle::roadNode);
+	void updateBranchList(cycle::roadNode, std::vector<cycle::roadNode> * toRemove);
+	cycle::roadNode snapToIntersection(vec2 start, vec2 end);
 
 	void genGridPoints();
 	void genRadialPoints();
