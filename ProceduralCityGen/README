@@ -40,5 +40,6 @@ PARAMETERS: Global parameters that change the result of the program
   enables XBOX controller to be used, if plugged in
 -modelview
   Enables Model View instead of FPS mode for the camera
-
+-fullbright
+  Enables bright ambient lighting over the entire world.
  

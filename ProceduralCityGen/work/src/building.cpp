@@ -269,7 +269,7 @@ void Building::generateWindows(vec2 a, vec2 b, float elevation, vec3 normal) {
 	float bottom = elevation+(BLOCK_SIZE*0.2f);						//the bottom and top of the windows
 	float top = elevation + (BLOCK_SIZE - (BLOCK_SIZE*0.2));		//
 
-	float dist = (float)hypot(a.x - b.x, b.y - a.y);				//length of the wall
+	float dist = distance(a,b);				//length of the wall
 
 	float margin = dist;					//this will become the start point along the wall
 	int i;									//i is the amount of window spaces available
