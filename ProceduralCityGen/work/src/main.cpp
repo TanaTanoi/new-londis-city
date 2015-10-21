@@ -383,7 +383,7 @@ void generateBuildings() {
 
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
-	g_network->createRoads(options&op_experimental);
+	g_network->createRoads(!(options&op_experimental));
 	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
