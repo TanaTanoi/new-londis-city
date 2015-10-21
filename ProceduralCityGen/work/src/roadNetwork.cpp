@@ -41,7 +41,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
 	canBranch.insert(rn);
 
-	for (int i = 0; i < 15; i++) {
+	for (int i = 0; i < 8; i++) {
 		cout << "I " << i << endl;
 		vector<roadNode> toAdd;
 		vector<roadNode> toRemove;
@@ -235,8 +235,13 @@ void RoadNetwork::branch(roadNode n, vector<roadNode> * toAdd, vector<roadNode> 
 	if(end.ID == -1){return;}
 
 	// Adds new road
-	toAdd->push_back(end);
-	addRoad(n,end);
+
+	if (distance(n.location, end.location) > minLength ) { // forces roads to be of at least minimum length		
+		if ((int)adjacencyList[end.ID].size() < 4) {
+			toAdd->push_back(end);
+			addRoad(n, end);
+		}
+	}
 
 	updateBranchList(n, toRemove);
 }
@@ -654,31 +659,8 @@ void RoadNetwork::renderRoads(){
 
 	//glColor3f(1.0f,0.0f,0.0f); // red roads
 	//glLineWidth(2.0f);
-	glBegin(GL_LINES);
-	int j = 0;
-	//	//	for(road r : allRoads){
-	//	//	for(int i = allRoads.size()-1;i>=0;i--){
-	for(int i = 0; i < allRoads.size();i++){
-		road r = allRoads[i];
-		float chance =  r.ID/(float)allRoads.size();j++;
-		srand(r.ID);
-		//		if(chance<0.33f){
-		//			glColor3f(chance*3.0f,0,0);
-		//		}else if(chance <0.66f){
-		//			glColor3f(0,(chance-0.33f)*3.0f,0);
-		//		}else{
-		//			glColor3f(0,0,(chance-0.66f)*3.0f);
-		//		}
-		float red = (float)rand()/(RAND_MAX);
-		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
-		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
-		glVertex2f(r.start.location.x, r.start.location.y);
-		glVertex2f(r.end.location.x, r.end.location.y);
-	}
-	glEnd();
+	
+	
 	//	glColor3f(0.0,1.0,0.0);
 	for(primitive p :cycles){
 		float red = (float)rand()/(RAND_MAX);
@@ -711,6 +693,40 @@ void RoadNetwork::renderRoads(){
 		//	 }
 	}
 	glEnd();
+
+
+	glBegin(GL_LINES);
+	int j = 0;
+	//	//	for(road r : allRoads){
+	//	//	for(int i = allRoads.size()-1;i>=0;i--){
+	for (int i = 0; i < allRoads.size(); i++) {
+		road r = allRoads[i];
+		float chance = r.ID / (float)allRoads.size(); j++;
+		srand(r.ID);
+		//		if(chance<0.33f){
+		//			glColor3f(chance*3.0f,0,0);
+		//		}else if(chance <0.66f){
+		//			glColor3f(0,(chance-0.33f)*3.0f,0);
+		//		}else{
+		//			glColor3f(0,0,(chance-0.66f)*3.0f);
+		//		}
+		float red = (float)rand() / (RAND_MAX);
+		srand(rand());
+		float gr = (float)rand() / RAND_MAX;
+		srand(rand());
+		float br = (float)rand() / RAND_MAX;
+		glColor3f(red, gr, br);
+		glVertex2f(r.start.location.x, r.start.location.y);
+		glVertex2f(r.end.location.x, r.end.location.y);
+	}
+	glEnd();
+
+
+
+
+
+
+
 }
 
 void RoadNetwork::findMinimumCycles(){
