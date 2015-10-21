@@ -17,6 +17,12 @@
 #include "utility.hpp"
 #include "comp308.hpp"
 enum building_type { SKYSCRAPER = 0, RESIDENTIAL = 1, INDUSTRIAL = 2};
+
+/* boundingArea -> 	The floor plan of this building
+ * seed -> 			Generation seed
+ * b_type ->		Building type
+ * height->			Approximate height based on the amount of iterations of the L-System
+ */
 struct buildingParams {
 	std::vector<comp308::vec2> boundingArea;	//the area in which this building is limited
 	unsigned int seed = 0;								//the seed for generation
@@ -35,7 +41,7 @@ struct buildingLOD {
 
 const float BLOCK_SIZE = 0.3f;
 const float FOUNDATION_SIZE = 0.05f;
-const float WINDOW_WIDTH = 0.1f;
+const float WINDOW_WIDTH = 0.02f;
 const float EXTRUDE_THRESHOLD = 0.1f;//default 0.3
 const int TOTAL_WALL_TEXTURES = 4;
 const int TOTAL_WINDOW_TEXTURES = 5;
@@ -66,8 +72,8 @@ public:
 	static int basicHashcode(std::string);
 	int generateSingleBuilding(int,float);
 
-	int generateBuildingsFromSections(std::string, std::vector<util::section>);	//Test method
-	int generateBuildingsFromSections(std::vector<util::section>);
+	int generateBuildingsFromSections(std::string, std::vector<util::section>,float,comp308::vec2);	//Test method
+	int generateBuildingsFromSections(std::vector<util::section>,float,comp308::vec2);
 
 	void generateFromString(std::vector<comp308::vec2>, std::string);
 	void generatePointRoof(std::vector<comp308::vec2>,float);

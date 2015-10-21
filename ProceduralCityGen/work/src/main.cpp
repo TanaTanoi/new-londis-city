@@ -43,14 +43,14 @@ int main(int argc, char **argv) {
 			//Showcase mode "showcase [type] [size]" and can take optional seed
 			if (i + 2 >= argc) {
 				cout
-						<< "Showcase mode requires two parameters, [type] and [size]"
-						<< "\n";
+				<< "Showcase mode requires two parameters, [type] and [size]"
+				<< "\n";
 				cout << "    (e.g. 'showcase 3 15')" << endl;
 				return -1;
 			} else if (i != 1) {
 				cout
-						<< "Showcase mode is a mode, not a parameter. It must be the first argument"
-						<< endl;
+				<< "Showcase mode is a mode, not a parameter. It must be the first argument"
+				<< endl;
 				return -1;
 			} else {
 				mode = SHOWCASE_MODE;
@@ -61,8 +61,8 @@ int main(int argc, char **argv) {
 		} else if (argument.compare("car") == 0) {
 			if (i != 1) {
 				cout
-						<< "Car mode is a mode, not a parameter, It must be the first argument"
-						<< endl;
+				<< "Car mode is a mode, not a parameter, It must be the first argument"
+				<< endl;
 				return -1;
 			}
 			options = options | op_modelview;
@@ -77,13 +77,13 @@ int main(int argc, char **argv) {
 		} else if (argument.compare("network") == 0) {
 			if (i + 3 >= argc) {
 				cout
-						<< "Network mode requires three parameters, [type], [size], and [cycle bool]"
-						<< endl;
+				<< "Network mode requires three parameters, [type], [size], and [cycle bool]"
+				<< endl;
 				return -1;
 			} else if (i != 1) {
 				cout
-						<< "Network mode is a mode, not a parameter, It must be the first argument"
-						<< endl;
+				<< "Network mode is a mode, not a parameter, It must be the first argument"
+				<< endl;
 				return -1;
 			} else {
 				//if valid
@@ -93,15 +93,14 @@ int main(int argc, char **argv) {
 				i = i + 3;
 			}
 			mode = NETWORK_MODE;
-		} else if (argument.compare("-seed") == 0) {
-			if (i + 1 >= argc) {	//if we don't have an additional argument
-				cout << "Seed requires a parameter (e.g. '-seed COMP308')"
-						<< endl;
+		}else if(argument.compare("-seed")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"Seed requires a parameter (example usage. '-seed COMP308')"<<endl;
 				return -1;
-			} else {
-				user_seed = Building::basicHashcode(std::string(argv[i + 1]));
-				cout << "Using seed " << argv[i + 1] << endl;
-				i++;
+			}else{
+				user_seed = Building::basicHashcode(std::string(argv[i+1]));
+				cout<<"Using seed "<< argv[i+1]<<endl;
+				i+=1;
 			}
 		} else if (argument.compare("-heightmap") == 0) {
 			//if the user wants a heightmap to pop up
@@ -115,15 +114,13 @@ int main(int argc, char **argv) {
 
 		} else if (argument.compare("-joystick") == 0) {
 			//enable joystick if it is present
-			if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
-				options = options | op_joystick;
-			} else {
-				cout << "No joystick present;" << endl;
-			}
+			options = options| op_joystick;
 
-		} else if (argument.compare("-modelview") == 0) {
-			options = op_modelview;
+		}else if (argument.compare("-modelview") == 0) {
+			options = options|op_modelview;
 			p_dir = normalize(-p_pos);//Set spot light position to look at center point
+		}else if(argument.compare("-fullbright")==0){
+			options = options|op_fullbright;
 		} else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
@@ -270,7 +267,6 @@ void renderLoop() {
 		/*Draw buildings*/
 		for (lot l : g_sections->getLots()) {
 			glPushMatrix();
-			glTranslatef(0, 0.05f, 0);
 			glCallList(l.buildings.high);
 			glPopMatrix();
 			building.generateBlock(l.boundingBox, 0.0f);
@@ -344,7 +340,7 @@ void renderLoop() {
 		for (int i = 0; i < (int) roads.size(); ++i) {
 			building.generateRoad(
 					roads[i].start.location
-							* Generator::SECTION_TO_POINT_SCALE(),
+					* Generator::SECTION_TO_POINT_SCALE(),
 					roads[i].end.location * Generator::SECTION_TO_POINT_SCALE(),
 					0.5f);
 		}
@@ -386,9 +382,25 @@ void generateBuildings() {
 	// Generate building display list
 	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
-	for (lot l : allLots) {
+			vec2 min = vec2(10000,10000);
+	vec2 max = vec2(0,0);
+	vec2 zero = vec2(0,0);
+	for(lot l: allLots){
+
+		vector<vec2> bounds = Generator::getBoundingBox(Generator::sectionToPoints(l.boundingBox));
+		if(distance(bounds[0],zero)<distance(min,zero)){
+			min = bounds[0];
+		}
+		if(distance(bounds[1],zero)>distance(max,zero)){
+			max = bounds[1];
+		}
+	}
+	float range = distance(max,min);
+
+
+	for(lot l: allLots){
 		srand(rand());
-		l.buildings.high = building.generateBuildingsFromSections(l.sections);
+		l.buildings.high = building.generateBuildingsFromSections(l.sections,range,min);
 		g_sections->addBuildingToLot(l);
 	}
 	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
@@ -419,14 +431,21 @@ void initBuildingGenerator() {
 }
 
 void initLighting() {
+	float ambient_full[] ={ 0.99f, 0.99f, 0.99f, 1.0f };
+	float ambient[]= { 0.2f, 0.2f, 0.2f, 1.0f };
 
 	float direction[] = { 0.0f, -0.5f, -0.5f, 0.0f };
 	float diffintensity[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	float ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+
 	float specular[] = { 1, 1, 1, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, direction);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffintensity);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	if(options&op_fullbright){
+		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_full);
+	}else{
+		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	}
+
 	glEnable(GL_LIGHT0);
 
 	float light_ambient[] = { triggerDiff / 2.0f, triggerDiff / 2.0f,
@@ -514,16 +533,20 @@ void drawGrid(double grid_size, double square_size) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		int mods) {
 	cout << "Key: " << key << endl;
-
-	if ((options & op_heightmap) && key == 257) {
-		cout << "Entering render mode" << endl;
-		options = options & !op_heightmap;		//disable heightmap
+	if((options&op_heightmap) && key == 257&&action){
 		generateBuildings();
-		if (options & op_joystick) {
+		options = options^op_heightmap;//disable heightmap
+		cout<<"Disabling heightmap, entering render mode "<<(options&op_modelview)<<endl;
+		if(options&op_joystick){
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
-		glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
-	} else if (mode == SHOWCASE_MODE && key == 257 && action) {
+		if((options&op_modelview)){
+			glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
+			cout<<"Setting modelview "<<endl;
+		}else{
+			glfwSetCursorPosCallback(window, mouseMotionCallbackFPS);
+		}
+	}else if(mode == SHOWCASE_MODE && key == 257&&action){
 		showcase_mode_angle = 1;
 	} else if (key == 87 && action) {
 		p_pos += 0.05f * p_front * 1;
@@ -558,7 +581,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	}
 	if (button == GLFW_MOUSE_BUTTON_1) {
 		m_LeftButton = action;
-	} else if (button == GLFW_MOUSE_BUTTON_2 && action) {
+	} /*else if (button == GLFW_MOUSE_BUTTON_2 && action) {
 		string input;
 		cout << "Enter an input seed: ";
 		cin >> input;
@@ -567,7 +590,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 				g_sections->testSection().sections);
 		mode = 0;
 		glfwSetCursorPosCallback(window, mouseMotionCallbackModelView);
-	}
+	}*/
 }
 
 bool firstM = true;
@@ -706,7 +729,7 @@ void joystickEventsPoll() {
 	 * 10 - Right Stick Press
 	 */
 	if (button_count > 0) {
-		if (buttons[8] == GLFW_PRESS && !c_xbox_button_down) {
+		/*if (buttons[8] == GLFW_PRESS && !c_xbox_button_down) {
 
 			c_xbox_button_down = true;
 			//If Xbox button pressed
@@ -715,7 +738,7 @@ void joystickEventsPoll() {
 			cout << "Regenerating city" << endl;
 		} else if (buttons[8] == GLFW_RELEASE) {
 			c_xbox_button_down = false;
-		}
+		}*/
 	}
 }
 
@@ -767,7 +790,7 @@ void initSkybox(string filepath) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glUniform1i(glGetUniformLocation(skybox_shader, "skybox"),
-	GL_TEXTURE_CUBE_MAP);
+			GL_TEXTURE_CUBE_MAP);
 
 }
 

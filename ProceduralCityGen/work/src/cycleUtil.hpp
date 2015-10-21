@@ -8,6 +8,7 @@
 #pragma once
 
 #include "comp308.hpp"
+#include "utility.hpp"
 #include <cmath>
 #include <algorithm>
 #include <string>
@@ -65,6 +66,30 @@ struct primitive {
 	vector<roadNode> vertices;
 	int type; // 0 isolated vertex, 1 filament, 2 cycle/filament
 };
+
+inline void sortByIntersection(vector<road> * roads, vec2 start, vec2 end){
+	vector<road> unsorted = (*roads);
+	roads->clear();
+	vector<float> distances;
+	for(int i = 0; i < unsorted.size(); i++){
+		cout << "I  " << i << endl;
+		vec2 inter = util::getIntersection(start, end, unsorted[i].start.location, unsorted[i].end.location);
+		float dist = distance(inter, start);
+		bool added = false;
+
+		for(int j = 0; j < (int)roads->size(); j++){
+			if(!added && dist < (int)distances[j]){
+				distances.insert(distances.begin() + j, dist);
+				roads->insert(roads->begin() + j, unsorted[i]);
+				added = true;
+			}
+		}
+		if(!added){
+			distances.push_back(dist);
+			roads->push_back(unsorted[i]);
+		}
+	}
+}
 
 /**
  * Sorts a set of road nodes so

@@ -339,16 +339,28 @@ util::section Generator::shrinkSection(util::section sec){
 }
 
 /*Converts a vector of sections into a vector of building parameters*/
-vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vector<vec2> heightmap) {
+vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vector<vec2> heightmap, float range, vec2 min) {
 	//TODO convert a lot into a list of building parameters I can send to the main then building class
+
 	vector<buildingParams> toReturn;
 	for (int i = 0; i < sections.size(); i++) {
 		buildingParams p;
 		p.boundingArea = sectionToPoints(sections[i]);
 		p.seed = rand();
 		p.b_type = (building_type)(p.seed % 2);//TODO make this have an effect, possibly
-		float ymap = Spline::calculateYValue(heightmap,abs(p.boundingArea[0].x));
-		p.height = (int)(((480-ymap)/480)*5+2);
+
+		float xmap = distance(p.boundingArea[0],min);
+		cout<<"XMAPA "<<xmap<<"\n";
+		xmap = xmap/range;
+		cout<<"XMAPB "<<xmap<<"\n";
+		xmap*=640;
+		cout<<"XMAPC "<<xmap<<"\n"<<endl;
+		float ymap = Spline::calculateYValue(heightmap,xmap);//should return a value between 0 and 480
+//		p.height = (int)(((480-ymap)/480)*5+2);
+//		cout<<"YMAPA "<< ymap<<endl;
+		ymap = ((480.0f-ymap)/480.0f);//make ymap a value between 0 and 1
+//		cout<<"YMAPB "<< ymap<<endl;
+		p.height = (int)(ymap*7.0f+1.0f);
 		srand(p.seed);
 		toReturn.push_back(p);
 	}

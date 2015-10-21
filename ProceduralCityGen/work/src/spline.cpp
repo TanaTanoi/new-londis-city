@@ -37,20 +37,22 @@ vec2 Spline::calculatePoint(vec2 p0, vec2 p1, vec2 p2, vec2 p3,
 
 float Spline::calculateYValue(vector<vec2> points, float x_dist) {
 
-	float x = points[1].x;	//set first point for comparison
-	int i = 2;
+	float x = points[0].x;	//set first point for comparison
+	int i = 1;
 	while (x < x_dist && i <= points.size()) {
 		x = points[i].x;
 		++i;
-	}	//find the mid point of the spline
+	}	//find the point we need to deal with (goes one over the spline)
+//	cout<<"Amount of points "<< points.size()<<endl;
+//	cout<<"using i " << i << endl;
 	vec2 a = points[i - 3];
-	vec2 b = points[i - 2];
-	vec2 c = points[i - 1];
+	vec2 b = points[i - 2];//spline between here
+	vec2 c = points[i - 1];//and here
 	vec2 d = points[i];
 	float t = c.x - b.x;	//difference between middle points
-	t = (x_dist - b.x) / t;	//over the difference between middle point and x distnace
+	t = (x_dist - b.x) / t;	//over the difference between middle point and x distance - x_dist >b.x
 	vec2 result = calculatePoint(a, b, c, d, t);
-	return result.y;		//return value between 0 and 1
+	return max(result.y,0.1f);		//return value between 0.1 and 480
 }
 
 Spline::~Spline() {

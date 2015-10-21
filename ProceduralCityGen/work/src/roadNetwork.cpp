@@ -18,7 +18,8 @@ using namespace comp308;
 using namespace std;
 using namespace vor;
 
-RoadNetwork::RoadNetwork(){}
+RoadNetwork::RoadNetwork() {
+}
 /**
  * Checks whether a road will be fully inside a the world
  * which is represented by a section
@@ -29,7 +30,7 @@ RoadNetwork::RoadNetwork(){}
 void RoadNetwork::genGridPoints() {
 	for (int i = farLeft + gridSpace; i < farRight; i = i + gridSpace) {
 		for (int j = minHeight + gridSpace; j < maxHeight; j = j + gridSpace) {
-			vec2 point = vec2(i,j);
+			vec2 point = vec2(i, j);
 			if (insideWorld(point)) {
 				points.push_back(point);
 			}
@@ -39,77 +40,257 @@ void RoadNetwork::genGridPoints() {
 
 void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
+	canBranch.insert(rn);
 
-	for (int i = 0; i < 4; i++) {
-		int count = (int)allNodes.size();
-		for (int i = 0; i < count; i++) {
-			branch(allNodes[i]);
+	for (int i = 0; i < 7; i++) {
+		cout << "I " << i << endl;
+		vector<roadNode> toAdd;
+		vector<roadNode> toRemove;
+		for (roadNode n : canBranch) {
+			branch(n, &toAdd, &toRemove);
+		}
+		cout << "Branched" << endl;
+		for (roadNode n : toAdd) {
+			canBranch.insert(n);
+		}
+		for (roadNode n : toRemove) {
+			canBranch.erase(n);
+		}
+		toAdd.clear();
+		toRemove.clear();
+	}
+
+	//removeFilaments();
+
+}
+
+void RoadNetwork::removeFilaments() {
+	int count = 0;
+	int i = 0;
+
+	while (i < (int) allRoads.size()) {
+		road r = allRoads[i];
+		if ((int) adjacencyList[r.start.ID].size() == 1
+				|| (int) adjacencyList[r.end.ID].size() == 1) {
+
+			for (int i = 0; i < (int) adjacencyList[r.start.ID].size(); i++) {
+				if (adjacencyList[r.start.ID][i] == r.end.ID) {
+					cout << "REMOVE EDGE: Remove start from end" << endl;
+					adjacencyList[r.start.ID].erase(
+							adjacencyList[r.start.ID].begin() + i);
+					break;
+				}
+			}
+
+			for (int i = 0; i < (int) adjacencyList[r.end.ID].size(); i++) {
+				if (adjacencyList[r.end.ID][i] == r.start.ID) {
+					cout << "REMOVE EDGE: Remove end from start" << endl;
+					adjacencyList[r.end.ID].erase(
+							adjacencyList[r.end.ID].begin() + i);
+					break;
+				}
+			}
+			allRoads.erase(allRoads.begin() + i);
+			count++;
+		} else {
+			i++;
 		}
 	}
 
+	if (count > 0) {
+		removeFilaments();
+	}
 }
 
-void RoadNetwork::branch(roadNode n) {
-	// Gets length of new road
-	float random = ((float)rand() / (RAND_MAX));
-	float length = minLength + random*(maxLength - minLength);
-	random = ((float)rand() / (RAND_MAX));
+vec2 RoadNetwork::direction(roadNode n) {
+	cout << "Getting direction" << endl;
+
 	// Gets angle of new road
-	float angle = minAngle + random* (maxAngle - minAngle);
-	float radAngle = radians(angle);
-	//Creates new road
-	vec2 dir = normalize(vec2((float)cos(radAngle), (float)sin(radAngle)));
-	vec2 road = dir*length;
-	vec2 endPoint = n.location + road;
-	// Adds new road
-	roadNode end = addNode(endPoint);
-	canBranch.insert(end); // adds new node to branch set
-	addRoad(n,end);
+	float random = ((float) rand() / (RAND_MAX));
+	float angle = 0.0f;
+	vec2 dir;
+	// If first branch
 
-	updateBranchList(n);
+	int count = (int) adjacencyList[n.ID].size();
+	switch (count) {
+
+	case 0: {
+		angle = minAngle + random * (maxAngle - minAngle);
+		float radAngle = radians(angle);
+		//Creates new road
+		dir = normalize(vec2((float) cos(radAngle), (float) sin(radAngle)));
+		return dir;
+	}
+	case 1: {
+		angle = minRotateAngle + random * (maxRotateAngle - minRotateAngle);
+		float radAngle = radians(angle);
+		float cs = cos(radAngle);
+		float sn = sin(radAngle);
+
+		roadNode other = allNodes[adjacencyList[n.ID].at(0)];
+		dir = normalize(n.location - other.location);
+
+		return vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
+	}
+	case 2: {
+		angle = minRotateAngle + random * (maxRotateAngle - minRotateAngle);
+		float radAngle = radians(angle);
+		float cs = cos(radAngle);
+		float sn = sin(radAngle);
+
+		roadNode other = allNodes[adjacencyList[n.ID][0]];
+
+		cout << "Length " << length(other.location - n.location) << endl;
+		dir = findPerp(other.location - n.location);
+
+		return vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
+	}
+	case 3: {
+		angle = minRotateAngle + random * (maxRotateAngle - minRotateAngle);
+		float radAngle = radians(angle);
+		float cs = cos(radAngle);
+		float sn = sin(radAngle);
+
+		roadNode other = allNodes[adjacencyList[n.ID][0]];
+		cout << "Length " << length(other.location - n.location) << endl;
+		//		if(util::isNAN(length(n.location-other.location))){
+		//			return vec2(0,1);
+		//		}
+		cout << "Other " << other.location.x << "  " << other.location.y
+				<< "  N  " << n.location.x << " " << n.location.y << endl;
+		dir = findPerp(other.location - n.location);
+
+		return -1 * vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
+	}
+
+	}
+
+	return vec2(0, 1);
 
 }
 
-void RoadNetwork::updateBranchList(roadNode n) {
-	float random = ((float)rand() / (RAND_MAX));
-	int noAdj = (int)adjacencyList[n.ID].size();
+roadNode RoadNetwork::snapToExisting(vec2 inter, road r) {
+	float startDist = distance(inter, r.start.location);
+	if (startDist < snapDistance) {
+		return r.start;
+	}
+	float endDist = distance(inter, r.end.location);
+	if (endDist < snapDistance) {
+		return r.end;
+	}
+	return {vec2(),-1};
+}
+
+roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end) {
+	cout << "snap to intersection " << endl;
+
+	vector<road> intersect;
+	for (road r : allRoads) {
+		if (intersects(start.location, end, r.start.location, r.end.location)) {
+			if (r.start.ID != start.ID && r.end.ID != start.ID) {
+				intersect.push_back(r);
+			}
+		}
+	}
+
+	if ((int) intersect.size() == 0) {
+		roadNode oldEnd = addNode(end);
+		return oldEnd;
+	}
+
+	sortByIntersection(&intersect, start.location, end);
+
+	vec2 firstInter = getIntersection(start.location, end,
+			intersect[0].start.location, intersect[0].end.location);
+	roadNode newEnd = snapToExisting(firstInter, intersect[0]);
+
+	if (newEnd.ID == -1) {
+		newEnd = addNode(firstInter);
+	} else if ((int) adjacencyList[newEnd.ID].size() > 3) {
+		return {vec2(),-1};
+	}
+	updateAdjacencyList(intersect[0], newEnd);
+	return newEnd;
+}
+
+void RoadNetwork::branch(roadNode n, vector<roadNode> * toAdd,
+		vector<roadNode> * toRemove) {
+	cout << "Branch" << endl;
+	// Gets length of new road
+	float random = ((float) rand() / (RAND_MAX));
+	float length = minLength + random * (maxLength - minLength);
+	random = ((float) rand() / (RAND_MAX));
+
+	vec2 dir = direction(n);
+	if (isNAN(dir.x) || isNAN(dir.y)) {
+		return;
+	}
+
+	vec2 road = dir * length;
+	vec2 endPoint = n.location + road;
+
+	// Now checks for intersection and snap
+	roadNode end = snapToIntersection(n, endPoint);
+
+	if (end.ID == -1) {
+		return;
+	}
+
+	// Adds new road
+	toAdd->push_back(end);
+	addRoad(n, end);
+
+	updateBranchList(n, toRemove);
+}
+
+void RoadNetwork::updateBranchList(roadNode n, vector<roadNode> * toRemove) {
+	cout << "Updating branch list " << endl;
+	float random = ((float) rand() / (RAND_MAX));
+	int noAdj = (int) adjacencyList[n.ID].size();
 
 	if (noAdj == 1) {
-		if (random < 0.1) { canBranch.erase(n); } // 10% chance of being removed
+		if (random < 0.1) {
+			toRemove->push_back(n);
+		} // 10% chance of being removed
+	} else if (noAdj == 2) {
+		if (random < 0.35) {
+			toRemove->push_back(n);
+		} // 35% chance of being removed
+	} else if (noAdj == 3) {
+		if (random < 0.7) {
+			toRemove->push_back(n);
+		} // 70% chance of being removed
+	} else {
+		toRemove->push_back(n); //remove from canBranch
 	}
-	else if (noAdj == 2) {
-		if (random < 0.35) { canBranch.erase(n); } // 35% chance of being removed
-	}
-	else if (noAdj == 3) {
-		if (random < 0.7) { canBranch.erase(n); } // 70% chance of being removed
-	}
-	else {
-		canBranch.erase(n); //remove from canBranch
-	}
+	cout << "Updated branch list" << endl;
 }
 
 void RoadNetwork::genRadialPoints() {
-	int maxHalfLength = max(farRight-farLeft, maxHeight - minHeight)/2 ;
-	vec2 centrePoint = vec2(farLeft + (farRight-farLeft)/2, minHeight + (maxHeight-minHeight)/2);
+	int maxHalfLength = max(farRight - farLeft, maxHeight - minHeight) / 2;
+	vec2 centrePoint = vec2(farLeft + (farRight - farLeft) / 2,
+			minHeight + (maxHeight - minHeight) / 2);
 	cout << "Circle Points " << circlePoints << endl;
 	points.push_back(centrePoint);
 	for (int i = radOut; i < maxHalfLength; i = i + radOut) {
-		cout << "Max half length: " << maxHalfLength << " Rad out : " << i << endl;
+		cout << "Max half length: " << maxHalfLength << " Rad out : " << i
+				<< endl;
 		for (int j = 0; j < circlePoints; j++) {
 			cout << "J is " << j << endl;
 			vec2 startCirc;
 			if (j == 0) {
 				startCirc = vec2(centrePoint.x, centrePoint.y + i);
 				if (insideWorld(startCirc)) {
-					cout << "Start is inside world"<< endl;
+					cout << "Start is inside world" << endl;
 					points.push_back(startCirc);
 				}
-			}
-			else {
-				vec2 p = rotate(centrePoint,startCirc, ((float)j/(float)circlePoints)*360);
-				cout << "new vector " << j << " is " << p.x << "  " << p.y << endl;
+			} else {
+				vec2 p = rotate(centrePoint, startCirc,
+						((float) j / (float) circlePoints) * 360);
+				cout << "new vector " << j << " is " << p.x << "  " << p.y
+						<< endl;
 				if (insideWorld(p)) {
-					cout << "Non start "  << j << " is inside world" << endl;
+					cout << "Non start " << j << " is inside world" << endl;
 					points.push_back(p);
 				}
 			}
@@ -117,22 +298,29 @@ void RoadNetwork::genRadialPoints() {
 	}
 }
 
-
-int RoadNetwork::insideWorld(road r ){
-	line road = {r.start.location, r.end.location};
+int RoadNetwork::insideWorld(road r) {
+	line road = { r.start.location, r.end.location };
 
 	// should check is roadLine intersects any of the sectionLines
-	for(line l : outline.lines){
+	for (line l : outline.lines) {
 		//		if(intersects(road,line)){ //write this at some point
 		//			return 1;
 		//		}
 	}
 
 	// if not then it should somehow determine the highest/lowest rightmost and leftmost values and check against those
-	if(road.start.y > maxHeight && road.end.y > maxHeight){ return 2; } // too high
-	if(road.start.y < minHeight && road.end.y < minHeight){ return 2; } // too low
-	if(road.start.x > farRight && road.end.x > farRight){ return 2; } // too far right
-	if(road.start.x < farLeft && road.end.x < farLeft){ return 2; } // too far left
+	if (road.start.y > maxHeight && road.end.y > maxHeight) {
+		return 2;
+	} // too high
+	if (road.start.y < minHeight && road.end.y < minHeight) {
+		return 2;
+	} // too low
+	if (road.start.x > farRight && road.end.x > farRight) {
+		return 2;
+	} // too far right
+	if (road.start.x < farLeft && road.end.x < farLeft) {
+		return 2;
+	} // too far left
 
 	return 0;
 
@@ -141,18 +329,21 @@ int RoadNetwork::insideWorld(road r ){
 /**
  * Checks whether a point is inside or outside the world outline
  */
-int RoadNetwork::insideWorld(vec2 point){
+int RoadNetwork::insideWorld(vec2 point) {
 	// Quick bounding box check for efficiency
-	if(point.y > maxHeight || point.y < minHeight || point.x > farRight || point.x < farLeft){
+	if (point.y > maxHeight || point.y < minHeight || point.x > farRight
+			|| point.x < farLeft) {
 		return false;
 	}
 	// Now actually checks per line
 	// Algorithm from http://www.codeproject.com/Tips/84226/Is-a-Point-inside-a-Polygon
 
 	bool c = false;
-	for(line l : outline.lines){
-		if ( ((l.end.y>point.y) != (l.start.y>point.y)) &&
-				(point.x < (l.start.x-l.end.x) * (point.y-l.end.y) / (l.start.y-l.end.y) + l.end.x) )
+	for (line l : outline.lines) {
+		if (((l.end.y > point.y) != (l.start.y > point.y))
+				&& (point.x
+						< (l.start.x - l.end.x) * (point.y - l.end.y)
+								/ (l.start.y - l.end.y) + l.end.x))
 			c = !c;
 	}
 	return c;
@@ -164,8 +355,8 @@ int RoadNetwork::insideWorld(vec2 point){
  *
  * This method assumes that the road has already been confirmed to have an intersection
  */
-road RoadNetwork::truncate(road r){
-	line l = {r.start.location, r.end.location};
+road RoadNetwork::truncate(road r) {
+	line l = { r.start.location, r.end.location };
 	// Need to get intersection put
 	// Then pull inside a little
 	// Get length of line
@@ -176,7 +367,7 @@ road RoadNetwork::truncate(road r){
 /**
  * Adds an intersection between to nodes to the adjacency list
  */
-void RoadNetwork::addIntersection(int id1, int id2){
+void RoadNetwork::addIntersection(int id1, int id2) {
 	adjacencyList[id1].push_back(id2);
 	adjacencyList[id2].push_back(id1);
 	// NOTE: need to deal with when these intersections destroy other intersections
@@ -186,20 +377,20 @@ void RoadNetwork::addIntersection(int id1, int id2){
  * Adds new node to the list of all road nodes
  * giving it a new ID
  */
-roadNode RoadNetwork::addNode(vec2 point){
-	roadNode r = {point, nodeID++};
+roadNode RoadNetwork::addNode(vec2 point) {
+	roadNode r = { point, nodeID++ };
 	allNodes.push_back(r);
 	//	cout<<" ADD NODE " << allNodes[allNodes.size()-1].location.x  << " " << allNodes[allNodes.size()-1].location.y<< endl;
-	adjacencyList[r.ID] =  vector<int>();
+	adjacencyList[r.ID] = vector<int>();
 	return r;
 }
 
 /**
  * Adds new road to list of all roads
  */
-road RoadNetwork::addRoad(roadNode start,roadNode end){
-	road r = {start,end,roadID++};
-	cout<<" Adding road "<<endl;
+road RoadNetwork::addRoad(roadNode start, roadNode end) {
+	road r = { start, end, roadID++ };
+	cout << " Adding road " << endl;
 	allRoads.push_back(r);
 	adjacencyList[start.ID].push_back(end.ID);
 	adjacencyList[end.ID].push_back(start.ID);
@@ -211,74 +402,77 @@ road RoadNetwork::addRoad(roadNode start,roadNode end){
  * the given node. Also replaces that road in allRoads with the
  * resulting two roads
  */
-void RoadNetwork::updateAdjacencyList(road r, roadNode n){
+void RoadNetwork::updateAdjacencyList(road r, roadNode n) {
 	// remove r from allRoads
-	for(int i = 0; i < allRoads.size(); i++){
-		if(r.ID == allRoads[i].ID){
+	for (int i = 0; i < allRoads.size(); i++) {
+		if (r.ID == allRoads[i].ID) {
 			allRoads.erase(allRoads.begin() + i);
 			break;
 		}
 	}
 
 	// remove end from start and vice versa in adjacency list
-	for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
-		if(adjacencyList[r.start.ID][i] == r.end.ID){
-			adjacencyList[r.start.ID].erase(adjacencyList[r.start.ID].begin() + i);
+	for (int i = 0; i < (int) adjacencyList[r.start.ID].size(); i++) {
+		if (adjacencyList[r.start.ID][i] == r.end.ID) {
+			adjacencyList[r.start.ID].erase(
+					adjacencyList[r.start.ID].begin() + i);
 			break;
 		}
 	}
 
-	for(int i = 0; i < (int)adjacencyList[r.end.ID].size(); i++){
-		if(adjacencyList[r.end.ID][i] == r.start.ID){
+	for (int i = 0; i < (int) adjacencyList[r.end.ID].size(); i++) {
+		if (adjacencyList[r.end.ID][i] == r.start.ID) {
 			adjacencyList[r.end.ID].erase(adjacencyList[r.end.ID].begin() + i);
 			break;
 		}
 	}
 
 	// create two new roads start-n and n-end
-	addRoad(r.start,n);
-	addRoad(n,r.end);
+	addRoad(r.start, n);
+	addRoad(n, r.end);
 }
 
 /**
  * Calulates the most extreme points of the section
  * (i.e. min and max heights as well as the left and rightmost values)
  */
-void RoadNetwork::calulateBoundary(){
-	for(int i = 0; i < (int)outline.lines.size(); i++){
-		if(i ==0){ // Sets all to be a value at first line
+void RoadNetwork::calulateBoundary() {
+	for (int i = 0; i < (int) outline.lines.size(); i++) {
+		if (i == 0) { // Sets all to be a value at first line
 			maxHeight = max(outline.lines[i].start.y, outline.lines[i].end.y);
 			minHeight = min(outline.lines[i].start.y, outline.lines[i].end.y);
 			farLeft = min(outline.lines[i].start.x, outline.lines[i].end.x);
 			farRight = max(outline.lines[i].start.x, outline.lines[i].end.x);
-		}
-		else{
-			maxHeight = max(maxHeight, max(outline.lines[i].start.y, outline.lines[i].end.y));
-			minHeight = min(minHeight, min(outline.lines[i].start.y, outline.lines[i].end.y));
-			farLeft = min(farLeft, min(outline.lines[i].start.x, outline.lines[i].end.x));
-			farRight = max(farRight, max(outline.lines[i].start.x, outline.lines[i].end.x));
+		} else {
+			maxHeight = max(maxHeight,
+					max(outline.lines[i].start.y, outline.lines[i].end.y));
+			minHeight = min(minHeight,
+					min(outline.lines[i].start.y, outline.lines[i].end.y));
+			farLeft = min(farLeft,
+					min(outline.lines[i].start.x, outline.lines[i].end.x));
+			farRight = max(farRight,
+					max(outline.lines[i].start.x, outline.lines[i].end.x));
 		}
 	}
 }
 
+void RoadNetwork::recDivideGrid(road r, int level, bool halfLength) {
 
-void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
-
-	line l = {r.start.location,r.end.location};
+	line l = { r.start.location, r.end.location };
 	vec2 perpBi = getBisector(l);
 	vec2 centrePoint = centrePointOfLine(l);
 
 	// Now needs to create a node at centre point and update the adjacency list
 	roadNode rn = addNode(centrePoint);
-	updateAdjacencyList(r,rn);
+	updateAdjacencyList(r, rn);
 	// Then needs to extend in to opposite directions from centrePoint and add
 	float length = getLength(l);
 	if (halfLength) {
 		length = length / 2.0;
 	}
 
-	vec2 a = getLineForLength(centrePoint,perpBi,length);
-	vec2 b = getLineForLength(centrePoint,-perpBi,length);
+	vec2 a = getLineForLength(centrePoint, perpBi, length);
+	vec2 b = getLineForLength(centrePoint, -perpBi, length);
 	bool aIntersect = false;
 	bool bIntersect = false;
 
@@ -288,122 +482,133 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	// need to check here if a and b intercept
 	// now checks if the end point intersects any existing roads
 	int n = allRoads.size();
-	for(int i = 0; i < n; i++){
-		line l =  {allRoads[i].start.location, allRoads[i].end.location,0};
-		if(!aIntersect && isPointOnLine(a,l)){
+	for (int i = 0; i < n; i++) {
+		line l = { allRoads[i].start.location, allRoads[i].end.location, 0 };
+		if (!aIntersect && isPointOnLine(a, l)) {
 			cout << "Point is on line " << "" << endl;
-			cout<<"ALL ROADS END "<< allRoads[i].end.location.x<<endl;
+			cout << "ALL ROADS END " << allRoads[i].end.location.x << endl;
 			// check existing
 			//			if((int)round(a.x == allRoads[i].start.location.x) && a.y == allRoads[i].start.location.y){
-			if(floatEqual(a.x,allRoads[i].start.location.x)&&floatEqual(a.y,allRoads[i].start.location.y)){
+			if (floatEqual(a.x, allRoads[i].start.location.x)
+					&& floatEqual(a.y, allRoads[i].start.location.y)) {
 				//cout << "Cuaght" << endl;
 				r1 = allRoads[i].start;
 				aIntersect = true;
 			}
 			//			else if(a.x == allRoads[i].end.location.x && a.y == allRoads[i].end.location.y){
-			else if(floatEqual(a.x,allRoads[i].end.location.x)&&floatEqual(a.y,allRoads[i].end.location.y)){
+			else if (floatEqual(a.x, allRoads[i].end.location.x)
+					&& floatEqual(a.y, allRoads[i].end.location.y)) {
 				r1 = allRoads[i].end;
 				aIntersect = true;
-			}else{
+			} else {
 				n--;
 				r1 = addNode(a);
-				cout << "Old road split "  << r1.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
-				updateAdjacencyList(allRoads[i],r1);
+				cout << "Old road split " << r1.ID << "Splitting "
+						<< allRoads[i].start.ID << " " << allRoads[i].end.ID
+						<< endl;
+				updateAdjacencyList(allRoads[i], r1);
 				aIntersect = true;
 			}
-		}
-		else if(!bIntersect && isPointOnLine(b,l)){
+		} else if (!bIntersect && isPointOnLine(b, l)) {
 			// check existing
-			if(floatEqual(b.x,allRoads[i].start.location.x)&&floatEqual(b.y,allRoads[i].start.location.y)){
+			if (floatEqual(b.x, allRoads[i].start.location.x)
+					&& floatEqual(b.y, allRoads[i].start.location.y)) {
 				r2 = allRoads[i].start;
 				bIntersect = true;
-			}
-			else if(floatEqual(b.x,allRoads[i].end.location.x)&&floatEqual(b.y,allRoads[i].end.location.y)){
+			} else if (floatEqual(b.x, allRoads[i].end.location.x)
+					&& floatEqual(b.y, allRoads[i].end.location.y)) {
 				r2 = allRoads[i].end;
 				bIntersect = true;
-			}else{
+			} else {
 				n--;
 				r2 = addNode(b);
-				cout << "Old road split "  << r2.ID << "Splitting " << allRoads[i].start.ID << " " << allRoads[i].end.ID  <<endl;
-				updateAdjacencyList(allRoads[i],r2);
+				cout << "Old road split " << r2.ID << "Splitting "
+						<< allRoads[i].start.ID << " " << allRoads[i].end.ID
+						<< endl;
+				updateAdjacencyList(allRoads[i], r2);
 
 				bIntersect = true;
 			}
 		}
 	}
 
-	if(!aIntersect){
+	if (!aIntersect) {
 		r1 = addNode(a);
-		cout << "Node created "  << r1.ID << endl;
+		cout << "Node created " << r1.ID << endl;
 	}
-	if(!bIntersect){
+	if (!bIntersect) {
 		r2 = addNode(b);
-		cout << "Node created "  << r2.ID << endl;
+		cout << "Node created " << r2.ID << endl;
 	}
 
-	road left = addRoad(rn,r1);
-	road right = addRoad(rn,r2);
+	road left = addRoad(rn, r1);
+	road right = addRoad(rn, r2);
 
-	cout<< "First line added " << endl;
-	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
+	cout << "First line added " << endl;
+	cout << "Adjacents size" << adjacencyList.size() << " Nodes size "
+			<< allNodes.size() << "  Egdes size " << allRoads.size() << endl;
 
-	if(level < 3){
-		cout<< "First div on level " << level << endl;
-		recDivideGrid(left, level+1,!halfLength);
-		cout<< "Second div on level " << level << endl;
-		recDivideGrid(right, level+1,!halfLength);
+	if (level < 3) {
+		cout << "First div on level " << level << endl;
+		recDivideGrid(left, level + 1, !halfLength);
+		cout << "Second div on level " << level << endl;
+		recDivideGrid(right, level + 1, !halfLength);
 	}
 }
 
 // Assumes square world
-void RoadNetwork::createNewYorkGrid(section s){
+void RoadNetwork::createNewYorkGrid(section s) {
 	line l = s.lines[0]; // gets first line in outline
 
 	// Creates first road
 	vec2 perpBi = getBisector(l);
 	vec2 start = centrePointOfLine(l);
 	vec2 end = vec2(start.x, 100);
-	cout<<"END " << end.x << " " << end.y<<endl;
+	cout << "END " << end.x << " " << end.y << endl;
 	// Adds first road
 	addNode(start);
 	addNode(end);
-	addRoad(allNodes[0],allNodes[1]);
-	cout << "Node 1 " << allNodes[0].location.x << " " << allNodes[0].location.y << " node 2 " << allNodes[1].location.x << " "<< allNodes[1].location.y << endl;
+	addRoad(allNodes[0], allNodes[1]);
+	cout << "Node 1 " << allNodes[0].location.x << " " << allNodes[0].location.y
+			<< " node 2 " << allNodes[1].location.x << " "
+			<< allNodes[1].location.y << endl;
 
-	cout<< "First line added " << endl;
-	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
+	cout << "First line added " << endl;
+	cout << "Adjacents size" << adjacencyList.size() << " Nodes size "
+			<< allNodes.size() << "  Egdes size " << allRoads.size() << endl;
 
 	// Now recursively subdivide
-	recDivideGrid(allRoads[0],0,true);
+	recDivideGrid(allRoads[0], 0, true);
 
 }
 
-void RoadNetwork::createRoads(section world){
+void RoadNetwork::createRoads(section world) {
+	srand(time(NULL));
 	outline = world;
 	calulateBoundary();
-//	genBranchRoads(vec2(250,250));
-	createNewYorkGrid(outline);
+	genBranchRoads(vec2(250, 250));
+//	createNewYorkGrid(outline);
 	//genRadialPoints();
 	//createVoronoiRoads();
 	//testIsolatedVertex();
 	//testFilamentVertex();
 	//testCycle();
 
-//	cout << endl;
-//	cout << "Adjacency List" << endl;
-//	for(int i = 0; i < adjacencyList.size(); i++){
-//		cout << " key " << i << ": ";
-//		for(int j = 0; j < adjacencyList[i].size(); j++){
-//			cout << " " << adjacencyList[i][j];
-//		}
-//		cout << endl;
-//	}
-//
-//	cout << endl;
-//	cout << "Road List" << endl;
-//	for(int i = 0; i < allRoads.size(); i++){
-//		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
-//	}
+	//	cout << endl;
+	cout << "Adjacency List" << endl;
+	for (int i = 0; i < adjacencyList.size(); i++) {
+		cout << " key " << i << ": ";
+		for (int j = 0; j < adjacencyList[i].size(); j++) {
+			cout << " " << adjacencyList[i][j];
+		}
+		cout << endl;
+	}
+	//
+	//	cout << endl;
+	//	cout << "Road List" << endl;
+	//	for(int i = 0; i < allRoads.size(); i++){
+	//		cout << "Start: " << allRoads[i].start.ID << " End: " <<  allRoads[i].end.ID << endl;
+	//	}
 
 	findMinimumCycles();
 	cout << "Done !" << endl;
@@ -412,12 +617,12 @@ void RoadNetwork::createRoads(section world){
 	// Now generate minor roads
 }
 
-void RoadNetwork::testNetwork(){
+void RoadNetwork::testNetwork() {
 
-	line a = {vec2(400,400), vec2(100,400), 0};
-	line b = {vec2(100,400), vec2(100,100), 1};
-	line c = {vec2(100,100), vec2(400,100), 2};
-	line d = {vec2(400,100), vec2(400,400), 3};
+	line a = { vec2(400, 400), vec2(100, 400), 0 };
+	line b = { vec2(100, 400), vec2(100, 100), 1 };
+	line c = { vec2(100, 100), vec2(400, 100), 2 };
+	line d = { vec2(400, 100), vec2(400, 400), 3 };
 
 	vector<line> lines;
 	lines.push_back(a);
@@ -425,40 +630,41 @@ void RoadNetwork::testNetwork(){
 	lines.push_back(c);
 	lines.push_back(d);
 
-
 	section s;
 	s.lines = lines;
 
 	createRoads(s);
 }
 
-void RoadNetwork::createVoronoiRoads(){
+void RoadNetwork::createVoronoiRoads() {
 	//genGridPoints();
-	vec2 a = vec2(200,300);
-	vec2 b = vec2(300,200);
-	vec2 c = vec2(200,200);
-	vec2 d = vec2(350,150);
-	vec2 e = vec2(300,100);
+	vec2 a = vec2(200, 300);
+	vec2 b = vec2(300, 200);
+	vec2 c = vec2(200, 200);
+	vec2 d = vec2(350, 150);
+	vec2 e = vec2(300, 100);
 	points.push_back(a);
 	points.push_back(b);
 	points.push_back(d);
 	points.push_back(c);
 	points.push_back(e);
-	points.push_back(e-a);
-	points.push_back(e-c);
+	points.push_back(e - a);
+	points.push_back(e - c);
 
-	cout<< "Points generated" << endl;
+	cout << "Points generated" << endl;
 	voro = Voronoi();
 	vor::edges edgeList = voro.GetEdges(points, 600, 600);
 
 	cout << "edgeList size " << edgeList.size() << endl;
-	for(VEdge e : edgeList){
+	for (VEdge e : edgeList) {
 		allRoads.push_back(e.edge);
-		cout <<" road " << e.edge.start.location.x <<" , " << e.edge.start.location.y << "    " << e.edge.end.location.x << " , " << e.edge.end.location.y << endl;
+		cout << " road " << e.edge.start.location.x << " , "
+				<< e.edge.start.location.y << "    " << e.edge.end.location.x
+				<< " , " << e.edge.end.location.y << endl;
 	}
 }
 
-void RoadNetwork::renderRoads(){
+void RoadNetwork::renderRoads() {
 	//cout <<"rendering roads" << endl;
 
 	//glColor3f(0.5,0.0,0.5);
@@ -480,11 +686,12 @@ void RoadNetwork::renderRoads(){
 	//glLineWidth(2.0f);
 	glBegin(GL_LINES);
 	int j = 0;
-//	//	for(road r : allRoads){
-//	//	for(int i = allRoads.size()-1;i>=0;i--){
-	for(int i = 0; i < allRoads.size();i++){
+	//	//	for(road r : allRoads){
+	//	//	for(int i = allRoads.size()-1;i>=0;i--){
+	for (int i = 0; i < allRoads.size(); i++) {
 		road r = allRoads[i];
-		float chance =  r.ID/(float)allRoads.size();j++;
+		float chance = r.ID / (float) allRoads.size();
+		j++;
 		srand(r.ID);
 		//		if(chance<0.33f){
 		//			glColor3f(chance*3.0f,0,0);
@@ -493,167 +700,170 @@ void RoadNetwork::renderRoads(){
 		//		}else{
 		//			glColor3f(0,0,(chance-0.66f)*3.0f);
 		//		}
-		float red = (float)rand()/(RAND_MAX);
+		float red = (float) rand() / (RAND_MAX);
 		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
+		float gr = (float) rand() / RAND_MAX;
 		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
+		float br = (float) rand() / RAND_MAX;
+		glColor3f(red, gr, br);
 		glVertex2f(r.start.location.x, r.start.location.y);
 		glVertex2f(r.end.location.x, r.end.location.y);
 	}
 	glEnd();
-//	glColor3f(0.0,1.0,0.0);
-//	for(primitive p :cycles){
-//		float red = (float)rand()/(RAND_MAX);
-//		srand(rand());
-//		float gr = (float)rand()/RAND_MAX;
-//		srand(rand());
-//		float br = (float)rand()/RAND_MAX;
-//		glColor3f(red,gr,br);
-//		glBegin(GL_POLYGON);
-//
-//		for(roadNode v : p.vertices){
-//			glVertex2f(v.location.x, v.location.y);
-//		}
-//		glEnd();
-//	}
+	//	glColor3f(0.0,1.0,0.0);
+	for (primitive p : cycles) {
+		float red = (float) rand() / (RAND_MAX);
+		srand(rand());
+		float gr = (float) rand() / RAND_MAX;
+		srand(rand());
+		float br = (float) rand() / RAND_MAX;
+		glColor3f(red, gr, br);
+		glBegin(GL_POLYGON);
 
+		for (roadNode v : p.vertices) {
+			glVertex2f(v.location.x, v.location.y);
+		}
+		glEnd();
+	}
 
-
-	glColor3f(0.0,0.0,1.0); // blue intersections
+	glColor3f(0.0, 0.0, 1.0); // blue intersections
 	glPointSize(10);
 
 	glBegin(GL_POINTS);
 	//for(roadNode n : allNodes){
-	for(int i = allNodes.size()-1;i>=0;i--){
+	for (int i = allNodes.size() - 1; i >= 0; i--) {
 		roadNode n = allNodes[i];
 		//if(n.ID > 10 &&  n.ID < 13){
-			glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+		glColor3f(n.ID / (float) allNodes.size(),
+				n.ID / (float) allNodes.size(), n.ID / (float) allNodes.size());
 
-			glVertex2f(n.location.x, n.location.y);
-//	 }
+		glVertex2f(n.location.x, n.location.y);
+		//	 }
 	}
 	glEnd();
 }
 
-void RoadNetwork::findMinimumCycles(){
+void RoadNetwork::findMinimumCycles() {
 	cout << "--------------------" << endl;
 	cout << "Finding min cycles" << endl;
 	vector<primitive> prims = extractPrimitives();
-	for(primitive p : prims){
-		if(p.type == 2){ // if cycle
+	for (primitive p : prims) {
+		if (p.type == 2) { // if cycle
 			cycles.push_back(p);
 		}
 	}
-	cout<<"Primitives " << prims.size()<<endl;
-	cout<<"Cycles " << cycles.size()<<endl;
+	cout << "Primitives " << prims.size() << endl;
+	cout << "Cycles " << cycles.size() << endl;
 }
 
-
-vector<primitive> RoadNetwork::extractPrimitives(){
+vector<primitive> RoadNetwork::extractPrimitives() {
 
 	cout << "Extracting primitives" << endl;
 
 	vector<primitive> primitives;
 	vector<roadNode> heap = sortPoints(allNodes);
 
-	for(int i = 0; i < heap.size(); i++){
-		cout<< heap[i].ID <<endl;
+	for (int i = 0; i < heap.size(); i++) {
+		cout << heap[i].ID << endl;
 	}
 
-	map<int,vector<int>> adjacencies = adjacencyList;
+	map<int, vector<int>> adjacencies = adjacencyList;
 	vector<road> roads = sortRoads(allRoads);
 
-	cout << "All nodes " << (int)allNodes.size() << endl;
-	cout << "Heap size" << (int)heap.size() << endl;
-
-	while((int)heap.size() > 0){
-
+	cout << "All nodes " << (int) allNodes.size() << endl;
+	cout << "Heap size" << (int) heap.size() << endl;
+	while ((int) heap.size() != 0) {
+		if ((int) roads.size() == 0) {
+			cout << "BREAKING BECAUSE NO MORE ROADS" << endl;
+			break;
+		}
 
 		roadNode vertex = heap[0];
 		vector<int> adjs = adjacencies[vertex.ID];
-		int noAdj = (int)adjs.size();
+		int noAdj = (int) adjs.size();
 
-		if(noAdj == 0){
+		if (noAdj == 0) {
 			cout << "Extracting isolated vertex" << endl;
 			// extract isolated vertex
+			cout << "IV Heap Before" << (int) heap.size() << endl;
 			extractIsolatedVertex(&primitives, &heap, &adjacencies);
-		}
-
-		else if ( noAdj == 1){
+			cout << "IV Heap After" << (int) heap.size() << endl;
+		} else if (noAdj == 1) {
 			cout << "Extracting filament vertex" << endl;
 			// extract filament
-			extractFilament(vertex.ID, adjacencies[vertex.ID][0] ,&primitives, &heap, &adjacencies, &roads);
-		}
-
-		else{
+			cout << "EF Heap Before" << (int) heap.size() << endl;
+			extractFilament(vertex.ID, adjacencies[vertex.ID][0], &primitives,
+					&heap, &adjacencies, &roads);
+			cout << "EF Heap After" << (int) heap.size() << endl;
+		} else {
 			// extract filament or cycle
 			cout << "Extracting cycle" << endl;
 			extractPrimitive(&primitives, &heap, &adjacencies, &roads);
 		}
+		cout << " HEAP SIZE " << (int) heap.size() << endl;
 
 	}
 
 	return primitives;
 }
 
-void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs){
+void RoadNetwork::extractIsolatedVertex(vector<primitive> * primitives,
+		vector<roadNode> * heap, map<int, vector<int>> * adjs) {
 	vector<roadNode> vertices;
 	vertices.push_back(heap->front()); // removes roadNode from heap
 	heap->erase(heap->begin());
 	cout << "Heap size " << heap->size() << endl;
 	//removeFromHeap(heap,startID);// remove from heap
-	primitive p = {vertices,0}; // adds vertex to primitive and sets it as isolated vertex
+	primitive p = { vertices, 0 }; // adds vertex to primitive and sets it as isolated vertex
 	adjs->erase(vertices[0].ID); // removes from adjacency list
 	primitives->push_back(p);
 }
 
 // Note: visiting a vertex should remove it from adjacency list
 
-void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
-	cout << "Extracting a filament " << endl;
-	if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){// the edge between startID (heap[0]) and an adjacent vertex of ID endID
-		cout << "Testing a cycle edge " << endl;
-		if((int)(*adjs)[startID].size() >= 3){
+void RoadNetwork::extractFilament(int startID, int endID,
+		vector<primitive> * primitives, vector<roadNode> * heap,
+		map<int, vector<int>> * adjs, vector<road> * roads) {
+	cout << "Extracting a filament road size: " << (int) (*roads).size()
+			<< endl;
+	if ((*roads)[(findRoadIndex((*roads), startID, endID))].isCycleEdge) { // the edge between startID (heap[0]) and an adjacent vertex of ID endID
+		if ((int) (*adjs)[startID].size() >= 3) {
 
-			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
+			int toRemove = findRoadIndex((*roads), startID, endID); //remove edge v0 to v1
 			roads->erase(roads->begin() + toRemove);
 
 			startID = endID;
-			if((int)(*adjs)[startID].size() == 1){
+			if ((int) (*adjs)[startID].size() == 1) {
 				endID = (*adjs)[startID][0];
 			}
 		}
 
-		while((int)(*adjs)[startID].size() == 1){
-			cout<<"start id is " <<startID<<endl;
+		while ((int) (*adjs)[startID].size() == 1) {
+			cout << "start id is " << startID << endl;
 			endID = (*adjs)[startID][0];
-			if((*roads)[findRoadIndex((*roads),startID,endID)].isCycleEdge){//  if cycle edge
-				removeFromHeap(heap,startID);// remove from heap
-				int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
-				roads->erase(roads->begin() + toRemove);// remove edge
-				removeAdjacencyLinks(startID,adjs); //remove vertex
+			if ((*roads)[findRoadIndex((*roads), startID, endID)].isCycleEdge) { //  if cycle edge
+				removeFromHeap(heap, startID);				//remove from heap
+				int toRemove = findRoadIndex((*roads), startID, endID); //remove edge v0 to v1
+				roads->erase(roads->begin() + toRemove);		//remove edge
+				removeAdjacencyLinks(startID, adjs); 			//remove vertex
 				startID = endID;
-				cout<<"SIZE "<<(int)(*adjs)[startID].size()<<endl;
-			}
-			else{
-				cout<<"Breaking because his road isn't a cycle edge"<<endl;
+				cout << "SIZE " << (int) (*adjs)[startID].size() << endl;
+			} else {
+				cout << "Breaking because his road isn't a cycle edge" << endl;
 				break;
 			}
 		}
-		cout<<"We then ask this ol if what up"<<endl;
-		if((int)(*adjs)[startID].size() == 0){
-			removeFromHeap(heap,startID);//remove from heap
-			removeAdjacencyLinks(startID,adjs); //remove vertex
+		cout << "We then ask this ol if what up" << endl;
+		if ((int) (*adjs)[startID].size() == 0) {
+			removeFromHeap(heap, startID);		//remove from heap
+			removeAdjacencyLinks(startID, adjs); //remove vertex
 		}
-	}
-	else{
+	} else {
 		cout << "Not a cycle edge " << endl; // Here safe
 		primitive p;
 		p.type = 1; // sets to filament
 
-		if((int)(*adjs)[startID].size() >= 3){
+		if ((int) (*adjs)[startID].size() >= 3) {
 			cout << "Has 3+ edges out " << endl;
 
 			//			for(int i = 0; i < (*adjs)[startID].size(); i++){
@@ -662,166 +872,172 @@ void RoadNetwork::extractFilament(int startID, int endID, vector<primitive> * pr
 			//			cout<< endl;
 
 			p.vertices.push_back(allNodes[startID]);
-			cout << "Removing " <<startID << " " <<endID;
-			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
-			roads->erase(roads->begin() + toRemove);//remove edge
+			cout << "Removing " << startID << " " << endID << endl;
+			int toRemove = findRoadIndex((*roads), startID, endID); //remove edge v0 to v1
+			cout << "ROAD SIZE AT F IS " << (int) (*roads).size() << endl;
+			roads->erase(roads->begin() + toRemove); //remove edge
+			cout << "ROAD AFTR AT F IS " << (int) (*roads).size() << endl;
 			startID = endID;
-			if((int)(*adjs)[startID].size() == 1){
+			if ((int) (*adjs)[startID].size() == 1) {
 				endID = (*adjs)[startID][0];
 			}
 		}
 
-		while((int)(*adjs)[startID].size() == 1){
+		while ((int) (*adjs)[startID].size() == 1) {
 			cout << "Has only 1 adj in while loop" << endl;
 			p.vertices.push_back(allNodes[startID]);
 			endID = (*adjs)[startID][0];
-			removeFromHeap(heap,startID);//remove from heap (all verts)
+			removeFromHeap(heap, startID); //remove from heap (all verts)
 
-			int toRemove = findRoadIndex((*roads),startID,endID); //remove edge v0 to v1
-			cout<< " Output "<<toRemove<<endl;
-			cout << "Here" << endl;
-			roads->erase(roads->begin() + toRemove);//remove edge (find road and remove road)
-			removeAdjacencyLinks(startID,adjs); //remove vertex (remove all links to this and itself from the adj list)
+			int toRemove = findRoadIndex((*roads), startID, endID); //remove edge v0 to v1
+			cout << " Output " << toRemove << endl;
+			cout << "ROAD SIZE AT G IS " << (int) (*roads).size() << endl;
+			roads->erase(roads->begin() + toRemove); //remove edge (find road and remove road)
+			cout << "ROAD AFTR AT G IS " << (int) (*roads).size() << endl;
+			removeAdjacencyLinks(startID, adjs); //remove vertex (remove all links to this and itself from the adj list)
 			startID = endID;
 		}
 		cout << "Now doesn't have 1 adj" << endl;
 		p.vertices.push_back(allNodes[startID]);
-		if((int)(*adjs)[startID].size() == 0){
-			removeFromHeap(heap,startID);//remove from heap
-			removeAdjacencyLinks(startID,adjs); //remove vertex
+		if ((int) (*adjs)[startID].size() == 0) {
+			removeFromHeap(heap, startID); //remove from heap
+			removeAdjacencyLinks(startID, adjs); //remove vertex
 		}
 		primitives->push_back(p);
 	}
-	cout << "Got filament" <<endl;
+	cout << "Got filament" << endl;
 }
 //when I erase a road I just want to remove the two links
-void RoadNetwork::removeEdge(vector<road> * roads, map<int,vector<int>> * adjs, int toRemove){
+void RoadNetwork::removeEdge(vector<road> * roads, map<int, vector<int>> * adjs,
+		int toRemove) {
 	//we probably want to get the actual start and end points ut of the this road to remove the links from list
 	// remove end from start and vice versa in adjacency list
 	road r = (*roads)[toRemove];
-	cout<<"REMOVE EDGE: Road to remove "<<toRemove<<endl;
-	for(int i = 0; i < (int)(*adjs)[r.start.ID].size(); i++){
-		if((*adjs)[r.start.ID][i] == r.end.ID){
-			cout<<"REMOVE EDGE: Remove start from end"<<endl;
+	cout << "REMOVE EDGE: Road to remove " << toRemove << endl;
+	for (int i = 0; i < (int) (*adjs)[r.start.ID].size(); i++) {
+		if ((*adjs)[r.start.ID][i] == r.end.ID) {
+			cout << "REMOVE EDGE: Remove start from end" << endl;
 			(*adjs)[r.start.ID].erase((*adjs)[r.start.ID].begin() + i);
 			break;
 		}
 	}
 
-	for(int i = 0; i < (int)(*adjs)[r.end.ID].size(); i++){
-		if((*adjs)[r.end.ID][i] == r.start.ID){
-			cout<<"REMOVE EDGE: Remove end from start"<<endl;
+	for (int i = 0; i < (int) (*adjs)[r.end.ID].size(); i++) {
+		if ((*adjs)[r.end.ID][i] == r.start.ID) {
+			cout << "REMOVE EDGE: Remove end from start" << endl;
 			(*adjs)[r.end.ID].erase((*adjs)[r.end.ID].begin() + i);
 			break;
 		}
 	}
-	roads->erase(roads->begin() + toRemove);//remove edge
+	roads->erase(roads->begin() + toRemove);	//remove edge
 }
 
-
-void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNode> * heap, map<int,vector<int>> * adjs, vector<road> * roads){
+void RoadNetwork::extractPrimitive(vector<primitive> * primitives,
+		vector<roadNode> * heap, map<int, vector<int>> * adjs,
+		vector<road> * roads) {
 	vector<roadNode> visited = vector<roadNode>();
 	vector<roadNode> sequence;
-	cout<<"Afdfdfdfed " << roads->size()<<endl;
-	roadNode start = (*heap)[0]; // v0
-	roadNode v1 = getClockwiseMost(start, (*adjs)[start.ID]); // v1
+	cout << "Afdfdfdfed " << (int) roads->size() << endl;
+	roadNode start = (*heap)[0]; // insert v0
+	roadNode v1 = getClockwiseMost(start, (*adjs)[start.ID]);// v1 := most clockwise of v0
 
-	sequence.push_back(start);
+	sequence.push_back(start);									//add v0
 
-	roadNode vprev = start;
+	roadNode vprev = start;			//vp = v0
 
-	roadNode vcurr = v1;
+	roadNode vcurr = v1;			//vc = v1
 
 	cout << "Start: " << start.ID;
 	cout << " v1: " << v1.ID;
-	cout<<endl;
+	cout << endl;
 
+	while (vcurr.ID != -1 && vcurr.ID != start.ID && !contains(visited, vcurr)) {//while vc != null && vc != v0 and vc != visited
+		cout << "In cycle while loop" << endl;
 
-	while(vcurr.ID != start.ID && !contains(visited,vcurr)){
-		cout << "In cycle while loop" <<endl;
+		sequence.push_back(vcurr);	//TODO why do we do this before break?
+		visited.push_back(vcurr);//We break after because its an early break condition
 
-		sequence.push_back(vcurr);
-		visited.push_back(vcurr);
-		if((int)(*adjs)[vcurr.ID].size() == 1){
-			cout << "Break " << endl;
-			break;
-		}
-		roadNode vnext = getAntiClockwiseMost(vprev,vcurr,(*adjs)[vcurr.ID]);
-		vprev = vcurr;
-		vcurr = vnext;
+//		if((int)(*adjs)[vcurr.ID].size() == 1){ //if vc(the next vc) == null, then end
+//			cout << "Break " << endl;
+//			break;
+//		}
+
+		roadNode vnext = getAntiClockwiseMost(vprev, vcurr, (*adjs)[vcurr.ID]);	//vnext = anti clockwise between vp and vc
+		vprev = vcurr;				//vp := vc
+		vcurr = vnext;				//vc := vn
 	}
 	///curr is now equal to start, if cycle.
 	cout << "Passed while loop" << endl;
 
-	if((int)(*adjs)[vcurr.ID].size() == 1){
+	if (vcurr.ID == -1) {	//if vc approximates to null
 		//Filament found, may not actaully start at vprev, but it is a part of it
 		cout << "Filament found" << endl;
-		extractFilament(vcurr.ID, (*adjs)[vcurr.ID][0], primitives, heap, adjs, roads);
-	}
-	else if(vcurr.ID == start.ID){
+		extractFilament(vprev.ID, (*adjs)[vprev.ID][0], primitives, heap, adjs,
+				roads);		//Use vc because vc would be null if possible
+	} else if (vcurr.ID == start.ID) {
 		cout << "Minimal cycle found" << endl;
 		// Minimal cycle found
-		primitive p = {sequence, 2};
+		primitive p = { sequence, 2 };
 		primitives->push_back(p);
 
 		// for each edge in the cycle
-		int n = (int)sequence.size();
+		int n = (int) sequence.size();
 
-		for(int i = 0; i < n;i++){
-			cout << "Here" << endl;
-
-			setCycleEdge(roads,i,(i+1)%n);
+		for (int i = 0; i < n; i++) {
+			setCycleEdge(roads, i, (i + 1) % n);
 		}
 
-
-		cout<<"Input " << start.ID << " " << v1.ID;
-		int toRemove = findRoadIndex((*roads),start.ID,v1.ID); //remove edge v0 to v1
-		cout<<" output " << toRemove<<endl;
-		cout<< "Start adjs. Removing  "<<v1.ID <<" "<< (int)(*adjs)[start.ID].size()<<endl;
+		cout << "Input " << start.ID << " " << v1.ID;
+		int toRemove = findRoadIndex((*roads), start.ID, v1.ID); //remove edge v0 to v1
+		cout << " output " << toRemove << endl;
+		cout << "Start adjs. Removing  " << v1.ID << " "
+				<< (int) (*adjs)[start.ID].size() << endl;
 		removeEdge(roads, adjs, toRemove);
-		cout<< "Start adjs end. Start ID "<<start.ID<<" "<< (int)(*adjs)[start.ID].size()<<endl;
-		cout<<"And edge has actually been removed " << roads->size()<<endl;
-		if((int)(*adjs)[start.ID].size() == 1){
-			cout<<"Exracted filament Start.ID : ADJ: "<<(*adjs)[start.ID][0]<<endl;
-			extractFilament(start.ID, (*adjs)[start.ID][0], primitives, heap, adjs, roads);
+		cout << "Start adjs end. Start ID " << start.ID << " "
+				<< (int) (*adjs)[start.ID].size() << endl;
+		cout << "And edge has actually been removed " << roads->size() << endl;
+		if ((int) (*adjs)[start.ID].size() == 1) {
+			cout << "Exracted filament Start.ID : ADJ: " << (*adjs)[start.ID][0]
+					<< endl;
+			extractFilament(start.ID, (*adjs)[start.ID][0], primitives, heap,
+					adjs, roads);
 
 		}
 
-		if((int)(*adjs)[v1.ID].size() == 1){
-			cout<<"Exracted filament v1.ID"<<endl;
-			extractFilament(v1.ID, (*adjs)[v1.ID][0], primitives, heap, adjs, roads);
+		if ((int) (*adjs)[v1.ID].size() == 1) {
+			cout << "Exracted filament v1.ID" << endl;
+			extractFilament(v1.ID, (*adjs)[v1.ID][0], primitives, heap, adjs,
+					roads);
 		}
-	}
-
-	else{
-		cout << "Else loop" << endl;
-		while((int)(*adjs)[start.ID].size() == 2){
+	} else {
+		while ((int) (*adjs)[start.ID].size() == 2) {
 			//cout << "Stuck in else while loop" << endl;
-			if((*adjs)[start.ID].at(0) != v1.ID){
+			if ((*adjs)[start.ID].at(0) != v1.ID) {
 				v1 = start;
 				start = allNodes[(*adjs)[start.ID][0]];
-			}
-			else{
+			} else {
 				v1 = start;
 				start = allNodes[(*adjs)[start.ID][1]];
 			}
 		}
+		cout << "Extracting a thingy but not a cycle edge" << endl;
 		extractFilament(start.ID, v1.ID, primitives, heap, adjs, roads);
 	}
 
 }
 
-void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID){
-	int toSet = findRoadIndex((*roads),startID, endID);
+void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID) {
+	int toSet = findRoadIndex((*roads), startID, endID);
 	cout << "found road index" << endl;
 	(*roads)[toSet].isCycleEdge = true;
 }
 
 road RoadNetwork::findClosestRoads(vec3 position) {
 	road min = allRoads[0];
-	vec2 pos = vec2(position.x,position.z);
-	for(int i = 1; i < allRoads.size();i++){
-		if(abs(length(min.end.location-pos))>abs(length(allRoads[i].end.location-pos))){
+	vec2 pos = vec2(position.x, position.z);
+	for (int i = 1; i < allRoads.size(); i++) {
+		if (abs(length(min.end.location - pos))
+				> abs(length(allRoads[i].end.location - pos))) {
 			min = allRoads[i];
 		}
 	}
@@ -830,26 +1046,25 @@ road RoadNetwork::findClosestRoads(vec3 position) {
 
 // Gets the clockwiseMost adjacent vertex
 // Returns the ID of it
-roadNode RoadNetwork::getClockwiseMost(roadNode current, vector<int> adj){
-	vec2 dCurr = vec2(0,-1); //support line
+roadNode RoadNetwork::getClockwiseMost(roadNode current, vector<int> adj) {
+	vec2 dCurr = vec2(0, -1); //support line
 	roadNode vnext = allNodes[adj[0]]; // sets up first adjacent vertex
-	vec2 dnext = vnext.location -current.location;
-	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+	vec2 dnext = vnext.location - current.location;
+	bool vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 
-	for(int i = 1; i < (int)adj.size(); i++){
+	for (int i = 1; i < (int) adj.size(); i++) {
 		vec2 dirAdj = allNodes[adj[i]].location - current.location; // gets direction of adjacent vertex
-		if(vcurrIsConvex){
-			if(DotPerp(dCurr,dirAdj) < 0 || DotPerp(dnext,dirAdj) < 0){
+		if (vcurrIsConvex) {
+			if (DotPerp(dCurr, dirAdj) < 0 || DotPerp(dnext, dirAdj) < 0) {
 				vnext = allNodes[adj[i]];
 				dnext = dirAdj;
-				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 			}
-		}
-		else{
-			if(DotPerp(dCurr,dirAdj) < 0 && DotPerp(dnext,dirAdj) < 0){
+		} else {
+			if (DotPerp(dCurr, dirAdj) < 0 && DotPerp(dnext, dirAdj) < 0) {
 				vnext = allNodes[adj[i]];
 				dnext = dirAdj;
-				vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+				vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 			}
 
 		}
@@ -859,35 +1074,38 @@ roadNode RoadNetwork::getClockwiseMost(roadNode current, vector<int> adj){
 
 // Gets the clockwiseMost adjacent vertex
 // Returns the ID of it
-roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current, vector<int> adj){
+roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current,
+		vector<int> adj) {
+	if ((int) adj.size() == 1) {
+		return {vec2(0,0),-1};
+	}
 	vec2 dCurr = current.location - vprev.location; //support line
 	roadNode vnext = allNodes[adj[0]]; // sets up first adjacent vertex
 
-	if(adj[0] == vprev.ID){
-		if((int)adj.size() == 1){
+	if (adj[0] == vprev.ID) {
+		if ((int) adj.size() == 1) {
 			return vprev;
 		}
 		vnext = allNodes[adj[1]];
 	}
 
-	vec2 dnext = vnext.location -current.location;
-	bool vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+	vec2 dnext = vnext.location - current.location;
+	bool vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 
-	for(int i = 1; i < (int)adj.size(); i++){
-		if(adj[i] != vprev.ID){
+	for (int i = 1; i < (int) adj.size(); i++) {
+		if (adj[i] != vprev.ID) {
 			vec2 dirAdj = allNodes[adj[i]].location - current.location; // gets direction of adjacent vertex
-			if(vcurrIsConvex){
-				if(DotPerp(dCurr,dirAdj) > 0 && DotPerp(dnext,dirAdj) > 0){
+			if (vcurrIsConvex) {
+				if (DotPerp(dCurr, dirAdj) > 0 && DotPerp(dnext, dirAdj) > 0) {
 					vnext = allNodes[adj[i]];
 					dnext = dirAdj;
-					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+					vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 				}
-			}
-			else{
-				if(DotPerp(dCurr,dirAdj) > 0 || DotPerp(dnext,dirAdj) > 0){
+			} else {
+				if (DotPerp(dCurr, dirAdj) > 0 || DotPerp(dnext, dirAdj) > 0) {
 					vnext = allNodes[adj[i]];
 					dnext = dirAdj;
-					vcurrIsConvex = (int)round(DotPerp(dnext,dCurr)) <=0;
+					vcurrIsConvex = (int) round(DotPerp(dnext, dCurr)) <= 0;
 				}
 
 			}
@@ -896,48 +1114,47 @@ roadNode RoadNetwork::getAntiClockwiseMost(roadNode vprev, roadNode current, vec
 	return vnext;
 }
 /* This kills a vertex   */
-void RoadNetwork::removeAdjacencyLinks(int ID, map<int,vector<int>> * adjs){
+void RoadNetwork::removeAdjacencyLinks(int ID, map<int, vector<int>> * adjs) {
 	// Removes itself from other vertices links
-	for(int i : (*adjs)[ID]){
-		for(int j = 0; j < (int)(*adjs)[i].size(); j++){
-			if(ID == (*adjs)[i].at(j)){				vector<int> near = (*adjs)[i];
-			near.erase(near.begin() + j);
-			(*adjs)[i] = near;
+	for (int i : (*adjs)[ID]) {
+		for (int j = 0; j < (int) (*adjs)[i].size(); j++) {
+			if (ID == (*adjs)[i].at(j)) {
+				vector<int> near = (*adjs)[i];
+				near.erase(near.begin() + j);
+				(*adjs)[i] = near;
 			}
 		}
 	}
 	//Deletes it's own links
 	adjs->erase(ID);
+}
+
+void RoadNetwork::testIsolatedVertex() {
+	addNode(vec2(200, 200));
+}
+
+void RoadNetwork::testFilamentVertex() {
+	roadNode r = addNode(vec2(200, 200));
+	roadNode s = addNode(vec2(400, 200));
+	addRoad(r, s);
 
 }
 
-void RoadNetwork::testIsolatedVertex(){
-	addNode(vec2(200,200));
-}
-
-void RoadNetwork::testFilamentVertex(){
-	roadNode r = addNode(vec2(200,200));
-	roadNode s = addNode(vec2(400,200));
-	addRoad(r,s);
-
-}
-
-void RoadNetwork::testCycle(){
-	vec2 r = (vec2(100,100));
-	vec2 s = (vec2(100,400));
-	vec2 t = (vec2(400,400));
-	vec2 u = (vec2(400,100));
+void RoadNetwork::testCycle() {
+	vec2 r = (vec2(100, 100));
+	vec2 s = (vec2(100, 400));
+	vec2 t = (vec2(400, 400));
+	vec2 u = (vec2(400, 100));
 
 	roadNode a = addNode(r);
 	roadNode b = addNode(s);
 	roadNode c = addNode(t);
 	roadNode d = addNode(u);
 
-	addRoad(a,b);
-	addRoad(b,c);
+	addRoad(a, b);
+	addRoad(b, c);
 	//	addRoad(a,c);
-	addRoad(c,d);
-	addRoad(d,a);
-
+	addRoad(c, d);
+	addRoad(d, a);
 
 }
