@@ -551,12 +551,17 @@ void RoadNetwork::createNewYorkGrid(section s){
 
 }
 
-void RoadNetwork::createRoads(section world){
-	srand(time(NULL));
+void RoadNetwork::createRoads(section world, bool gridOn){
+
 	outline = world;
 	calulateBoundary();
-	genBranchRoads(vec2(250,250));
-//	createNewYorkGrid(outline);
+//
+	if(gridOn){
+	createNewYorkGrid(outline);
+	}
+	else{
+		genBranchRoads(vec2(250,250));
+	}
 	//genRadialPoints();
 	//createVoronoiRoads();
 	//testIsolatedVertex();
