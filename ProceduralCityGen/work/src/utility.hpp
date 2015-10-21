@@ -96,6 +96,18 @@ public:
 	}
 };
 
+inline vec2 findPerp(vec2 dir){
+	cout << "finding perp" << endl;
+	dir = normalize(dir);
+	cout << "It could be the normalizing" << endl;
+	vec3 direction = vec3(dir.x, 0, dir.y);
+	vec3 upvec = vec3(0,1,0);
+	cout << "It's probably the cross product" << endl;
+	vec3 perp = cross(direction, upvec);
+	cout << "found perp " << endl;
+	return vec2(perp.x,perp.z);
+}
+
 inline vec2 rotate(vec2 centrePoint, vec2 toRotate, float deg) {
 	double angleInRadians = radians(deg);
 	double cosTheta = cos(angleInRadians);
@@ -206,6 +218,9 @@ inline vec2 getIntersection(line l, line o) {
 /*REQUIRES: The lines to actually intersect
  Intersection method given two lines, represented by 2 start and end vectors*/
 inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
+
+	cout << "Get intersection" << endl;
+
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
 	//cout << "Equations " << e1.x << " " << e1.y << " to " << e2.x << " " << e2.y << "|" << endl;
