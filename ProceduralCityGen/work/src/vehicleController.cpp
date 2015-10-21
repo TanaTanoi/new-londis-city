@@ -45,8 +45,9 @@ clock_t begin_time = clock();
 void renderTargets(Vehicle *);
 
 VehicleController::VehicleController(string vehicles, string textures,
-		vector<vec3> limits, vec3 bounds) {
+		int size) {
 
+	m_size = size;
 	readConfig(vehicles);
 	readTextures(textures);
 }
@@ -100,7 +101,7 @@ void VehicleController::initTexture(string filename, GLuint index) {
 void VehicleController::initVehicles() {
 
 	// TODO will have to change this according to the size of the map
-	int size = 4, index;
+	int size = m_size, index;
 
 	for (int i = 0; i < size; i++) {
 		index = rand() % m_filenames_car.size();

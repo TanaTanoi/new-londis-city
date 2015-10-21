@@ -48,11 +48,8 @@ private:
 	// Used to make vehicles travel between points
 	Spline *m_spline = nullptr;
 
-	// Points that vehicles cannot occupy
-	std::vector<comp308::vec3> m_outOfBounds;
-
 	// Size of the map
-	comp308::vec3 m_mapSize;
+	int m_size;
 
 	// textures and cars
 	std::vector<std::string> m_filenames_car;
@@ -102,8 +99,7 @@ private:
 
 public:
 
-	VehicleController(std::string, std::string, std::vector<comp308::vec3>,
-			comp308::vec3);
+	VehicleController(std::string, std::string, int size = 10);
 	virtual ~VehicleController();
 
 	void parseRoadNetwork(RoadNetwork*);
