@@ -173,6 +173,8 @@ int main(int argc, char **argv) {
 	if (mode == FULL_MODE) {
 		initBuildingGenerator();
 		initLighting();
+
+
 		if (!(options & op_heightmap)) {
 			cout << "No heightmap, generating buildings now" << endl;
 			//if we don't want a height map, just generate the buildings
@@ -278,6 +280,9 @@ void renderLoop() {
 			building.generateRoad(r.start.location * scale,
 					r.end.location * scale, 0.2f);
 		}
+
+		g_vehicleCtrl->tick();
+
 		/*Draw world*/
 		building.drawGround(100.0f);
 		drawSkycube(100.0f);	//the further away it is the better it looks
@@ -360,6 +365,8 @@ void renderLoop() {
  *assigns buildings to the loads, and stores them in the
  *section code.*/
 void generateBuildings() {
+
+
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
 	g_network->testNetwork();
@@ -403,6 +410,11 @@ void generateBuildings() {
 		l.buildings.high = building.generateBuildingsFromSections(l.sections,range,min);
 		g_sections->addBuildingToLot(l);
 	}
+	g_vehicleCtrl = new VehicleController(
+			"../work/res/assets/vehicle_config.txt",
+			"../work/res/assets/tex_config.txt", car_mode_number);
+
+	g_vehicleCtrl->parseRoadNetwork(g_network);
 	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
 }
 

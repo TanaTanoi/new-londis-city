@@ -187,7 +187,7 @@ void VehicleController::tick() {
 			m_vehicles[i].resetSplineTime();
 		}
 
-		renderTargets(&m_vehicles[i]);
+//		renderTargets(&m_vehicles[i]);
 
 		// Calculate transformation
 		vec3 trans = interpolate(&m_vehicles[i], m_vehicles[i].getPathIndex());
@@ -221,8 +221,9 @@ void renderTargets(Vehicle *v) {
 	for (int j = 0; j < (int) v->getPath().size(); ++j) {
 		t = v->getPath()[j];
 		// cout << "target " << t.ID << ", " << t.location << endl;
-		glVertex3f(t.location.x * Generator::SECTION_TO_POINT_SCALE(), 0,
-				t.location.y * Generator::SECTION_TO_POINT_SCALE());
+		float world_scale = Generator::SECTION_TO_POINT_SCALE()*2.0f;
+		glVertex3f(t.location.x * world_scale, 0,
+				t.location.y * world_scale);
 	}
 	glEnd();
 	glPopMatrix();
@@ -259,11 +260,11 @@ void VehicleController::renderVehicle(Vehicle *vehicle, vec3 *trans, vec3 *rot,
 
 	// Render the vehicle
 	glPushMatrix();
-
+	float world_scale = Generator::SECTION_TO_POINT_SCALE()*2.0f;
 	// Translate it to grid coordinates
-	glTranslatef(trans->x * Generator::SECTION_TO_POINT_SCALE(),
-			trans->y * Generator::SECTION_TO_POINT_SCALE(),
-			trans->z * Generator::SECTION_TO_POINT_SCALE());
+	glTranslatef(trans->x * world_scale,
+			trans->y *world_scale,
+			trans->z * world_scale);
 
 	// Rotate vehicle in the direction it is facing
 	glRotatef(rot->y, 0, 1, 0);

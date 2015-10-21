@@ -51,7 +51,7 @@ int showcase_mode_type = 0;
 float showcase_mode_size = 1.0f;
 int showcase_mode_angle = 0;
 /* Car mode options*/
-int car_mode_number = 10;
+int car_mode_number = 50;
 
 /*Network mode options*/
 int network_mode_type = 0;
