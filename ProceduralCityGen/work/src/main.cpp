@@ -108,6 +108,14 @@ int main(int argc, char **argv) {
 				cout<<"Using seed "<< argv[i+1]<<endl;
 				i+=1;
 			}
+		}else if(argument.compare("-totalcars")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"Total Cars requires a parameter (example usage. '-totalcars 70')"<<endl;
+				return -1;
+			}else{
+				car_mode_number = std::atoi(argv[i + 1]);
+				i+=1;
+			}
 		} else if (argument.compare("-heightmap") == 0) {
 			//if the user wants a heightmap to pop up
 			cout << "Heightmap Enabled" << endl;
@@ -296,7 +304,6 @@ void renderLoop() {
 		drawSkycube(100.0f);	//the further away it is the better it looks
 
 	} else if (mode == SHOWCASE_MODE) {
-
 		setupCamera();
 		initLighting();
 		glTranslatef(0, -1, 0);

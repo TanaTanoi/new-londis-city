@@ -42,4 +42,5 @@ PARAMETERS: Global parameters that change the result of the program
   Enables Model View instead of FPS mode for the camera
 -fullbright
   Enables bright ambient lighting over the entire world.
- 
+-totalcars [number of cars:int;default 10]
+  Allows more/less cars to be added to the simulation.
