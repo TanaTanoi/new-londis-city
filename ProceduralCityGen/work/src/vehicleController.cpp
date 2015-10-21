@@ -105,14 +105,17 @@ void VehicleController::initVehicles() {
 
 	for (int i = 0; i < size; i++) {
 		index = rand() % m_filenames_car.size();
+		srand(rand());
 		m_vehicles.push_back(Vehicle(m_filenames_car[index], i));
 
 		// Set a texture
 		index = rand() % m_filenames_tex.size() + 1;
+		srand(rand());
 		m_vehicles[i].setTexture(index);
 
 		// Set a random starting position
 		vector<roadNode> goals = m_network->getAllNodes();
+		srand(rand());
 		int randomNumber = rand() % goals.size();
 
 		roadNode start = goals[randomNumber];
@@ -187,7 +190,7 @@ void VehicleController::tick() {
 			m_vehicles[i].resetSplineTime();
 		}
 
-		renderTargets(&m_vehicles[i]);
+		// renderTargets(&m_vehicles[i]);
 
 		// Calculate transformation
 		vec3 trans = interpolate(&m_vehicles[i], m_vehicles[i].getPathIndex());
@@ -198,7 +201,7 @@ void VehicleController::tick() {
 		else
 			rot = yaw(&m_vehicles[i], &trans);
 
-		vec3 scale = vec3(0.1);
+		vec3 scale = vec3(0.08);
 
 		renderVehicle(&m_vehicles[i], &trans, &rot, &scale,
 				m_vehicles[i].getTexture());
@@ -260,16 +263,18 @@ void VehicleController::renderVehicle(Vehicle *vehicle, vec3 *trans, vec3 *rot,
 	// Render the vehicle
 	glPushMatrix();
 
+	float world_scale = 2.0f;
+
 	// Translate it to grid coordinates
-	glTranslatef(trans->x * Generator::SECTION_TO_POINT_SCALE(),
-			trans->y * Generator::SECTION_TO_POINT_SCALE(),
-			trans->z * Generator::SECTION_TO_POINT_SCALE());
+	glTranslatef(trans->x * Generator::SECTION_TO_POINT_SCALE() * world_scale,
+			trans->y * Generator::SECTION_TO_POINT_SCALE() * world_scale,
+			trans->z * Generator::SECTION_TO_POINT_SCALE() * world_scale);
 
 	// Rotate vehicle in the direction it is facing
 	glRotatef(rot->y, 0, 1, 0);
 
 	// Shift the vehicle to the left side of the road
-	glTranslatef(0, 0, -0.2);
+	glTranslatef(0, 0, world_scale * -0.2);
 	glScalef(scale->x, scale->y, scale->z);
 	vehicle->renderVehicle();
 	glPopMatrix();
@@ -296,10 +301,11 @@ vec3 VehicleController::interpolate(Vehicle *v, roadNode *prev, roadNode *cur,
 
 	// Turning points
 	float length = distance(targ1, targ2);
-	vec2 turn1 = targ1 + ((length * 0.9) * normalize(targ2 - targ1));
+	const float pointDist = 0.9;
+	vec2 turn1 = targ1 + ((length * pointDist) * normalize(targ2 - targ1));
 
 	length = distance(targ2, targ3);
-	vec2 turn2 = targ2 + ((length * 0.9) * normalize(targ3 - targ2));
+	vec2 turn2 = targ2 + ((length * pointDist) * normalize(targ3 - targ2));
 
 	// Calculate translation
 	vec2 translate = Spline::calculatePoint(targ1, turn1, turn2, targ3,
@@ -342,6 +348,7 @@ roadNode VehicleController::generateGoal(Vehicle* vehicle) {
 	vector<roadNode> goals = m_network->getAllNodes();
 
 	int randomNumber = rand() % goals.size();
+	srand(rand());
 	roadNode goal = goals[randomNumber];
 
 	if (vehicle->getGoal().location.x == -1)
@@ -376,63 +383,88 @@ bool VehicleController::canTravel(Vehicle *v) {
 
 	for (int i = 0; i < (int) m_vehicles.size(); ++i) {
 
-		// We don't want to check itself
-		if (v->getId() != i) {
+//		// We don't want to check itself
+//		if (v->getId() != i) {
+//
+//			// Find if they are in the same direction
+////			if (length(cross(v->getPos(), m_vehicles[i].getPos())) == 0) {
+//
+//				// Calculate the distance between the vehicles and its neigbours
+//				float dist = distance(v->getPos(), m_vehicles[i].getPos());
+//
+//				cerr << v->getId() << " and " << i << " are colliding" << "	Distance " << dist << endl;
+//
+//				// If the vehicle is too close to another one stop it.
+////				if (length(v->getPos()) < length(m_vehicles[i].getPos())
+////						&& dist <= 10) {srand(rand());
+//
+//				// Find the direction vector of v
+//				vec2 target = v->getPath()[v->getPathIndex()].location;
+//				vec2 dir = normalize(vec2(target.x - v->getPos().x, target.y - v->getPos().z));
+//
+//				// Find which vehicle is in front
+//				vec3 diff3d = v->getPos() - m_vehicles[i].getPos();
+//				vec2 diff = vec2(diff3d.x,diff3d.z);
+//				float front = dot(dir, normalize(diff));
+//
+//				cout << "Current Vehicle " << v->getPos() << endl;
+//				cout << "Other vehicle " << m_vehicles[i].getPos() << endl;
+//				cout << "DIR  " << dir << endl;
+//				cout << "DIFF " << diff << endl;
+//				cout << "FRONT " << front << endl;
+//				if (dist <= 0.9f && front > 0.99f) {
+//					cerr << "Oi, get off my ass cunt " << endl;
+//					// return false;
+//				}
+////			}
 
-			// Find if they are in the same direction
-			if (length(cross(v->getPos(), m_vehicles[i].getPos())) == 0) {
+		// If they are about to intersect and not traveling in the same direction
+		if (!v->getPath().empty() && !m_vehicles[i].getPath().empty()) {
 
-				cerr << v->getId() << " and " << i << " are colliding" << endl;
+			// Current target of current vehicle
+			roadNode targ1 = v->getPath()[v->getPathIndex()];
+
+			// Current target of other vehicle
+			roadNode targ2 =
+					m_vehicles[i].getPath()[m_vehicles[i].getPathIndex()];
+
+			// Previous target of other vehicle
+			roadNode targ3 =
+					m_vehicles[i].getPath()[m_vehicles[i].getPathIndex() - 1];
+			if (targ1.ID == targ2.ID || targ1.ID == targ3.ID) {
+
+				cout << "Vehicle " << v->getId() << " is at: " << v->getPos()
+						<< endl;
+				cout << "Vehicle " << m_vehicles[i].getId() << " is at: "
+						<< m_vehicles[i].getPos() << endl;
 
 				// Calculate the distance between the vehicles and its neigbours
 				float dist = distance(v->getPos(), m_vehicles[i].getPos());
 				cout << "	Distance " << dist << endl;
 
+				if (dist == 0)
+					cerr << "Holy shit holy shit bad things" << endl;
+
+				// Find the direction vector of v
+				vec2 target = v->getPath()[v->getPathIndex()].location;
+				vec2 dir = normalize(
+						vec2(target.x - v->getPos().x,
+								target.y - v->getPos().z));
+
+				// Find which vehicle is in front
+				vec3 diff3d = v->getPos() - m_vehicles[i].getPos();
+				vec2 diff = vec2(diff3d.x, diff3d.z);
+				float front = dot(dir, normalize(diff));
+
 				// If the vehicle is too close to another one stop it.
 				if (length(v->getPos()) > length(m_vehicles[i].getPos())
-						&& dist <= 20) {
-					cerr << "Oi, get off my ass cunt " << endl;
+						&& dist <= 30) {
+					cerr << "Too close tumeke " << endl;
 					return false;
 				}
 			}
-
-			// If they are about to intersect and not traveling in the same direction
-			else if (!v->getPath().empty()
-					&& !m_vehicles[i].getPath().empty()) {
-
-				// Current target of current vehicle
-				roadNode targ1 = v->getPath()[v->getPathIndex()];
-
-				// Current target of other vehicle
-				roadNode targ2 =
-						m_vehicles[i].getPath()[m_vehicles[i].getPathIndex()];
-
-				// Previous target of other vehicle
-				roadNode targ3 =
-						m_vehicles[i].getPath()[m_vehicles[i].getPathIndex() - 1];
-				if (targ1.ID == targ2.ID || targ1.ID == targ3.ID) {
-
-					cout << "Vehicle " << v->getId() << " is at: "
-							<< v->getPos() << endl;
-					cout << "Vehicle " << m_vehicles[i].getId() << " is at: "
-							<< m_vehicles[i].getPos() << endl;
-
-					// Calculate the distance between the vehicles and its neigbours
-					float dist = distance(v->getPos(), m_vehicles[i].getPos());
-					cout << "	Distance " << dist << endl;
-
-					if (length(v->getPos()) == length(m_vehicles[i].getPos()))
-						cerr << "Holy shit holy shit bad things" << endl;
-
-					// If the vehicle is too close to another one stop it.
-					if (length(v->getPos()) > length(m_vehicles[i].getPos())
-							&& dist <= 30) {
-						cerr << "Too close tumeke " << endl;
-						return false;
-					}
-				}
-			}
 		}
+// 	}
 	}
 	return true;
 }
