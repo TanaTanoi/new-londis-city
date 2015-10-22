@@ -42,6 +42,10 @@ void SectionDivider::divideAllLots(vector<section> lotOutlines){
 	}
 }
 
+void SectionDivider::changeFill(){
+	fill = !fill;
+}
+
 /**
  * Divides the sections
  */
@@ -219,29 +223,29 @@ section SectionDivider::getInnerSection(section s, line bi, line toCut, line lon
 }
 
 lot SectionDivider::testSection() {
-				line a = {vec2(100,100),vec2(400,100),0};
-				line d = {vec2(150,300), vec2(100,100), 3 };
-				line c = {vec2(350,300),vec2(150,300), 2};
-				line b = { vec2(400,100),  vec2(350,300),1 };
+	//				line a = {vec2(100,100),vec2(400,100),0};
+	//				line d = {vec2(150,300), vec2(100,100), 3 };
+	//				line c = {vec2(350,300),vec2(150,300), 2};
+	//				line b = { vec2(400,100),  vec2(350,300),1 };
 	//
-//	line a = {vec2(150,100),vec2(400,100),0};
-//	line d = {vec2(100,400), vec2(150,100), 3 };
-//	line c = {vec2(400,400),vec2(100,400), 2};
-//	line b = { vec2(400,150),  vec2(400,400),1 };
+	//	line a = {vec2(150,100),vec2(400,100),0};
+	//	line d = {vec2(100,400), vec2(150,100), 3 };
+	//	line c = {vec2(400,400),vec2(100,400), 2};
+	//	line b = { vec2(400,150),  vec2(400,400),1 };
 
-//		line a = {vec2(100,100),vec2(400,100),0};
-//		line b = {vec2(400,100),vec2(250,300),1};
-//		line c = {vec2(250,300),vec2(100,100),2};
-//
-	vector<line > lines = vector<line >();
-	lines.push_back(a);
-	lines.push_back(b);
-	lines.push_back(c);
-	lines.push_back(d);
+	//		line a = {vec2(100,100),vec2(400,100),0};
+	//		line b = {vec2(400,100),vec2(250,300),1};
+	//		line c = {vec2(250,300),vec2(100,100),2};
+	//
+	//	vector<line > lines = vector<line >();
+	//	lines.push_back(a);
+	//	lines.push_back(b);
+	//	lines.push_back(c);
+	//	lines.push_back(d);
 
 
-	section s;// = Generator::createRandomSection();
-	s.lines = lines;
+	section s = Generator::createRandomSection();
+	//s.lines = lines;
 	s.area = getSectionSize(s);
 
 	lot l;
@@ -328,17 +332,20 @@ bool SectionDivider::hasStreetAccess(section s, lot l) {
 }
 
 void SectionDivider::renderTest() {
-	//renderWireFrame();
-	renderPoly();
+	if(!fill){
+		renderWireFrame();
+	}else{
+		renderPoly();
+	}
 }
 
 void SectionDivider::renderWireFrame(){
 	for(int i =0; i < (int)lots[0].sections.size(); i++){ // (int)sections.size()
 
-//		if(i == 8){
-//			cout << lots[0].sections[8].lines[0].start.x << "," <<  lots[0].sections[8].lines[0].start.y
-//					<< "  " <<  lots[0].sections[8].lines[0].end.x << "," << lots[0].sections[8].lines[0].end.y << endl;
-//		}
+		//		if(i == 8){
+		//			cout << lots[0].sections[8].lines[0].start.x << "," <<  lots[0].sections[8].lines[0].start.y
+		//					<< "  " <<  lots[0].sections[8].lines[0].end.x << "," << lots[0].sections[8].lines[0].end.y << endl;
+		//		}
 
 
 		glBegin(GL_LINES);

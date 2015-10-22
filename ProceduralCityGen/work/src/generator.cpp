@@ -295,12 +295,12 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 /*Generates a section based on a randomly created floor plan of points*/
 section Generator::createRandomSection(){
 	section s;
-	vector<vec2> points = generateFloorPlan(vec2(0,0),200,rand()%6+4);
+	vector<vec2> points = generateFloorPlan(vec2(320,240),100,rand()%7+3);
 
 	vector<util::line> lines = vector<util::line>();
 	int n = points.size();
 	for(int i =0;i<n;i++){
-		points[i] = points[i] + vec2(rand()%200-100,rand()%200-100);
+		points[i] = points[i] + vec2(rand()%120-100,rand()%120-100);
 
 	}
 	for(int i =0; i < n;i++){

@@ -106,6 +106,7 @@ int main(int argc, char **argv) {
 			}else{
 				user_seed = Building::basicHashcode(std::string(argv[i+1]));
 				cout<<"Using seed "<< argv[i+1]<<endl;
+				options = options|op_customseed;
 				i+=1;
 			}
 		}else if(argument.compare("-totalcars")==0){
@@ -184,7 +185,14 @@ int main(int argc, char **argv) {
 	glDepthFunc(GL_LEQUAL);
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	srand(user_seed);
+
+
+
+	if(options&op_customseed){
+		srand(user_seed);
+	}else{
+		srand(time(NULL));
+	}
 
 	if (mode == FULL_MODE) {
 		initBuildingGenerator();
@@ -404,7 +412,7 @@ void generateBuildings() {
 	// Generate building display list
 	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
-			vec2 min = vec2(10000,10000);
+	vec2 min = vec2(10000,10000);
 	vec2 max = vec2(0,0);
 	vec2 zero = vec2(0,0);
 	for(lot l: allLots){
@@ -585,7 +593,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 		p_pos -= 0.05f * p_right * 1;
 	} else if (key == 63 && action) {
 		p_pos -= 0.05f * p_front * 1;
+	}else if(mode == SECTION_MODE && key == 78 && action){
+		g_sections->testSection();
+	}else if(mode == SECTION_MODE && key == 83 && action){
+		g_sections->changeFill();
 	}
+
 
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
