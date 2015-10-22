@@ -37,13 +37,13 @@ private:
 	float farRight;
 
 	// L system param
-	int maxLength = 100;
+	int maxLength = 80;
 	int minLength = 40;
 	int minAngle = 0;
 	int maxAngle = 360;
 	int minRotateAngle = -15;
 	int maxRotateAngle = 15;
-	int snapDistance = 10;
+	int snapDistance = 20;
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;

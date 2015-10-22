@@ -16,11 +16,12 @@ struct lot{
 
 class SectionDivider {
 private:
-	float goalArea = 800; // Does not work at 11000 FIXME
+	float goalArea = 1500; // Does not work at 11000 FIXME
 	float minArea = 200;
 	std::vector<lot> lots;
 	int sectionID = 0;
 	int lotID =0;
+	bool fill = true;
 	//for testing
 	std::vector<util::section> sections;
 
@@ -52,6 +53,7 @@ public:
 	void renderSections();
 	void divideAllLots(std::vector<util::section>);
 	void addBuildingToLot(lot);
+	void changeFill();
 	lot testSection(); // for testing
 	void renderTest(); // for testing
 
