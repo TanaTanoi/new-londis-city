@@ -89,6 +89,7 @@ private:
 	void removeFilaments();
 	void reset();
 
+
 	void genGridPoints();
 	void genRadialPoints();
 	void createVoronoiRoads();
@@ -102,6 +103,7 @@ public:
 	void renderRoads();
 	void createRoads(bool,int);
 	void recDivide(cycle::road);
+	int getCycleSize();
 
 	// Testing
 		void testNetwork();

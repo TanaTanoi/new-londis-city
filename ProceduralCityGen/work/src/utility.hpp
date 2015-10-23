@@ -97,14 +97,14 @@ public:
 };
 
 inline vec2 findPerp(vec2 dir){
-	cout << "finding perp" << endl;
+	//cout << "finding perp" << endl;
 	dir = normalize(dir);
-	cout << "It could be the normalizing" << endl;
+	//cout << "It could be the normalizing" << endl;
 	vec3 direction = vec3(dir.x, 0, dir.y);
 	vec3 upvec = vec3(0,1,0);
-	cout << "It's probably the cross product" << endl;
+	//cout << "It's probably the cross product" << endl;
 	vec3 perp = cross(direction, upvec);
-	cout << "found perp " << endl;
+	//cout << "found perp " << endl;
 	return vec2(perp.x,perp.z);
 }
 
@@ -112,13 +112,13 @@ inline vec2 rotate(vec2 centrePoint, vec2 toRotate, float deg) {
 	double angleInRadians = radians(deg);
 	double cosTheta = cos(angleInRadians);
 	double sinTheta = sin(angleInRadians);
-	cout << "cosTheta " << cosTheta << "  sinTheta " << sinTheta << endl;
+	//cout << "cosTheta " << cosTheta << "  sinTheta " << sinTheta << endl;
 	vec2 dir = toRotate-centrePoint;
 	float x = (cosTheta * (dir.x) - sinTheta * (dir.y));
 	float y = (sinTheta * (dir.x) + cosTheta * (dir.y));
 
 
-	cout << "  X  " << x << "   Y   " << y << endl;
+	//cout << "  X  " << x << "   Y   " << y << endl;
 	return vec2(x,y)+centrePoint;
 }
 
@@ -129,48 +129,48 @@ inline vec2 getEquation(vec2 a, vec2 b) {
 	equation.y = (a.y - (equation.x * a.x));
 	if (isNAN(equation.x) || isInfinite(equation.x)) { //if x is nan, then it is paralell to the y-axis, and thus can't be represented properly
 	//instead we leave x as nan and change y to the x point along the axis where the line is
-	//cout << "Equation from " << a.x << " " << a.y << " to " << b.x << " " << b.y << " is y-axis" << endl;
+	////cout << "Equation from " << a.x << " " << a.y << " to " << b.x << " " << b.y << " is y-axis" << endl;
 		equation.y = a.x;
 	}
 	return equation;
 }
 
 inline vec2 getIntersection(line l, vec2 cutDir, vec2 cutPoint) {
-	//cout << "Line ID " << l.ID;
+	////cout << "Line ID " << l.ID;
 	float m_l = (l.end.y - l.start.y) / (l.end.x - l.start.x);
 	float c_l = l.end.y - m_l * l.end.x;
-	//cout << "Original line "<< m_l << "  " << c_l << endl;
-	//cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
+	////cout << "Original line "<< m_l << "  " << c_l << endl;
+	////cout << "Cut x " << cutDir.x <<  "Cut y " << cutDir.y << endl;
 
 	float m = cutDir.y / cutDir.x;
 	float c = cutPoint.y - m * cutPoint.x; // y = mx + c so c =  y - mx
 
 	if (m == m_l || m == -m_l) { // two parallel lines
-	//cout << "Parallel lines " << endl;
+	////cout << "Parallel lines " << endl;
 		throw noIntersectionException();
 	}
 
 	if (l.end.x == l.start.x) { // line is vertical
-		//cout << "Existing line is vertical " << endl;
+		////cout << "Existing line is vertical " << endl;
 		float y = m * l.start.x + c; // finds appropriate y value on other line
 		return vec2(l.start.x, y);
 	}
 
 	if (cutDir.x == 0) { // other line is vertical
-		//cout << "New line is vertical " << endl;
-		//cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
+		////cout << "New line is vertical " << endl;
+		////cout << "Cut point " << cutPoint.x << "  " << cutPoint.y << endl;
 		float y = m_l * cutPoint.x + c_l; // finds appropriate y value on  line
 		return vec2(cutPoint.x, y);
 	}
 
-	//cout << "Bisector line "<< m << "  " << c << endl;
+	////cout << "Bisector line "<< m << "  " << c << endl;
 
 	// Calculates the intersection point
 	float x = (c - c_l) / (m_l - m);
 	float y = m_l * x + c_l;
 
 	if (x == 0.0 && y == 0.0) {
-		//cout << "Returning blank vec2" << endl;
+		////cout << "Returning blank vec2" << endl;
 	}
 
 	return vec2(x, y);
@@ -184,22 +184,22 @@ inline vec2 getIntersection(line l, line o) {
 	float c = o.end.y - m * o.end.x;
 
 	if (m == m_l || m == -m_l) {
-		cout << "Threw exception" << endl;
+		//cout << "Threw exception" << endl;
 		throw noIntersectionException();
 	}
 	if (l.end.x == l.start.x) { // line is vertical
-		//cout << "Vertical line" << endl;
-		//cout << "Line " << l.start.x << ", " << l.start.y << "  "  << l.end.x << ", " << l.end.y << endl;
-		//cout << "Other " << o.start.x << ", " << o.start.y << "  "  << o.end.x << ", " << o.end.y << endl;
+		////cout << "Vertical line" << endl;
+		////cout << "Line " << l.start.x << ", " << l.start.y << "  "  << l.end.x << ", " << l.end.y << endl;
+		////cout << "Other " << o.start.x << ", " << o.start.y << "  "  << o.end.x << ", " << o.end.y << endl;
 
 		float y = m * l.start.x + c; // finds appropriate y value on other line
 
-		//cout << "New " << l.start.x << " , " << y << endl;
+		////cout << "New " << l.start.x << " , " << y << endl;
 		return vec2(l.start.x, y);
 	}
 
 	if (o.end.x == o.start.x) { // other line is vertical
-		//cout << "Vertical line" << endl;
+		////cout << "Vertical line" << endl;
 		float y = m_l * o.start.x + c_l; // finds appropriate y value on  line
 		return vec2(o.start.x, y);
 	}
@@ -209,7 +209,7 @@ inline vec2 getIntersection(line l, line o) {
 	float y = m * x + c; // was m_l and c_l
 
 	if (x == 337.5) {
-		cout << "Found bisector cut" << endl;
+		//cout << "Found bisector cut" << endl;
 	}
 
 	return vec2(x, y);
@@ -222,7 +222,7 @@ inline vec2 getIntersection(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 
 	vec2 e1 = getEquation(a1, a2);
 	vec2 e2 = getEquation(b1, b2);
-	//cout << "Equations " << e1.x << " " << e1.y << " to " << e2.x << " " << e2.y << "|" << endl;
+	////cout << "Equations " << e1.x << " " << e1.y << " to " << e2.x << " " << e2.y << "|" << endl;
 	//If paralell lines
 	//get x value in which they meet
 	float x = (e2.y - e1.y) / (e1.x - e2.x);
@@ -247,12 +247,12 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	vec2 e2 = getEquation(b1, b2);
 	//If paralell lines or if both are paralell to the y-axis
 	if (e1.x == e2.x) {
-		//		cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
+		//		//cout << "gradients are equal" << e1.x <<  " " << e2.x <<endl;
 		return false;
 	}
 
 	if ((isInfinite(e1.x)) && (isInfinite(e2.x))) {
-		//		cout << "both are y axis" << endl;
+		//		//cout << "both are y axis" << endl;
 		return false;
 	}
 	vec2 value = getIntersection(a1, a2, b1, b2);
@@ -261,15 +261,15 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 	//if x is out of bounds X VALUE GOTTEN HERE IS WRONG , SHOULD BE 0.5
 	if (x < min(a1.x, a2.x) || x > max(a2.x, a1.x) || x < min(b2.x, b1.x)
 			|| x > max(b1.x, b2.x)) {
-		//		cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
+		//		//cout << "X is out of bounds "<<x << " " << a1.x  << " to " << a2.x<< endl;
 		return false;
 	}
 
 	//if y is out of bounds
 	if (value.y > max(a1.y, a2.y) || value.y < min(a2.y, a1.y)
 			|| value.y > max(b1.y, b2.y) || value.y < min(b2.y, b1.y)) {
-		//		cout << a1.y << " to " << a2.y << endl;
-		//		cout << "Y value is out of bounds " << value.y <<  endl;
+		//		//cout << a1.y << " to " << a2.y << endl;
+		//		//cout << "Y value is out of bounds " << value.y <<  endl;
 		return false;
 	}
 
@@ -278,29 +278,29 @@ inline bool intersects(vec2 a1, vec2 a2, vec2 b1, vec2 b2) {
 }
 
 inline bool intersects(line lon, vec2 cut, vec2 cutPoint) {
-	//	cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
+	//	//cout << "cutPoint " <<cutPoint.x << "  " << cutPoint.y << endl;
 
 	vec2 intersection;
 	try {
 		intersection = getIntersection(lon, cut, cutPoint);
 	} catch (const noIntersectionException &e) {
-		cout << "Caught parallel line" << endl;
+		//cout << "Caught parallel line" << endl;
 		return false;
 	} // This was a set of two parallel lines
 
-	//cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
+	////cout << "Intersection Point " << intersection.x << " " << intersection.y << endl;
 
 	// Now uses the intersection point of these two lines to determine if this is
 	//the line it should split
 	if (intersection.x == 0.0 && intersection.y == 0.0) {
-		//cout << "Blank vec2 here " << endl;
+		////cout << "Blank vec2 here " << endl;
 	}
 
 	if (intersection.x <= max(lon.start.x, lon.end.x)
 			&& intersection.x >= min(lon.start.x, lon.end.x)
 			&& intersection.y <= max(lon.start.y, lon.end.y)
 			&& intersection.y >= min(lon.start.y, lon.end.y)) {
-		//	cout << "INTERSECTS" << endl;
+		//	//cout << "INTERSECTS" << endl;
 		return true;
 	}
 
@@ -323,7 +323,7 @@ inline bool shareSlope(line edge, line secEdge) {
 	int m2 = int(round(m));
 
 	if (m1 == m2) {
-		cout << "Shared slope" << endl;
+		//cout << "Shared slope" << endl;
 		return true; // have same slope
 	}
 	return false; // have different slopes
@@ -372,7 +372,7 @@ inline bool shareSide(line edge, line secEdge) {
 
 		float c = edge.end.y - m * edge.end.x;
 
-		cout << "slope " << m << " y intercept " << c << endl;
+		//cout << "slope " << m << " y intercept " << c << endl;
 
 		// finish this
 		// should now check if the start or end point lies on the equation line
@@ -380,20 +380,20 @@ inline bool shareSide(line edge, line secEdge) {
 
 		float y = secEdge.start.x * m + c;
 
-		cout << y << " " << int(round(secEdge.start.y)) << endl;
+		//cout << y << " " << int(round(secEdge.start.y)) << endl;
 
 		if (int(round(y)) == int(round(secEdge.start.y))) {
 			return true;
 		}
 
 		y = secEdge.end.x * m + c;
-		cout << y << " " << int(round(secEdge.end.y)) << endl;
+		//cout << y << " " << int(round(secEdge.end.y)) << endl;
 		if (int(round(y)) == int(round(secEdge.end.y))) {
 			return true;
 		}
 
 	}
-	cout << "Returned false" << endl;
+	//cout << "Returned false" << endl;
 	return false;
 }
 
@@ -433,7 +433,7 @@ inline vec2 centrePointOfLine(line l){
 
 
 inline bool floatEqual(float x, float y){
-	cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
+	//cout << "Equating " << x << " " << y <<  " " << ((int)round(x*10.0f) == (int)round(y*10.0f)) << endl;
 	return (int)round(x*10.0f) == (int)round(y*10.0f);
 }
 

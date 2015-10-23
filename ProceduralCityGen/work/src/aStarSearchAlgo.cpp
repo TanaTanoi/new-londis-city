@@ -24,15 +24,15 @@ vector<roadNode> AStarSearchAlgo::getPath(roadNode *target) {
 
 	m_path.clear();
 
-	// cout << "Reversing..." << endl;
+	// //cout << "Reversing..." << endl;
 
 	for (int i = target->ID; i < (int) m_allNodes.size();
 			i = m_allNodes[i].from->ID) {
 
-		cout << i << endl;
+		//cout << i << endl;
 		m_path.push_back(m_allNodes[i]);
 
-		// cout << "Accessing " << m_allNodes[i].from->ID << endl;
+		// //cout << "Accessing " << m_allNodes[i].from->ID << endl;
 		// roadNode node = m_allNodes[m_allNodes[i].from->ID];
 		if (m_allNodes[i].from == NULL)
 			break;
@@ -41,14 +41,14 @@ vector<roadNode> AStarSearchAlgo::getPath(roadNode *target) {
 
 	reverse(m_path.begin(), m_path.end());
 
-	// cout << "Reversing Done, size: " << m_path.size() << endl;
+	// //cout << "Reversing Done, size: " << m_path.size() << endl;
 	return m_path;
 }
 
 void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 
-	// cout << "Finding path" << endl;
-	// cout << "Number of nodes: " << m_allNodes.size() << endl;
+	// //cout << "Finding path" << endl;
+	// //cout << "Number of nodes: " << m_allNodes.size() << endl;
 	m_start = *start;
 	m_goal = *goal;
 
@@ -80,12 +80,12 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 			m_allNodes[nodeID].cost = dequeue.costToHere;
 			m_visited.push_back(m_allNodes[nodeID]);
 
-			// cout << "StartID: " << start->ID << endl;
-			// cout << "GoalID: " << goal->ID << endl;
-			// cout << "NodeID: " << node->ID << endl;
+			// //cout << "StartID: " << start->ID << endl;
+			// //cout << "GoalID: " << goal->ID << endl;
+			// //cout << "NodeID: " << node->ID << endl;
 			// If the goal has been found
 			if (m_allNodes[nodeID].ID == goal->ID) {
-				// cout << "NodeID found!!" << endl;
+				// //cout << "NodeID found!!" << endl;
 				return;
 			}
 
@@ -98,7 +98,7 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 //
 //				}
 
-				// cout << "NeighbourID: " << m_allNodes[index].ID << endl;
+				// //cout << "NeighbourID: " << m_allNodes[index].ID << endl;
 
 				if (!m_allNodes[neighID].isVisited_aStar) {
 					float costToNeigh = dequeue.costToHere

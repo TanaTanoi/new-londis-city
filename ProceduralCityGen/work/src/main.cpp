@@ -27,7 +27,7 @@ VehicleController *g_vehicleCtrl = nullptr;
 int user_seed = 42;
 
 // City size
-int city_size = 1;
+int city_size;
 
 //Main program
 //
@@ -93,7 +93,9 @@ int main(int argc, char **argv) {
 				network_mode_type = std::atoi(argv[i + 1]);
 				network_mode_size = std::atoi(argv[i + 2]);
 				network_mode_cycles = std::atoi(argv[i + 3]);
+				city_size = network_mode_size;
 				i = i + 3;
+				options = options|op_customsize;
 			}
 			mode = NETWORK_MODE;
 		}else if(argument.compare("section")==0){
@@ -198,8 +200,6 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-
-
 	if((options&op_customseed)){
 		srand(user_seed);
 	}else{
@@ -208,7 +208,6 @@ int main(int argc, char **argv) {
 
 	if(!(options&op_customsize)){
 		city_size = rand()%3;
-
 	}
 
 	if (mode == FULL_MODE) {
@@ -248,6 +247,15 @@ int main(int argc, char **argv) {
 		g_network = new RoadNetwork();
 		g_network->setNetMode();
 		g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+
+		//
+		while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || (g_network->getCycleSize() <= 6 && city_size == 0) || (g_network->getCycleSize() <= 150 && city_size == 2)){
+			delete(g_network);
+			g_network = new RoadNetwork();
+			g_network->setNetMode();
+			g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+		}
+
 
 	} else if (mode == SECTION_MODE) {
 		cout << "Section mode" << endl;
@@ -411,7 +419,6 @@ void generateBuildings() {
 	g_network = new RoadNetwork();
 
 	g_network->createRoads(options&op_experimental,city_size);
-	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
 	for (cycle::primitive prim : g_network->getCycles()) {

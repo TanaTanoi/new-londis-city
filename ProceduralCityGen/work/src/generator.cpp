@@ -147,7 +147,7 @@ vector<vec2> Generator::cutEdges(vector<vec2> points) {
 
 /*Generates a modern floorPlan for testing combinePlans*/
 vector<vec2> Generator::generateModernFloorPlan(vec2 center, float radius) {
-	cout<<"Generating modern floors"<<endl;
+	//cout<<"Generating modern floors"<<endl;
 	radius = max(0.3f,radius);
 	vector<vec2> shapeA = generateFloorPlan(center+vec2(radius/2,radius/2), radius*2, rand()%4+3);
 	srand(rand());
@@ -235,7 +235,7 @@ vector<vector<vec2>> Generator::subdivide(vector<vec2> points) {
 /*Combines two plans together in a logical OR fashion.*/
 vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
-	cout<<"START COMBINE"<<endl;
+	//cout<<"START COMBINE"<<endl;
 	vector<vec2> newPlan = vector<vec2>();
 	int n[] = { shapeA.size(),shapeB.size() };
 	vector<vec2> shapes[] = {shapeA,shapeB};
@@ -255,7 +255,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 		//while we don't contain the next point in the trace (currentPoint)
 		//add the point
 		newPlan.push_back(currentPoint);
-		cout<< " " << index<<":"<<curShape<<endl;
+		//cout<< " " << index<<":"<<curShape<<endl;
 		//check this line against the other shape for intersections
 		bool hasIntersection = false;
 		for (int j = 0; j < n[!curShape]; j++) {//for each line in the other shape
@@ -264,7 +264,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 //			int o_index = index+j;
 			if (util::intersects(currentPoint, shapes[curShape][(index + 1) % n[0]], shapes[!curShape][o_index],
 					shapes[!curShape][(o_index + 1) % n[1]])) {
-									cout<<"found intersection at " << o_index << endl;
+									//cout<<"found intersection at " << o_index << endl;
 				//if we find an intersection, add it
 				newPlan.push_back(util::getIntersection(currentPoint, shapes[curShape][(index + 1) % n[0]],
 						shapes[!curShape][o_index],
@@ -350,16 +350,16 @@ vector<buildingParams> Generator::sectionsToParams(vector<section> sections,vect
 		p.b_type = (building_type)(p.seed % 2);//TODO make this have an effect, possibly
 
 		float xmap = distance(p.boundingArea[0],min);
-		cout<<"XMAPA "<<xmap<<"\n";
+		//cout<<"XMAPA "<<xmap<<"\n";
 		xmap = xmap/range;
-		cout<<"XMAPB "<<xmap<<"\n";
+		//cout<<"XMAPB "<<xmap<<"\n";
 		xmap*=640;
-		cout<<"XMAPC "<<xmap<<"\n"<<endl;
+		//cout<<"XMAPC "<<xmap<<"\n"<<endl;
 		float ymap = Spline::calculateYValue(heightmap,xmap);//should return a value between 0 and 480
 //		p.height = (int)(((480-ymap)/480)*5+2);
-//		cout<<"YMAPA "<< ymap<<endl;
+//		//cout<<"YMAPA "<< ymap<<endl;
 		ymap = ((480.0f-ymap)/480.0f);//make ymap a value between 0 and 1
-//		cout<<"YMAPB "<< ymap<<endl;
+//		//cout<<"YMAPB "<< ymap<<endl;
 		p.height = (int)(ymap*7.0f+1.0f);
 		srand(p.seed);
 		toReturn.push_back(p);
