@@ -52,6 +52,11 @@ private:
 	int circlePoints = 6;
 	vor::Voronoi voro;
 
+	//Network mode
+	bool netMode = false;
+	bool drawCycles;
+	int recurseSize;
+
 	int insideWorld(comp308::vec2);
 	int insideWorld(cycle::road);
 	cycle::road truncate(cycle::road);
@@ -92,11 +97,13 @@ private:
 public:
 	RoadNetwork();
 	void renderRoads();
-	void createRoads(bool);
+	void createRoads(bool,int);
 	void recDivide(cycle::road);
 
 	// Testing
 		void testNetwork();
+		void networkModeGen(int,int,bool);
+		void setNetMode();
 
 	// Cam's methods
 

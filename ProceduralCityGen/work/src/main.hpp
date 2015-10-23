@@ -36,7 +36,8 @@ enum Options{
 	op_modelview  = 0x08,
 	op_fullbright = 0x10,
 	op_experimental=0x20,
-	op_customseed = 0x30,
+	op_customseed = 0x40,
+	op_customsize = 0x80,
 };
 unsigned char options = 0;
 

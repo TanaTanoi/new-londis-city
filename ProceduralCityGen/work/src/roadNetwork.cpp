@@ -26,6 +26,11 @@ RoadNetwork::RoadNetwork(){}
  * Returns 0 for inside, 1 for intersecting and 2 for completely outside
  */
 
+
+void RoadNetwork::setNetMode(){
+	netMode = true;
+}
+
 void RoadNetwork::genGridPoints() {
 	for (int i = farLeft + gridSpace; i < farRight; i = i + gridSpace) {
 		for (int j = minHeight + gridSpace; j < maxHeight; j = j + gridSpace) {
@@ -41,7 +46,7 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 	roadNode rn = addNode(start); // adds to adj list
 	canBranch.insert(rn);
 
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < recurseSize; i++) {
 		cout << "I " << i << endl;
 		vector<roadNode> toAdd;
 		vector<roadNode> toRemove;
@@ -59,7 +64,9 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 		toRemove.clear();
 	}
 
-	//removeFilaments();
+	if(netMode){
+		removeFilaments();
+	}
 
 }
 
@@ -75,6 +82,9 @@ void RoadNetwork::removeFilaments(){
 				if(adjacencyList[r.start.ID][i] == r.end.ID){
 					cout<<"REMOVE EDGE: Remove start from end"<<endl;
 					adjacencyList[r.start.ID].erase(adjacencyList[r.start.ID].begin() + i);
+					if((int)adjacencyList[r.start.ID].size() == 0){
+						allNodes[r.start.ID].ID = -1;
+					}
 					break;
 				}
 			}
@@ -83,6 +93,9 @@ void RoadNetwork::removeFilaments(){
 				if(adjacencyList[r.end.ID][i] == r.start.ID){
 					cout<<"REMOVE EDGE: Remove end from start"<<endl;
 					adjacencyList[r.end.ID].erase(adjacencyList[r.end.ID].begin() + i);
+					if((int)adjacencyList[r.end.ID].size() == 0){
+						allNodes[r.end.ID].ID = -1;
+					}
 					break;
 				}
 			}
@@ -207,8 +220,8 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	roadNode newEnd = snapToExisting(firstInter, intersect[0]);//if it should snap to existing point
 
 	if(newEnd.ID == -1){				//if it doesn't snap to existing, make a new road node that intersects line
-				newEnd = addNode(firstInter);
-				updateAdjacencyList(intersect[0],newEnd);
+		newEnd = addNode(firstInter);
+		updateAdjacencyList(intersect[0],newEnd);
 	}else if((int)adjacencyList[newEnd.ID].size()>3){//if it does, and it already has 4 nodes, then don't do anything at all.
 		return {vec2(),-1};
 	}
@@ -534,7 +547,7 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 	cout<< "First line added " << endl;
 	cout<< "Adjacents size" << adjacencyList.size() << " Nodes size " << allNodes.size() << "  Egdes size " << allRoads.size() <<endl;
 
-	if(level < 3){
+	if(level < recurseSize){
 		cout<< "First div on level " << level << endl;
 		recDivideGrid(left, level+1,!halfLength);
 		cout<< "Second div on level " << level << endl;
@@ -565,7 +578,7 @@ void RoadNetwork::createNewYorkGrid(section s){
 
 }
 
-void RoadNetwork::createRoads(bool gridOn){
+void RoadNetwork::createRoads(bool branchOn, int size){
 
 	line a = {vec2(400,400), vec2(100,400), 0};
 	line b = {vec2(100,400), vec2(100,100), 1};
@@ -582,11 +595,44 @@ void RoadNetwork::createRoads(bool gridOn){
 	section s;
 	s.lines = lines;
 	calulateBoundary();
-	if(!gridOn){
+	if(!branchOn){
+
+		switch(size){
+		case 0:
+			recurseSize = 2;
+			break;
+		case 1:
+			recurseSize = 3;
+			break;
+		case 2:
+			recurseSize = 4;
+			break;
+		default:
+			recurseSize = 3;
+			break;
+		}
+
 		createNewYorkGrid(s);
+
 	}
 	else{
-		genBranchRoads(vec2(250,250));
+
+		switch(size){
+		case 0:
+			recurseSize = rand()%3 + 8; // 8 - 10
+			break;
+		case 1:
+			recurseSize = rand()%5 + 12; // 12 - 16
+			break;
+		case 2:
+			recurseSize = rand()%5 + 18; // 18 -22
+			break;
+		default:
+			recurseSize = rand()%5 + 12;
+			break;
+		}
+
+		genBranchRoads(vec2(0,0));
 	}
 	//genRadialPoints();
 	//createVoronoiRoads();
@@ -619,7 +665,12 @@ void RoadNetwork::createRoads(bool gridOn){
 
 void RoadNetwork::testNetwork(){
 
-	createRoads(false);
+	createRoads(false,1);
+}
+
+void RoadNetwork::networkModeGen(int type, int size, bool cycle){
+	drawCycles = cycle;
+	createRoads(type,size);
 }
 
 void RoadNetwork::createVoronoiRoads(){
@@ -671,19 +722,21 @@ void RoadNetwork::renderRoads(){
 
 
 	//	glColor3f(0.0,1.0,0.0);
-	for(primitive p :cycles){
-		float red = (float)rand()/(RAND_MAX);
-		srand(rand());
-		float gr = (float)rand()/RAND_MAX;
-		srand(rand());
-		float br = (float)rand()/RAND_MAX;
-		glColor3f(red,gr,br);
-		glBegin(GL_POLYGON);
+	if(drawCycles){
+		for(primitive p :cycles){
+			float red = (float)rand()/(RAND_MAX);
+			srand(rand());
+			float gr = (float)rand()/RAND_MAX;
+			srand(rand());
+			float br = (float)rand()/RAND_MAX;
+			glColor3f(red,gr,br);
+			glBegin(GL_POLYGON);
 
-		for(roadNode v : p.vertices){
-			glVertex2f(v.location.x, v.location.y);
+			for(roadNode v : p.vertices){
+				glVertex2f(v.location.x, v.location.y);
+			}
+			glEnd();
 		}
-		glEnd();
 	}
 
 
@@ -718,12 +771,13 @@ void RoadNetwork::renderRoads(){
 	glBegin(GL_POINTS);
 	//for(roadNode n : allNodes){
 	for(int i = allNodes.size()-1;i>=0;i--){
-		roadNode n = allNodes[i];
-		//if(n.ID > 10 &&  n.ID < 13){
-		glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+		if(allNodes[i].ID > 0){
+			roadNode n = allNodes[i];
+			//if(n.ID > 10 &&  n.ID < 13){
+			glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
 
-		glVertex2f(n.location.x, n.location.y);
-		//	 }
+			glVertex2f(n.location.x, n.location.y);
+		}
 	}
 	glEnd();
 

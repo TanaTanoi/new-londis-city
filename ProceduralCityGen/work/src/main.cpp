@@ -26,6 +26,9 @@ VehicleController *g_vehicleCtrl = nullptr;
 /*Supplied seed for generation*/
 int user_seed = 42;
 
+// City size
+int city_size = 1;
+
 //Main program
 //
 int main(int argc, char **argv) {
@@ -109,6 +112,15 @@ int main(int argc, char **argv) {
 				options = options|op_customseed;
 				i+=1;
 			}
+		}else if(argument.compare("-size")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"size requires a parameter (example usage. '-seed COMP308')"<<endl;
+				return -1;
+			}else{
+				city_size = std::atoi(argv[i + 1]);
+				options = options|op_customsize;
+				i+=1;
+			}
 		}else if(argument.compare("-totalcars")==0){
 			if(i+1>=argc){//if we don't have an additional argument
 				cout<<"Total Cars requires a parameter (example usage. '-totalcars 70')"<<endl;
@@ -188,10 +200,15 @@ int main(int argc, char **argv) {
 
 
 
-	if(options&op_customseed){
+	if((options&op_customseed)){
 		srand(user_seed);
 	}else{
 		srand(time(NULL));
+	}
+
+	if(!(options&op_customsize)){
+		city_size = rand()%3;
+
 	}
 
 	if (mode == FULL_MODE) {
@@ -229,7 +246,8 @@ int main(int argc, char **argv) {
 	} else if (mode == NETWORK_MODE) {
 		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
-		g_network->testNetwork();
+		g_network->setNetMode();
+		g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
 
 	} else if (mode == SECTION_MODE) {
 		cout << "Section mode" << endl;
@@ -391,7 +409,8 @@ void generateBuildings() {
 
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
-	g_network->createRoads(options&op_experimental);
+
+	g_network->createRoads(options&op_experimental,city_size);
 	cout << "All cycles " << g_network->getCycles().size() << endl;
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
@@ -410,7 +429,6 @@ void generateBuildings() {
 	g_sections->divideAllLots(lotOutlines);
 	cout << "Generating buildings.." << endl;
 	// Generate building display list
-	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
 	vec2 min = vec2(10000,10000);
 	vec2 max = vec2(0,0);
