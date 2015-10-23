@@ -64,16 +64,16 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 		toRemove.clear();
 	}
 
-//	if(netMode){
-//		removeFilaments();
-//	}
+	//	if(netMode){
+	//		removeFilaments();
+	//	}
 
 
 	// Forces number of cycles
-//		if((city_size == 0 && (int)cycles.size() < 1)){// || (city_size == 1 && (int)cycles.size() < 15) ||(city_size == 2 && (int)cycles.size() < 150)){
-//			reset();
-//			genBranchRoads(start);
-//		}
+	//		if((city_size == 0 && (int)cycles.size() < 1)){// || (city_size == 1 && (int)cycles.size() < 15) ||(city_size == 2 && (int)cycles.size() < 150)){
+	//			reset();
+	//			genBranchRoads(start);
+	//		}
 
 }
 
@@ -203,11 +203,15 @@ void RoadNetwork::reset(){
 roadNode RoadNetwork::snapToExisting(vec2 inter, road r){
 	float startDist = distance(inter,r.start.location);
 	if(startDist < snapDistance){
-		return r.start;
+		if((int)adjacencyList[r.start.ID].size() < 4){
+			return r.start;
+		}
 	}
 	float endDist = distance(inter,r.end.location);
 	if(endDist < snapDistance){
-		return r.end;
+		if((int)adjacencyList[r.end.ID].size() < 4){
+			return r.end;
+		}
 	}
 	return {vec2(),-1};//don't change if here
 }
@@ -229,7 +233,12 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	}
 
 	if((int)intersect.size() == 0){
-		return snapToClose(end);
+		roadNode close = snapToClose(end);
+		if(close.ID >= 0){
+			addRoad(start,close);
+			return close;
+		}
+		return {vec2(),-1};
 	}
 
 	sortByIntersection(&intersect, start.location, end);//sort by distance
