@@ -83,7 +83,9 @@ lot SectionDivider::recDivideSection(lot lot, section s) {
 			//			//	//cout << "Recursively dividing" << endl;
 			//			//	//cout << "Size is " << l.area << endl;
 			//
-			lot = recDivideSection(lot, l);
+			if(!isNAN(l.area)){
+				lot = recDivideSection(lot, l);
+			}
 		}
 	}
 	return lot;
@@ -303,7 +305,7 @@ lot SectionDivider::removeUnusableSections(lot l) {
 	vector<section> toKeep = vector<section>();
 
 	for (section s : l.sections) { // checks each section
-		if (s.area > minArea) { // checks if section size is big enough
+		if (!isNAN(s.area) && s.area > minArea) { // checks if section size is big enough
 			//cout << "Section is big enough" << endl;
 			if (hasStreetAccess(s,l)) {
 				//cout << "Section added" << endl;

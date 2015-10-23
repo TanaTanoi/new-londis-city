@@ -177,6 +177,11 @@ vec2 RoadNetwork::direction(roadNode n){
 		//cout << "Other " << other.location.x << "  " << other.location.y << "  N  " << n.location.x << " " << n.location.y <<endl;
 		dir = findPerp(other.location - n.location);
 
+		if(dot(normalize(normalize(other.location)-normalize(n.location)), normalize(normalize(dir) - normalize(n.location))) > 7.5){
+
+			dir = -dir;
+		}
+
 		return -1*vec2(dir.x*cs - dir.y*sn, dir.x*sn + dir.y*cs);
 	}
 
@@ -196,20 +201,49 @@ void RoadNetwork::reset(){
 	roadID = 0;
 }
 
+void RoadNetwork::setDevianceLevel(int level){
+	devianceLevel = level;
+	switch(level){
+	case 0:
+		minRotateAngle = 0;
+		maxRotateAngle = 0;
+		break;
+	case 1:
+		minRotateAngle = -15;
+		maxRotateAngle = 15;
+		break;
+	case 2:
+		minRotateAngle = -30;
+		maxRotateAngle = 30;
+		break;
+
+	}
+}
+
 
 /* REQUIRES: If inter is a point that intersects with the road r:
  * Returns the start or end points if they are close enough, else returns -1
  *   */
-roadNode RoadNetwork::snapToExisting(vec2 inter, road r){
+roadNode RoadNetwork::snapToExisting(vec2 inter, vec2 start, road r){
 	float startDist = distance(inter,r.start.location);
 	if(startDist < snapDistance){
 		if((int)adjacencyList[r.start.ID].size() < 4){
+			for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
+				if(dot(normalize(start-r.start.location), normalize(adjacencyList[r.start.ID][i] - r.start.location)) > 7.5){
+					return {vec2(),-1};
+				}
+			}
 			return r.start;
 		}
 	}
 	float endDist = distance(inter,r.end.location);
 	if(endDist < snapDistance){
 		if((int)adjacencyList[r.end.ID].size() < 4){
+			for(int i = 0; i < (int)adjacencyList[r.start.ID].size(); i++){
+				if(dot(normalize(start-r.start.location), normalize(adjacencyList[r.start.ID][i] - r.start.location)) > 7.5){
+					return {vec2(),-1};
+				}
+			}
 			return r.end;
 		}
 	}
@@ -233,7 +267,7 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	}
 
 	if((int)intersect.size() == 0){
-		roadNode close = snapToClose(end);
+		roadNode close = snapToClose(end,start.location);
 		if(close.ID >= 0){
 			addRoad(start,close);
 			return close;
@@ -244,7 +278,7 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	sortByIntersection(&intersect, start.location, end);//sort by distance
 
 	vec2 firstInter = getIntersection(start.location ,snapEnd, intersect[0].start.location, intersect[0].end.location);
-	roadNode newEnd = snapToExisting(firstInter, intersect[0]);//if it should snap to existing point
+	roadNode newEnd = snapToExisting(firstInter, start.location, intersect[0]);//if it should snap to existing point
 
 	if(newEnd.ID == -1){				//if it doesn't snap to existing, make a new road node that intersects line
 		newEnd = addNode(firstInter);
@@ -259,7 +293,7 @@ int RoadNetwork::getCycleSize(){
 	return cycles.size();
 }
 
-roadNode RoadNetwork::snapToClose(vec2 point){
+roadNode RoadNetwork::snapToClose(vec2 point, vec2 start){
 	vector<road> snaps;
 	vector<float> dists;
 
@@ -286,7 +320,7 @@ roadNode RoadNetwork::snapToClose(vec2 point){
 	}
 
 	vec2 inter = getClosestPointOnLine(point, snaps[0].start.location, snaps[0].end.location);
-	roadNode newNode = snapToExisting(inter,snaps[0]);
+	roadNode newNode = snapToExisting(inter,start, snaps[0]);
 	if(newNode.ID == -1){
 		return addNode(inter);
 	}
@@ -622,6 +656,8 @@ void RoadNetwork::recDivideGrid(road r, int level,bool halfLength){
 
 // Assumes square world
 void RoadNetwork::createNewYorkGrid(section s){
+
+	cout << "Making New York Grid " << endl;
 	line l = s.lines[0]; // gets first line in outline
 
 	// Creates first road
@@ -1120,6 +1156,10 @@ void RoadNetwork::extractPrimitive(vector<primitive> * primitives, vector<roadNo
 		extractFilament(start.ID, v1.ID, primitives, heap, adjs, roads);
 	}
 
+}
+
+int RoadNetwork::getCitySize(){
+	return city_size;
 }
 
 void RoadNetwork::setCycleEdge(vector<road> * roads, int startID, int endID){

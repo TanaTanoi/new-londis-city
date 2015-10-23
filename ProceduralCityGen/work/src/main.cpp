@@ -28,6 +28,7 @@ int user_seed = 42;
 
 // City size
 int city_size;
+int devianceLevel = -1;
 
 //Main program
 //
@@ -152,7 +153,16 @@ int main(int argc, char **argv) {
 			options = options|op_fullbright;
 		}else if(argument.compare("-experimental")==0){
 			options = options|op_experimental;
-		} else {
+		} else if(argument.compare("-deviance")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"Deviance requires a parameter (example usage. '-deviance 0')"<<endl;
+				return -1;
+			}else{
+				devianceLevel = (std::atoi(argv[i+1]));
+				cout<<"Using set deviance "<< argv[i+1]<<endl;
+				i+=1;
+			}
+		}else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
 					<< endl;
@@ -245,15 +255,23 @@ int main(int argc, char **argv) {
 	} else if (mode == NETWORK_MODE) {
 		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
+		if(devianceLevel != -1){
+			g_network->setDevianceLevel(devianceLevel);
+		}
 		g_network->setNetMode();
 		g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
 
 		//
-		while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || (g_network->getCycleSize() <= 6 && city_size == 0) || (g_network->getCycleSize() <= 150 && city_size == 2)){
-			delete(g_network);
-			g_network = new RoadNetwork();
-			g_network->setNetMode();
-			g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+		if(options&op_experimental){
+			while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || ((g_network->getCycleSize() <= 6) && (city_size == 0)) || ((g_network->getCycleSize() <= 150) && (city_size == 2))){
+				delete g_network;
+				g_network = new RoadNetwork();
+				if(devianceLevel != -1){
+					g_network->setDevianceLevel(devianceLevel);
+				}
+				g_network->setNetMode();
+				g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+			}
 		}
 
 
@@ -417,8 +435,23 @@ void generateBuildings() {
 
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
+	if(devianceLevel != -1){
+		g_network->setDevianceLevel(devianceLevel);
+	}
 
 	g_network->createRoads(options&op_experimental,city_size);
+
+	if(options&op_experimental){
+		while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || ((g_network->getCycleSize() <= 6) && (city_size == 0)) || ((g_network->getCycleSize() <= 150) && (city_size == 2))){
+			delete g_network;
+			g_network = new RoadNetwork();
+			if(devianceLevel != -1){
+				g_network->setDevianceLevel(devianceLevel);
+			}
+			g_network->createRoads(options&op_experimental,city_size);
+		}
+	}
+
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
 	for (cycle::primitive prim : g_network->getCycles()) {
@@ -463,7 +496,7 @@ void generateBuildings() {
 			"../work/res/assets/tex_config.txt", car_mode_number);
 
 	g_vehicleCtrl->parseRoadNetwork(g_network);
-	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
+	cout << "Done! " << g_sections->getLots().size() << " lots created" << " from  "<< g_network->getCycleSize() << " cycles "<< endl;
 }
 
 /*Inits the building class, loads the shaders, and sets up the heightmap*/
