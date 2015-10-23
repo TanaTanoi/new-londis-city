@@ -329,6 +329,30 @@ inline bool shareSlope(line edge, line secEdge) {
 	return false; // have different slopes
 }
 
+inline float pointToLineDist( vec2 point, vec2 start, vec2 end){
+     vec2 v = end - start;
+     vec2 w = point - start;
+
+     double c1 = dot(w,v);
+     double c2 = dot(v,v);
+     double b = c1 / c2;
+
+     vec2 Pb = start + b * v;
+     return distance(point, Pb);
+}
+
+inline vec2 getClosestPointOnLine( vec2 point, vec2 start, vec2 end){
+     vec2 v = end - start;
+     vec2 w = point - start;
+
+     double c1 = dot(w,v);
+     double c2 = dot(v,v);
+     double b = c1 / c2;
+
+     vec2 intersectPoint = start + b * v;
+    return intersectPoint;
+}
+
 inline bool shareSide(line edge, line secEdge) {
 	if (shareSlope(edge, secEdge)) {
 

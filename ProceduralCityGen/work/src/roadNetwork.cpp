@@ -64,16 +64,16 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 		toRemove.clear();
 	}
 
-	if(netMode){
-		removeFilaments();
-	}
+//	if(netMode){
+//		removeFilaments();
+//	}
 
 
 	// Forces number of cycles
-	if((city_size == 0 && (int)cycles.size() < 2) || (city_size == 1 && (int)cycles.size() < 15) ||(city_size == 2 && (int)cycles.size() < 150)){
-		reset();
-		genBranchRoads(start);
-	}
+//		if((city_size == 0 && (int)cycles.size() < 1)){// || (city_size == 1 && (int)cycles.size() < 15) ||(city_size == 2 && (int)cycles.size() < 150)){
+//			reset();
+//			genBranchRoads(start);
+//		}
 
 }
 
@@ -229,8 +229,7 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	}
 
 	if((int)intersect.size() == 0){
-		roadNode oldEnd = addNode(end);
-		return oldEnd;//make a new node if nothing intersects
+		return snapToClose(end);
 	}
 
 	sortByIntersection(&intersect, start.location, end);//sort by distance
@@ -246,6 +245,41 @@ roadNode RoadNetwork::snapToIntersection(roadNode start, vec2 end){
 	}
 
 	return newEnd;
+}
+
+roadNode RoadNetwork::snapToClose(vec2 point){
+	vector<road> snaps;
+	vector<float> dists;
+
+	for(road r: allRoads){
+		float dist = pointToLineDist(point,r.start.location,r.end.location);
+		if(dist < snapDistance){
+			bool added = false;
+			for(int i = 0; i < (int)snaps.size(); i++){
+				if(!added && dist < dists[i]){
+					dists.insert(dists.begin() + i,dist);
+					snaps.insert(snaps.begin() + i,r);
+					added = true;
+				}
+			}
+			if(!added){
+				dists.push_back(dist);
+				snaps.push_back(r);
+			}
+		}
+	}
+
+	if((int)snaps.size() == 0){
+		return addNode(point);
+	}
+
+	vec2 inter = getClosestPointOnLine(point, snaps[0].start.location, snaps[0].end.location);
+	roadNode newNode = snapToExisting(inter,snaps[0]);
+	if(newNode.ID == -1){
+		return addNode(inter);
+	}
+	return newNode;
+
 }
 
 void RoadNetwork::branch(roadNode n, vector<roadNode> * toAdd, vector<roadNode> * toRemove) {
@@ -794,10 +828,12 @@ void RoadNetwork::renderRoads(){
 	for(int i = allNodes.size()-1;i>=0;i--){
 		if(allNodes[i].ID > 0){
 			roadNode n = allNodes[i];
-			//if(n.ID > 10 &&  n.ID < 13){
-			glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
+			if(netMode && n.ID >= 0){
+				//if(n.ID > 10 &&  n.ID < 13){
+				glColor3f(n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size(),n.ID/(float)allNodes.size());
 
-			glVertex2f(n.location.x, n.location.y);
+				glVertex2f(n.location.x, n.location.y);
+			}
 		}
 	}
 	glEnd();

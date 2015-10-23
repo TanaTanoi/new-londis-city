@@ -85,6 +85,7 @@ private:
 	void updateBranchList(cycle::roadNode, std::vector<cycle::roadNode> * toRemove);
 	cycle::roadNode snapToIntersection(cycle::roadNode start, vec2 end);
 	cycle::roadNode snapToExisting(vec2, cycle::road);
+	cycle::roadNode snapToClose(vec2);
 	void removeFilaments();
 	void reset();
 
