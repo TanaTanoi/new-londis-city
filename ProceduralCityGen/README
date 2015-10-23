@@ -46,6 +46,8 @@ Network mode:
 PARAMETERS: Global parameters that change the result of the program
 -seed [seed:string]
   Change the seed of the program
+-size[city_size:int]
+  Change the scale of the city size. Ranges between 0 and 2 as outlined in the network mode
 -heightmap
   Enables the heightmap on launch
 -fullscreen
