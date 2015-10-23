@@ -68,6 +68,13 @@ void RoadNetwork::genBranchRoads(vec2 start) {
 		removeFilaments();
 	}
 
+
+	// Forces number of cycles
+	if((city_size == 0 && (int)cycles.size() < 2) || (city_size == 1 && (int)cycles.size() < 15) ||(city_size == 2 && (int)cycles.size() < 150)){
+		reset();
+		genBranchRoads(start);
+	}
+
 }
 
 void RoadNetwork::removeFilaments(){
@@ -178,6 +185,18 @@ vec2 RoadNetwork::direction(roadNode n){
 	return vec2(0,1);
 
 }
+
+void RoadNetwork::reset(){
+	allNodes.clear();
+	adjacencyList.clear();
+	allRoads.clear();
+	cycles.clear();
+	canBranch.clear();
+	nodeID = 0;
+	roadID = 0;
+}
+
+
 /* REQUIRES: If inter is a point that intersects with the road r:
  * Returns the start or end points if they are close enough, else returns -1
  *   */
@@ -579,6 +598,8 @@ void RoadNetwork::createNewYorkGrid(section s){
 }
 
 void RoadNetwork::createRoads(bool branchOn, int size){
+
+	city_size = size;
 
 	line a = {vec2(400,400), vec2(100,400), 0};
 	line b = {vec2(100,400), vec2(100,100), 1};

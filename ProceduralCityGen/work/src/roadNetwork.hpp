@@ -44,6 +44,7 @@ private:
 	int minRotateAngle = -15;
 	int maxRotateAngle = 15;
 	int snapDistance = 20;
+	int city_size = 1;
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;
@@ -85,6 +86,7 @@ private:
 	cycle::roadNode snapToIntersection(cycle::roadNode start, vec2 end);
 	cycle::roadNode snapToExisting(vec2, cycle::road);
 	void removeFilaments();
+	void reset();
 
 	void genGridPoints();
 	void genRadialPoints();
