@@ -72,7 +72,7 @@ inline void sortByIntersection(vector<road> * roads, vec2 start, vec2 end){
 	roads->clear();
 	vector<float> distances;
 	for(int i = 0; i < unsorted.size(); i++){
-		cout << "I  " << i << endl;
+		//cout << "I  " << i << endl;
 		vec2 inter = util::getIntersection(start, end, unsorted[i].start.location, unsorted[i].end.location);
 		float dist = distance(inter, start);
 		bool added = false;
@@ -140,29 +140,29 @@ inline int findRoadIndex(vector<road> roads, int sID, int eID) {
 	}
 	return 0;
 	/*
-	 //	cout << "finding a road index" << endl;
+	 //	//cout << "finding a road index" << endl;
 	 int low = 0; int high = (int)roads.size()-1;
 	 while(low <= high){
 	 int mid = (low+high+1)/2;
-	 //		cout<<mid<<" MID " << (int)roads.size() <<endl;
-	 //		cout << "Looking for " << sID << " " <<eID << " Mid is  " <<  roads[mid].start.ID << " " << roads[mid].end.ID << endl;
-	 //		cout << "Mid is " << mid <<endl;
+	 //		//cout<<mid<<" MID " << (int)roads.size() <<endl;
+	 //		//cout << "Looking for " << sID << " " <<eID << " Mid is  " <<  roads[mid].start.ID << " " << roads[mid].end.ID << endl;
+	 //		//cout << "Mid is " << mid <<endl;
 
 	 if((sID == roads[mid].start.ID) && (eID == roads[mid].end.ID)){ // Found object
-	 //cout << "equal to" << endl;
+	 ////cout << "equal to" << endl;
 	 return mid;
 	 }
 	 else if((sID == roads[mid].start.ID && eID < roads[mid].end.ID) || (sID < roads[mid].start.ID)){ // Less than
-	 //			cout<< "Less than" <<endl;
+	 //			//cout<< "Less than" <<endl;
 	 high = mid - 1;
 	 }
 	 else{ // greater than
-	 //cout<< "Greater than" <<endl;
+	 ////cout<< "Greater than" <<endl;
 	 low = mid + 1;
 	 }
 	 }
 
-	 //cout << "Did not find in loop" << endl;
+	 ////cout << "Did not find in loop" << endl;
 
 	 if(sID == roads[low].start.ID && eID == roads[low].end.ID){ // Found object
 	 return low;
@@ -198,11 +198,11 @@ inline vector<road> sortRoads(vector<road> roads) {
 			sorted.push_back(current);
 		}
 	}
-	cout << "Printing sorted :";
+	//cout << "Printing sorted :";
 	for (road r : sorted) {
-		cout << r.start.ID << "|" << r.end.ID << " ";
+		//cout << r.start.ID << "|" << r.end.ID << " ";
 	}
-	cout << endl;
+	//cout << endl;
 	return sorted;
 
 }
@@ -253,8 +253,8 @@ inline void testAntiClockwise() {
 	//
 	//	roadNode result = getAntiClockwiseMost(c,start,adj);
 	//
-	//	cout << "Result" << endl;
-	//	cout<< result.x << " " << result.y << endl;
+	//	//cout << "Result" << endl;
+	//	//cout<< result.x << " " << result.y << endl;
 
 }
 

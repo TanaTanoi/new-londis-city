@@ -44,6 +44,7 @@ private:
 	int minRotateAngle = -15;
 	int maxRotateAngle = 15;
 	int snapDistance = 20;
+	int city_size = 1;
 
 	// Voronoi point generation
 	std::vector<comp308::vec2> points;
@@ -51,6 +52,12 @@ private:
 	int radOut = 15;
 	int circlePoints = 6;
 	vor::Voronoi voro;
+
+	//Network mode
+	bool netMode = false;
+	bool drawCycles;
+	int recurseSize;
+	int devianceLevel;
 
 	int insideWorld(comp308::vec2);
 	int insideWorld(cycle::road);
@@ -78,8 +85,11 @@ private:
 	comp308::vec2 direction(cycle::roadNode);
 	void updateBranchList(cycle::roadNode, std::vector<cycle::roadNode> * toRemove);
 	cycle::roadNode snapToIntersection(cycle::roadNode start, vec2 end);
-	cycle::roadNode snapToExisting(vec2, cycle::road);
+	cycle::roadNode snapToExisting(vec2, vec2, cycle::road);
+	cycle::roadNode snapToClose(vec2,vec2);
 	void removeFilaments();
+	void reset();
+
 
 	void genGridPoints();
 	void genRadialPoints();
@@ -92,11 +102,16 @@ private:
 public:
 	RoadNetwork();
 	void renderRoads();
-	void createRoads(bool);
+	void createRoads(bool,int);
 	void recDivide(cycle::road);
+	int getCycleSize();
+	int getCitySize();
+	void setDevianceLevel(int);
 
 	// Testing
 		void testNetwork();
+		void networkModeGen(int,int,bool);
+		void setNetMode();
 
 	// Cam's methods
 

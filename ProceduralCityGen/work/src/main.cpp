@@ -26,6 +26,10 @@ VehicleController *g_vehicleCtrl = nullptr;
 /*Supplied seed for generation*/
 int user_seed = 42;
 
+// City size
+int city_size;
+int devianceLevel = -1;
+
 //Main program
 //
 int main(int argc, char **argv) {
@@ -90,7 +94,9 @@ int main(int argc, char **argv) {
 				network_mode_type = std::atoi(argv[i + 1]);
 				network_mode_size = std::atoi(argv[i + 2]);
 				network_mode_cycles = std::atoi(argv[i + 3]);
+				city_size = network_mode_size;
 				i = i + 3;
+				options = options|op_customsize;
 			}
 			mode = NETWORK_MODE;
 		}else if(argument.compare("section")==0){
@@ -107,6 +113,15 @@ int main(int argc, char **argv) {
 				user_seed = Building::basicHashcode(std::string(argv[i+1]));
 				cout<<"Using seed "<< argv[i+1]<<endl;
 				options = options|op_customseed;
+				i+=1;
+			}
+		}else if(argument.compare("-size")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"size requires a parameter (example usage. '-seed COMP308')"<<endl;
+				return -1;
+			}else{
+				city_size = std::atoi(argv[i + 1]);
+				options = options|op_customsize;
 				i+=1;
 			}
 		}else if(argument.compare("-totalcars")==0){
@@ -138,7 +153,16 @@ int main(int argc, char **argv) {
 			options = options|op_fullbright;
 		}else if(argument.compare("-experimental")==0){
 			options = options|op_experimental;
-		} else {
+		} else if(argument.compare("-deviance")==0){
+			if(i+1>=argc){//if we don't have an additional argument
+				cout<<"Deviance requires a parameter (example usage. '-deviance 0')"<<endl;
+				return -1;
+			}else{
+				devianceLevel = (std::atoi(argv[i+1]));
+				cout<<"Using set deviance "<< argv[i+1]<<endl;
+				i+=1;
+			}
+		}else {
 			cout << "Unrecognized argument |" << argv[i] << "|" << "\n";
 			cout << "Refer to README for information on command line arguments"
 					<< endl;
@@ -186,12 +210,14 @@ int main(int argc, char **argv) {
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-
-
-	if(options&op_customseed){
+	if((options&op_customseed)){
 		srand(user_seed);
 	}else{
 		srand(time(NULL));
+	}
+
+	if(!(options&op_customsize)){
+		city_size = rand()%3;
 	}
 
 	if (mode == FULL_MODE) {
@@ -229,7 +255,25 @@ int main(int argc, char **argv) {
 	} else if (mode == NETWORK_MODE) {
 		cout << "Road mode" << endl;
 		g_network = new RoadNetwork();
-		g_network->testNetwork();
+		if(devianceLevel != -1){
+			g_network->setDevianceLevel(devianceLevel);
+		}
+		g_network->setNetMode();
+		g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+
+		//
+		if(options&op_experimental){
+			while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || ((g_network->getCycleSize() <= 6) && (city_size == 0)) || ((g_network->getCycleSize() <= 150) && (city_size == 2))){
+				delete g_network;
+				g_network = new RoadNetwork();
+				if(devianceLevel != -1){
+					g_network->setDevianceLevel(devianceLevel);
+				}
+				g_network->setNetMode();
+				g_network->networkModeGen(network_mode_type, network_mode_size, network_mode_cycles);
+			}
+		}
+
 
 	} else if (mode == SECTION_MODE) {
 		cout << "Section mode" << endl;
@@ -391,8 +435,23 @@ void generateBuildings() {
 
 	cout << "Generating network.." << endl;
 	g_network = new RoadNetwork();
-	g_network->createRoads(!(options&op_experimental));
-	cout << "All cycles " << g_network->getCycles().size() << endl;
+	if(devianceLevel != -1){
+		g_network->setDevianceLevel(devianceLevel);
+	}
+
+	g_network->createRoads(options&op_experimental,city_size);
+
+	if(options&op_experimental){
+		while( ((g_network->getCycleSize() <= 40) && (city_size == 1)) || ((g_network->getCycleSize() <= 6) && (city_size == 0)) || ((g_network->getCycleSize() <= 150) && (city_size == 2))){
+			delete g_network;
+			g_network = new RoadNetwork();
+			if(devianceLevel != -1){
+				g_network->setDevianceLevel(devianceLevel);
+			}
+			g_network->createRoads(options&op_experimental,city_size);
+		}
+	}
+
 	// Finds lot outlines
 	vector<util::section> lotOutlines;
 	for (cycle::primitive prim : g_network->getCycles()) {
@@ -410,7 +469,6 @@ void generateBuildings() {
 	g_sections->divideAllLots(lotOutlines);
 	cout << "Generating buildings.." << endl;
 	// Generate building display list
-	srand(user_seed);
 	vector<lot> allLots = g_sections->getLots();
 	vec2 min = vec2(10000,10000);
 	vec2 max = vec2(0,0);
@@ -438,7 +496,7 @@ void generateBuildings() {
 			"../work/res/assets/tex_config.txt", car_mode_number);
 
 	g_vehicleCtrl->parseRoadNetwork(g_network);
-	cout << "Done! " << g_sections->getLots().size() << " lots created" << endl;
+	cout << "Done! " << g_sections->getLots().size() << " lots created" << " from  "<< g_network->getCycleSize() << " cycles "<< endl;
 }
 
 /*Inits the building class, loads the shaders, and sets up the heightmap*/
