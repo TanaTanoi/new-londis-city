@@ -109,7 +109,7 @@ void AStarSearchAlgo::aStarSearch(roadNode *start, roadNode *goal) {
 
 					// Add a new fringeNode to the queue
 					fringeNode add = { &m_allNodes[neighID],
-							&m_allNodes[nodeID], costToNeigh, estTotal };
+							&m_allNodes[nodeID], costToNeigh, (float)estTotal };
 					fringe.push(add);
 				}
 			}

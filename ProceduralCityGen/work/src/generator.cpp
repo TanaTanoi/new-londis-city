@@ -237,7 +237,7 @@ vector<vec2> Generator::combinePlans(vector<vec2> shapeA, vector<vec2> shapeB) {
 	//get intersection points, if none, return
 	//cout<<"START COMBINE"<<endl;
 	vector<vec2> newPlan = vector<vec2>();
-	int n[] = { shapeA.size(),shapeB.size() };
+	int n[] = { (int)shapeA.size(),(int)shapeB.size() };
 	vector<vec2> shapes[] = {shapeA,shapeB};
 	//current shape we are tracing
 	int curShape = 0;
