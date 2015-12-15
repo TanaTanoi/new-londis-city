@@ -767,6 +767,7 @@ void joystickEventsPoll() {
 	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
 	const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1,
 			&button_count);
+	//LINUX
 	//0,1-Left Stick 2 is trigger (postive left, negative, right) 3,4 is Right Stick y,x
 	/* 0/1- Left Stick
 	 * 2  - Left Trigger
@@ -775,12 +776,20 @@ void joystickEventsPoll() {
 	 * 6/7- D-pad
 	 * */
 	if (axes_count > 0) {
+		/* OSX
+			0 - L-S X
+			1 - L-S Y
+			2 - R-S X
+			3 - R-S Y
+
+
+		*/
 		c_LSpos = vec2((float) ((int) (axes[0] * 100)) / 100.0f,
 				(float) ((int) (axes[1] * 100)) / 100.0f);
-		vec2 c_RSpos = vec2((float) ((int) (axes[4] * 100)) / 100.0f,
-				(float) ((int) (axes[3] * 100)) / 100.0f);
+		vec2 c_RSpos = vec2((float) ((int) (axes[3] * 100)) / 100.0f,
+				(float) ((int) (axes[2] * 100)) / 100.0f);
 
-		float trigger = axes[2];
+		float trigger = axes[4];
 		triggerDiff = axes[5] + 1;
 		float threshold = 0.2f;	//stops drifting when the user isn't touching the controller
 		if (abs(c_RSpos.y) >= threshold) {

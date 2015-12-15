@@ -866,7 +866,7 @@ void Building::generateParkWall(vec2 a, vec2 b, vec2 mid) {
 /*Renders a road between two points of a given width*/
 void Building::generateRoad(vec2 a, vec2 b,float width){
 	srand(a.x+b.x*a.y*b.y);
-	float ground = ((float)rand()/RAND_MAX)*0.02-0.01;
+	float ground = ((float)rand()/RAND_MAX)*0.02+0.04;
 	vec2 dir = (b-a);
 //	a += normalize(dir) * 0.1;
 //	b -= normalize(dir) * 0.1;
