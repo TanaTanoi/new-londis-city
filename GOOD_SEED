@@ -1,0 +1,2 @@
+bin/RandCityGen -joystick -size 1 -totalcars 20 -fullbright -experimental -heightmap -seed bigo
+
